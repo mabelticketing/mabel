@@ -3,8 +3,8 @@
 
 var express = module.parent.exports.express;
 
-var router   = express.Router();
-var __       = require("./strings.js");
+var router = express.Router();
+var __ = require("./strings.js");
 var passport = require("passport");
 
 router.get("/", function(req, res) {
@@ -13,13 +13,27 @@ router.get("/", function(req, res) {
 	});
 });
 
-router.get("/buy", 
-	passport.authenticate('bearer', {session: false}),
+router.get("/test",
+	passport.authenticate('bearer', {
+		session: false
+	}),
 	function(req, res) {
-	res.json({
-		"Welcome": __("You are authenticated!")
-	});
-});
+		res.json({
+			"user": req.user
+		});
+	}
+);
+
+router.get("/buy",
+	passport.authenticate('bearer', {
+		session: false
+	}),
+	function(req, res) {
+		res.json({
+			"Welcome": __("You are authenticated!")
+		});
+	}
+);
 
 
 

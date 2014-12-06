@@ -8,12 +8,13 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 var jwt            = require("jwt-simple");
 var __             = require("./strings.js");
 var mysql          = require("mysql");
-var https           = require("https");
+var https          = require("https");
 
 var secret = "---top-secret-string---";
 
 function getToken(userId) {
 	return jwt.encode({
+		authenticated: true,
 		id: userId
 	}, secret);
 }
@@ -64,11 +65,12 @@ passport.use(new RavenStrategy({
 	conn.connect();
 
 	// try to find user in db with crsid
-	conn.query("SELECT * FROM user WHERE crsid='" + crsid + "'", function(err, rows) {
-		if (err) console.log(err);
-		if (rows.length == 0) {
+	conn.query("SELECT * FROM user WHERE crsid=?", [crsid], function(err, rows) {
+		// pass errors through middleware
+		if (err) done(err);
+		if (rows.length < 1) {
 			// if user not in table then put them in
-			var lookupURL = "https://anonymous:@lookup-test.csx.cam.ac.uk/api/v1/person/crsid/" + crsid+ "?format=json";
+			var lookupURL = "https://anonymous:@lookup-test.csx.cam.ac.uk/api/v1/person/crsid/" + crsid + "?format=json";
 			https.get(lookupURL, function(res) {
 				var body = '';
 				res.on('data', function(chunk) {
@@ -77,34 +79,45 @@ passport.use(new RavenStrategy({
 				res.on('end', function() {
 					var response = JSON.parse(body);
 					var name = response.result.person.displayName;
-					conn.query("INSERT INTO user (name, email, crsid,\
-					 registration_time) VALUES ('"+name+"','"+crsid+"@cam.ac.uk','"+crsid+"', CURRENT_TIMESTAMP)");
-					conn.commit(function(err) { if (err) throw err; });
+					var insertQuery = "INSERT INTO user (name, email, crsid, registration_time) " +
+						 			"VALUES (?,?,?,CURRENT_TIMESTAMP)";
+					
+					// TODO: We have a bit more Ibis stuff to process to allocate user groups
+
+					conn.query(insertQuery, 
+						[name, crsid + "@cam.ac.uk", crsid],
+						function(err, result) {
+							// pass errors through middleware
+							if (err) done(err);
+
+							// now finally return the page to the user
+							done(null, {
+								token: getToken(result.insertId)
+							});
+						}
+					);
 				});
 			}).on('error', function(e) {
-				  console.log("Got error: ", e);
+				console.log("Got error: ", e);
+				done(err);
+			});
+		} else {
+			// the user is in the table, so just get his user id to encode as the token
+			done(null, {
+				token: getToken(rows[0].id)
 			});
 		}
-	});
-
-	// call callback
-	done(null, {
-		token: getToken(crsid)
 	});
 }));
 
 // passport bearer strategy
 passport.use(new BearerStrategy(
 	function(token, done) {
-		console.log("Checking token: " + token);
 		var decoded = jwt.decode(token, secret);
-		// TODO: make the token check more meaningful (see if it is valid in DB?)
-		if (decoded.id === "cl554" || decoded.id === "tl368") {
+		if (decoded.authenticated === true) {
 			return done(null, {
 				id: decoded.id
-			}, {
-				scope: 'all'
-			});
+			}, null);
 		} else {
 			return done(null, false);
 		}
@@ -113,7 +126,8 @@ passport.use(new BearerStrategy(
 
 
 
-// // passport session stuff - currently unused
+// below is currently not used meaningfully because we don't actually use sessions
+// but things get unhappy if the functions don't exist
 
 passport.deserializeUser(function(userid, done) {
 	// convert a user id into the user object itself
