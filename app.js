@@ -1,3 +1,6 @@
+/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
+/* global require, module, console */
+
 // imports
 var express = require("express");
 var app     = express();
@@ -16,7 +19,6 @@ app.set("views", __dirname + "/views");
 app.engine("html", require('ejs').renderFile);
 
 /* ROUTES */
-
 var APPRouter = require("./assets/app-routes.js");
 var APIRouter = require("./assets/api-routes.js");
 
