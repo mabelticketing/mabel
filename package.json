@@ -1,9 +1,9 @@
 {
-	"name": "Mabel",
-	"version": "0.1.0",
-	"description": "May ball ticketing system",
-	"dependencies": {
-		"express": "latest",
-		"mysql": "latest",
-	}
+  "name": "Mabel",
+  "version": "0.1.0",
+  "description": "May ball ticketing system",
+  "dependencies": {
+    "express": "^4.10.4",
+    "mysql": "^2.5.3"
+  }
 }
