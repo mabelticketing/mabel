@@ -1,5 +1,5 @@
 /*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
-/* global require, module, console */
+/* global require, module, console, __dirname */
 
 // imports
 var express   = require("express");
@@ -13,6 +13,12 @@ module.exports.app     = app;
 
 // import string module
 var __ = require("./assets/strings.js");
+
+// set the default directory for templated pages
+app.set("views", __dirname + "/views");
+
+// set the default template engine to ejs - for static html
+app.engine("html", require('ejs').renderFile);
 
 /* ROUTES */
 var APPRouter = require("./assets/app-routes.js");
