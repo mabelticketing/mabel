@@ -4,6 +4,11 @@
   "description": "May ball ticketing system",
   "dependencies": {
     "express": "^4.10.4",
-    "mysql": "^2.5.3"
+    "mysql": "^2.5.3",
+    "passport": "~0.2.1",
+    "passport-local": "~1.0.0",
+    "passport-raven": "~1.0.0",
+    "passport-http-bearer": "~1.0.1",
+    "jwt-simple": "~0.2.0"
   }
 }
