@@ -14,10 +14,11 @@ var __ = require("./assets/strings.js");
 
 
 /* ROUTES */
+var APPRouter = require("./assets/app-routes.js");
+var APIRouter = require("./assets/api-routes.js");
 
-app.get("/", function(req,res) {
-	res.send(__("You have joined the queue."));
-});
+app.use("/", APPRouter);
+app.use("/api", APIRouter);
 
 
 // listen on port 2000
