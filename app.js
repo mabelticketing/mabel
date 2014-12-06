@@ -1,3 +1,6 @@
+/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
+/* global require, module, console */
+
 // imports
 var express = require("express");
 var app     = express();
@@ -14,7 +17,7 @@ var __ = require("./assets/strings.js");
 
 app.get("/", function(req,res) {
 	res.send(__("You have joined the queue."));
-})
+});
 
 
 // listen on port 2000
