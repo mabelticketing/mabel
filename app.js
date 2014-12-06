@@ -9,6 +9,11 @@ module.exports.app     = app;
 // import string module
 var __ = require("./assets/strings.js");
 
+// set the default directory for templated pages
+app.set("views", __dirname + "/views");
+
+// set the default template engine to ejs - for static html
+app.engine("html", require('ejs').renderFile);
 
 /* ROUTES */
 
