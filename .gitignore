@@ -29,3 +29,5 @@ node_modules
 
 # sublime configuration
 *.sublime-*
+
+assets/config.js
