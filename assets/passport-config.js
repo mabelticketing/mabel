@@ -1,6 +1,6 @@
 /*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
 /* global require, console */
-
+var config 		   = require('./config.js')
 var passport       = require('passport');
 var LocalStrategy  = require('passport-local').Strategy;
 var RavenStrategy  = require('passport-raven').Strategy;
@@ -10,7 +10,7 @@ var __             = require("./strings.js");
 var mysql          = require("mysql");
 var https          = require("https");
 
-var secret = "---top-secret-string---";
+var secret = config.jwt_secret;
 
 function getToken(userId) {
 	return jwt.encode({
@@ -49,7 +49,7 @@ passport.use(new LocalStrategy(
 // configure raven passport authentication strategy
 passport.use(new RavenStrategy({
 	// NB I don't know what audience is actually for. It seems to just work like a base url
-	audience: 'http://localhost:2000',
+	audience: config.base_url,
 	desc: __('Mabel Ticketing System'),
 	msg: __('Mabel needs to check you are a current member of Emmanuel College'),
 	// use demonstration raven server in development
@@ -57,10 +57,10 @@ passport.use(new RavenStrategy({
 }, function(crsid, params, done) {
 	// connect to database
 	var conn = mysql.createConnection({
-		host: '104.236.25.186',
-		user: 'chris',
-		password: 'mabel-dbCHRISTMAS',
-		database: 'mabel'
+		host: config.db_host,
+		user: config.db_user,
+		password: config.db_password,
+		database: config.db_db
 	});
 	conn.connect();
 
@@ -70,7 +70,7 @@ passport.use(new RavenStrategy({
 		if (err) done(err);
 		if (rows.length < 1) {
 			// if user not in table then put them in
-			var lookupURL = "https://anonymous:@lookup-test.csx.cam.ac.uk/api/v1/person/crsid/" + crsid + "?format=json";
+			var lookupURL = config.lookup_url + "person/crsid/" + crsid + "?format=json";
 			https.get(lookupURL, function(res) {
 				var body = '';
 				res.on('data', function(chunk) {
