@@ -5,8 +5,8 @@
 drop table if exists transaction;
 drop table if exists payment_method;
 drop table if exists group_access_right;
-drop table if exists group_membership;
-drop table if exists group;
+drop table if exists user_group_membership;
+drop table if exists user_group;
 drop table if exists ticket;
 drop table if exists user;
 drop table if exists ticket_status;
@@ -59,18 +59,18 @@ create table user (
 create table ticket (
 	id int auto_increment not null,
 	booking_user_id int not null,
-	ticket_type_id not null,
-	status_id not null,
+	ticket_type_id int not null,
+	status_id int not null,
 	book_time timestamp,
 	primary key (id),
-	FOREIGN KEY (booking_user_id) REFERENCES event(id),
+	FOREIGN KEY (booking_user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
 	FOREIGN KEY (status_id) REFERENCES ticket_status(id)
 );
 
 ### GROUPS ###
 
-create table group (
+create table user_group (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	description varchar(1000),
@@ -79,13 +79,13 @@ create table group (
 
 ### GROUP MEMBERSHIPS ###
 
-create table group_membership (
+create table user_group_membership (
 	id int auto_increment not null,
 	user_id int not null,
 	group_id int not null,
 	primary key (id),
-	FOREIGN KEY (group_id) REFERENCES group(id),
-	FOREIGN KEY (user_id) REFERENCES user(id),
+	FOREIGN KEY (group_id) REFERENCES user_group(id),
+	FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 ### GROUP ACCESS RIGHTS ###
@@ -95,7 +95,7 @@ create table group_access_right (
 	group_id int not null,
 	ticket_type_id int not null,
 	primary key (id),
-	FOREIGN KEY (group_id) REFERENCES group(id)
+	FOREIGN KEY (group_id) REFERENCES user_group(id)
 );
 
 ### PAYMENT METHODS ###
@@ -120,5 +120,5 @@ create table transaction (
 	transaction_time timestamp not null,
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
-	FOREIGN KEY (payment_method) REFERENCES payment_method(id)
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
 );
