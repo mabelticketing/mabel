@@ -9,7 +9,7 @@ var passport = require("passport");
 
 router.get("/", function(req, res) {
 	res.json({
-		"Welcome": __("welcome to the api")
+		"Welcome": __("Welcome to the api, Strider!")
 	});
 });
 
