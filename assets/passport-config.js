@@ -1,6 +1,6 @@
 /*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
 /* global require, console */
-var config 		   = require('./config.js')
+var config 		   = require('./config.js');
 var passport       = require('passport');
 var LocalStrategy  = require('passport-local').Strategy;
 var RavenStrategy  = require('passport-raven').Strategy;

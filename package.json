@@ -2,6 +2,11 @@
   "name": "Mabel",
   "version": "0.1.0",
   "description": "May ball ticketing system",
+  "start": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"We haven't got any tests yet...\" && exit 0"
+  },
   "dependencies": {
     "express": "^4.10.4",
     "jade": "^1.8.1",

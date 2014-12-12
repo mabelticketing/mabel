@@ -5,6 +5,7 @@
 var express   = require("express");
 var app       = express();
 var passport  = require("passport");
+var config    = require('./assets/config.js');
 require("./assets/passport-config.js");
 
 // make visible outside module
@@ -31,4 +32,4 @@ app.use("/", APPRouter);
 app.use("/api", APIRouter);
 
 // listen on port 2000
-app.listen(2000);
+app.listen(config.port || 2000);
