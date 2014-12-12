@@ -18,7 +18,7 @@ var __ = require("./assets/strings.js");
 app.set("views", __dirname + "/views");
 
 // set the default template engine to ejs - for static html
-app.engine("html", require('ejs').renderFile);
+app.engine('jade', require('jade').__express);
 
 /* ROUTES */
 var APPRouter = require("./assets/app-routes.js");
