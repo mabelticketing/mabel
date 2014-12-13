@@ -5,7 +5,7 @@ var router = express.Router();
 var passport = require("passport");
 
 router.get("/", function(req, res) {
-	res.render("index.html");
+	res.render("index.jade");
 });
 
 router.get('/login/mabel',
