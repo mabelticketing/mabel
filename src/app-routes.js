@@ -1,4 +1,3 @@
-
 var express = module.parent.exports.express;
 
 var router = express.Router();
@@ -30,4 +29,7 @@ router.get('/login/raven',
 	}
 );
 
+router.get('/buy', function(req, res) {
+	res.render("buy.jade");
+});
 module.exports = router;
