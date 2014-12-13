@@ -1,12 +1,13 @@
 /*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
 /* global require, module, console */
 
-var express = module.parent.exports.express;
+var express  = module.parent.exports.express;
 
-var router = express.Router();
-var __ = require("./strings.js");
-var Queue = require("./queue.js");
+var router   = express.Router();
+var __       = require("./strings.js");
+var Queue    = require("./queue.js");
 var passport = require("passport");
+var api      = require("./api.js");
 var mysql = require('mysql');
 var config = require('./config.js');
 // TODO: send every route through passport.authenticate
@@ -42,10 +43,7 @@ router.get("/book",
 		bookQueue.joinQueue(req, res, next);
 	},
 	function(req, res) {
-		res.json({
-			"status": "booking",
-			"content": __("This is the booking content")
-		});
+		res.json(api.getBookingPageData());
 	}
 );
 
@@ -69,6 +67,10 @@ router.get("/user",
 		session: false
 	}),
 	function(req, res) {
+		// make this page accessible to admins only (the admin group is group 1):
+		if (req.user.groups.indexOf(1) < 0)
+			return res.send("You do not have permission to view this page");
+
 		var conn = mysql.createConnection({
 			host: config.db_host,
 			user: config.db_user,
@@ -77,7 +79,7 @@ router.get("/user",
 		});
 		conn.query("SELECT * FROM user WHERE id=?", [req.query.id], function(err, rows) {
 			if (err) res.send(err);
-			if (rows.length == 0) {
+			if (rows.length === 0) {
 				res.json({
 					error: "user doesn't exist"
 				});

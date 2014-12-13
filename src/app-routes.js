@@ -5,6 +5,9 @@ var passport = require("passport");
 /*** APP ROUTER ***/
 var router   = express.Router();
 
+var api = require("./api.js");
+var http = require('http');
+
 router.get("/", function(req, res) {
 	res.render("index.jade");
 });
@@ -16,39 +19,29 @@ router.get("/apitest", function(req, res) {
 router.get('/login/mabel',
 	passport.authenticate('local'),
 	function(req, res) {
-		// If this function gets called, authentication was successful.
-		// `req.user` contains the authenticated user.
-		res.json({
-			"user": req.user
-		});
-	});
+		res.render("loginConfirmation.jade", {token:req.user.token});
+	}
+);
 
 router.get('/login/raven',
 	passport.authenticate('raven'),
 	function(req, res) {
-		// If this function gets called, authentication was successful.
-		// `req.user` contains the authenticated user.
-		res.json({
-			"user": req.user
-		});
-	});
+		res.render("loginConfirmation.jade", {token:req.user.token});
+	}
+);
 
-router.get('/book',
-	function(req, res) {
-		// load page that either displays queue or booking form.
-		res.render("book.jade");
-	});
+router.get('/admin', function(req, res) {
+	res.render("admin.jade");
+});
+
+router.get('/book', function(req, res) {
+	res.render("book.jade");
+});
 
 router.get('/confirmation',
 	function(req, res) {
 		// display confirmation page
 		res.render('confirmation.jade');
-	});
-
-router.get('/buy',
-	function(req, res) {
-		// TODO: remove this? not entirely sure what it is for
-		res.render("buy.jade");
 	});
 
 module.exports = router;
