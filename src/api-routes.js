@@ -1,12 +1,13 @@
 /*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
 /* global require, module, console */
 
-var express = module.parent.exports.express;
+var express  = module.parent.exports.express;
 
-var router = express.Router();
-var __ = require("./strings.js");
-var Queue = require("./queue.js");
+var router   = express.Router();
+var __       = require("./strings.js");
+var Queue    = require("./queue.js");
 var passport = require("passport");
+var api      = require("./api.js");
 
 router.get("/", function(req, res) {
 	res.json({
@@ -38,10 +39,7 @@ router.get("/book",
 		bookQueue.joinQueue(req, res, next);
 	},
 	function(req, res) {
-		res.json({
-			"status": "booking",
-			"content": __("This is the booking content")
-		});
+		res.json(api.getBookingPageData());
 	}
 );
 router.get("/finishBook",
