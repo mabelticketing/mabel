@@ -1,0 +1,23 @@
+extends ./main.jade
+
+block title
+	title Book a ticket
+
+block content
+	h1 Book a ticket
+	h2 Welcome _, please select your tickets.
+	table
+		tr
+			th Ticket type
+			th Price
+			th (qty)
+		tr
+			td _
+			td £_
+			td
+				input(type="text", placeholder="qty")
+	p You will be charged #[b £800.00] for your tickets.
+	p how would you liek to pay?
+	input(type="radio", name="payment_method")
+	b _
+	p #[button Confirm your booking]
