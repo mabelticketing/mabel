@@ -37,7 +37,7 @@ function getBookingFormData(user, event_id, callback) {
 				JOIN ticket_type \
 					ON ticket_type.id = group_access_right.ticket_type_id \
 				WHERE ticket_type.event_id=? AND (";
-			if (user.groups.length < 0) {
+			if (user.groups.length < 1) {
 				return callback({
 					error: "The user is not a member of any groups!"
 				});
