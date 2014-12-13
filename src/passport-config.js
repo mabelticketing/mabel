@@ -43,41 +43,58 @@ function getToken(userId, callback) {
 
 // configure trivial passport authentication strategy
 passport.use(new LocalStrategy(
-	function(username, password, done) {
-		switch (username) {
-			case "cl554":
-				if (password === "eje14") {
-					getToken("cl554", function(token) {
-						done(null, {
-							token: token,
-						});
-					});
-					return;
-				}
-				break;
-			case "tl368":
-				if (password === "emb15") {
-					getToken("tl368", function(token) {
-						done(null, {
-							token: token,
-						});
-					});
-					return;
-				}
-				break;
-			default:
-				if (password === "myPass") {
-					getToken(username, function(token) {
-						done(null, {
-							token: token,
-						});
-					});
-					return;
-				}
+	function(email, password, done) {
+		var count = (email.match(/@/g) || []).length;
+		if (count !== 1) {
+			done({
+				error: __("Invalid email address")
+			});
 		}
-		return done(null, false, {
-			message: __("Invalid username or password")
-		});
+		var username = email.split("@")[0];
+		// password has to be equal to the part of the email before
+		if (password === username) {
+			var conn = getConnection();
+
+			// try to find user in db with crsid
+			conn.query("SELECT * FROM user WHERE email=?", [email], function(err, rows) {
+				// pass errors through middleware
+				if (err) done(err);
+				if (rows.length < 1) {
+					var insertQuery = "INSERT INTO user (name, email, registration_time) " +
+						"VALUES (?,?,CURRENT_TIMESTAMP)";
+
+					conn.query(insertQuery, ["Mabel User", email],
+						function(err, result) {
+							// pass errors through middleware
+							if (err) return done(err);
+
+							// now finally return the page to the user
+
+							getToken(result.insertId, function(token) {
+								done(null, {
+									token: token,
+								});
+							});
+						}
+					);
+					// });
+					// }).on('error', function(e) {
+					// 	console.log("Got error: ", e);
+					// 	done(err);
+					// });
+					conn.end();
+				} else {
+					// the user is in the table, so just get his user id to encode as the token
+					
+					return getToken(rows[0].id, function(token) {
+						done(null, {
+							token: token,
+						});
+					});
+				}
+			});
+
+		}
 	}
 ));
 
