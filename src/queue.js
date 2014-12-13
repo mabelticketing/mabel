@@ -45,8 +45,10 @@ Queue.prototype.joinQueue = function joinQueue(req, res, next) {
 		return next();
 	} else {
 		this.mutexLocked = false;
+		// TODO: Some sort of timeout if you don't check frequently enough
 		return res.json({
-			"Welcome": __("You are in a queue to buy tickets, at position %s!", queuePos + 1)
+			"status": "queueing",
+			"queuePos": queuePos+1
 		});
 	}
 };

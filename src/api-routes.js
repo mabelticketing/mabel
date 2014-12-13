@@ -29,34 +29,37 @@ router.get("/test",
 	}
 );
 
-var buyQueue = new Queue(1);
+// TODO: Increase number of people allowed through at a time from 1
+var bookQueue = new Queue(1);
 
-router.get("/buy",
+router.get("/book",
 	passport.authenticate('bearer', {
 		session: false
 	}),
 	// have to wrap in a function because express drops the 'this' context otherwise
 	// it does this for performance reasons, so if necessary this is a place to optimise
 	function(req, res, next) {
-		buyQueue.joinQueue(req, res, next);
+		bookQueue.joinQueue(req, res, next);
 	},
 	function(req, res) {
 		res.json({
-			"Welcome": __("You are ready to buy!")
+			"status": "booking",
+			"content": __("This is the booking content")
 		});
 	}
 );
 
-router.get("/finishbuy",
+router.get("/finishBook",
 	passport.authenticate('bearer', {
 		session: false
 	}),
 	function(req, res, next) {
-		buyQueue.leaveQueue(req, res, next);
+		bookQueue.leaveQueue(req, res, next);
 	},
 	function(req, res) {
 		res.json({
-			"Welcome": __("You have left the queue")
+			"status": "none", // TODO: Better status?
+			"content": __("You have left the queue")
 		});
 	}
 );

@@ -1,4 +1,3 @@
-
 var express = module.parent.exports.express;
 
 var router = express.Router();
@@ -69,6 +68,10 @@ res.render('book.jade');
 router.get('/confirmation', function(req, res) {
 	// TODO: complete this route
 	res.render('confirmation.jade');
+});
+//TODO: sort out
+router.get('/buy', function(req, res) {
+	res.render("buy.jade");
 });
 
 module.exports = router;
