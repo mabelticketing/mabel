@@ -1,8 +1,7 @@
 var express = module.parent.exports.express;
 
-var router = express.Router();
+var router   = express.Router();
 var passport = require("passport");
-var http = require('http');
 
 router.get("/", function(req, res) {
 	res.render("index.jade");
