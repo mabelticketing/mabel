@@ -1,23 +1,73 @@
 extends ./main.jade
 
+block scripts
+	script(type="text/javascript" src="/components/angular/angular.js")
+	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript").
+		var book = angular.module('booking', ['ngCookies']);
+		book.controller("bookingController", function BookingController($scope, apiCaller) {
+
+			// stores page data
+			$scope.data = {};
+
+			// method to poll api
+			$scope.pollApi = function pollApi() {
+				apiCaller.poll(function(err, data) {
+					if (err) console.log("there was an error"); //TODO: probably do more than this
+					else{
+						// stop polling if booking info returned
+						if (data.status == 'booking') clearInterval(poller);
+						$scope.data = data;
+					}
+				});
+			};
+
+			// set up polling at intervals
+			var poller = setInterval($scope.pollApi(), 30000);
+
+		});
+		book.factory("apiCaller", function ApiCaller($http, $cookies) {
+			return {
+				poll: function poll(callback) {
+					var token = $cookies.mabelAuthToken;
+					if (token) {
+						$http.get('/api/book?access_token='+token)
+							.success(function(data) {
+								callback(null, data);
+							})
+							.error(function(err) {
+								callback(err);
+							});
+					} else console.log("error: no auth token found"); // TODO: deal with this better
+				}
+			};
+		});
+
+
 block title
-	title Book a ticket
+	title(ng-if="data.status == 'queueing'") Queueing...
+	title(ng-if="data.status == 'booking'") Book your tickets!
 
 block content
-	h1 Book a ticket
-	h2 Welcome _, please select your tickets.
-	table
-		tr
-			th Ticket type
-			th Price
-			th (qty)
-		tr
-			td _
-			td £_
-			td
-				input(type="text", placeholder="qty")
-	p You will be charged #[b £800.00] for your tickets.
-	p how would you liek to pay?
-	input(type="radio", name="payment_method")
-	b _
-	p #[button Confirm your booking]
+	div(ng-app="booking", ng-controller="bookingController", ng-view)
+		div(ng-switch, ng-on="data.status")
+			div(ng-switch-when="'queueing'")
+				p queue information
+			div(ng-switch-when="'booking'")
+				h1 Book a ticket
+				h2 Welcome _, please select your tickets.
+				table
+					tr
+						th Ticket types
+						th Price
+						th (qty)
+					tr
+						td _
+						td £_
+						td
+							input(type="text", placeholder="qty")
+				p You will be charged #[b £800.00] for your tickets.
+				p how would you liek to pay?
+				input(type="radio", name="payment_method")
+				b _
+				p #[button Confirm your booking]
