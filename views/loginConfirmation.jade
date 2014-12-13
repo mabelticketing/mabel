@@ -1,0 +1,19 @@
+doctype html
+html
+	head
+		title Login Successful
+		script(type="text/javascript").
+			function createCookie(name,value,days) {
+				if (days) {
+					var date = new Date();
+					date.setTime(date.getTime()+(days*24*60*60*1000));
+					var expires = "; expires="+date.toGMTString();
+				}
+				else var expires = "";
+				document.cookie = name+"="+value+expires+"; path=/";
+			}
+			createCookie("mabelAuthToken", "#{token}",1);
+	body
+		h1 Login Successful.
+		p token is #{token}
+		a(href="/apitest/") Try it out!
