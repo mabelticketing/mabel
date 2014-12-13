@@ -37,13 +37,24 @@ router.get("/book",
 	passport.authenticate('bearer', {
 		session: false
 	}),
-	// have to wrap in a function because express drops the 'this' context otherwise
-	// it does this for performance reasons, so if necessary this is a place to optimise
-	function(req, res, next) {
-		bookQueue.joinQueue(req, res, next);
-	},
 	function(req, res) {
-		res.json(api.getBookingPageData());
+		var result = bookQueue.joinQueue(req.user.id);
+		if (result.queueing) {
+			res.json({
+				"status": "queueing",
+				"data": {
+					position: result.position,
+					of: result.of
+				}
+			});
+		} else {
+			api.getBookingFormData(req.user, function(data) {
+				res.json({
+					"status": "booking",
+					"data" : data
+				});
+			});
+		}
 	}
 );
 
