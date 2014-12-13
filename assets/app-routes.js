@@ -33,6 +33,10 @@ router.get('/login/raven',
 );
 
 router.get('/book', function(req, res) {
+	//TODO: new info - queue also displayed on this page.
+
+
+
 	// TODO: complete this route.
 	// check user did pass through queue
 	// get user information
@@ -51,7 +55,7 @@ router.get('/book', function(req, res) {
 
 res.render('book.jade');
 
-	} else res.redirect('/queue'); // if queue position not okay redirect to /queue
+	} // if queue position not okay redirect to /queue
 
 	
 
