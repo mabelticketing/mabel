@@ -16,22 +16,14 @@ router.get("/apitest", function(req, res) {
 router.get('/login/mabel',
 	passport.authenticate('local'),
 	function(req, res) {
-		// If this function gets called, authentication was successful.
-		// `req.user` contains the authenticated user.
-		res.json({
-			"user": req.user
-		});
+		res.render("loginConfirmation.jade", {token:req.user.token});
 	}
 );
 
 router.get('/login/raven',
 	passport.authenticate('raven'),
 	function(req, res) {
-		// If this function gets called, authentication was successful.
-		// `req.user` contains the authenticated user.
-		res.json({
-			"user": req.user
-		});
+		res.render("loginConfirmation.jade", {token:req.user.token});
 	}
 );
 router.get('/admin', function(req, res) {

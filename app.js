@@ -29,7 +29,6 @@ var APIRouter = require("./src/api-routes.js");
 app.use(passport.initialize());
 app.use("/", APPRouter);
 app.use("/api", APIRouter);
-app.use('/assets', express.static(__dirname + '/assets'));
 
 // serve static content in assets from root
 app.use('/', express.static(__dirname + '/assets'));
