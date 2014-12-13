@@ -77,9 +77,6 @@ create table user_group (
 	primary key (id)
 );
 
-### insert some default groups ###
-insert into user_group (name, description) values ('admins','For administrators')
-
 ### GROUP MEMBERSHIPS ###
 
 create table user_group_membership (

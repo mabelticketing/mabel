@@ -2,6 +2,7 @@
 /* global require, console */
 var config = require('./config.js');
 var passport = require('passport');
+var getConnection = require("./api.js").getConnection;
 var LocalStrategy = require('passport-local').Strategy;
 var RavenStrategy = require('passport-raven').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
@@ -11,16 +12,6 @@ var mysql = require("mysql");
 var https = require("https");
 
 var secret = config.jwt_secret;
-function getConnection() {
-	var conn = mysql.createConnection({
-		host: config.db_host,
-		user: config.db_user,
-		password: config.db_password,
-		database: config.db_db
-	});
-	conn.connect();
-	return conn;
-}
 
 // the token contains the user ID and also the groups which the user is a member of
 function getToken(userId, callback) {
@@ -119,13 +110,13 @@ passport.use(new RavenStrategy({
 			// res.on('end', function() {
 			// var response = JSON.parse(body);
 			// var name = response.result.person.displayName;
-			name = "Demo User";
+			var name = "Demo User";
 			var insertQuery = "INSERT INTO user (name, email, crsid, registration_time) " +
 				"VALUES (?,?,?,CURRENT_TIMESTAMP)";
 
 			// TODO: We have a bit more Ibis stuff to process to allocate user groups
 
-			conn.query(insertQuery, [name, crsid + "@cam.ac.uk", crsid],
+			conn.query(insertQuery, [name, "demo@cam.ac.uk", crsid],
 				function(err, result) {
 					// pass errors through middleware
 					if (err) done(err);
