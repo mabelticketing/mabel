@@ -15,12 +15,12 @@ function getConnection() {
 	return conn;
 }
 
-function getBookingFormData(user, callback) {
+function getBookingFormData(user, event_id, callback) {
 
 	var conn = getConnection();
 
-	var userSql = "SELECT * FROM user WHERE id=?";
-	conn.query(userSql, [user.id], function(err, rows) {
+	var userSQL = "SELECT * FROM user WHERE id=?";
+	conn.query(userSQL, [user.id], function(err, rows) {
 		if (err || rows.length === 0) {
 			return callback({
 				error: err || "User doesn't exist"
@@ -29,14 +29,14 @@ function getBookingFormData(user, callback) {
 			var userData = rows[0];
 
 			var ticketSQL = "SELECT DISTINCT(ticket_type.id) AS ticket_type_id,\
-				ticket_type.name AS name, \
-				ticket_type.price AS price \
-			FROM group_access_right \
-			JOIN user_group \
-				ON user_group.id = group_access_right.id \
-			JOIN ticket_type \
-				ON ticket_type.id = group_access_right.ticket_type_id \
-			WHERE ";
+					ticket_type.name AS name, \
+					ticket_type.price AS price \
+				FROM group_access_right \
+				JOIN user_group \
+					ON user_group.id = group_access_right.id \
+				JOIN ticket_type \
+					ON ticket_type.id = group_access_right.ticket_type_id \
+				WHERE ticket_type.event_id=? AND (";
 			if (user.groups.length < 0) {
 				return callback({
 					error: "The user is not a member of any groups!"
@@ -47,18 +47,28 @@ function getBookingFormData(user, callback) {
 					ticketSQL += sep + "user_group.id = ?";
 					sep = " OR ";
 				}
-				conn.query(ticketSQL, user.groups, function(err, ticketRows) {
+				ticketSQL += ");";
+				conn.query(ticketSQL, [event_id].concat(user.groups), function(err, ticketRows) {
 					if (err) {
 						return callback({
 							error: err
 						});
 					}
-					return callback({
-						availableTickets: ticketRows,
-						user: userData
+					var paymentSQL = "SELECT id, name, description FROM payment_method WHERE event_id=?;";
+					conn.query(paymentSQL, [event_id], function(err, paymentRows) {
+						if (err) {
+							return callback({
+								error: err
+							});
+						}
+						return callback({
+							availableTickets: ticketRows,
+							user: userData,
+							payment_methods: paymentRows
+						});
 					});
+					conn.end();
 				});
-				conn.end();
 			}
 		}
 	});

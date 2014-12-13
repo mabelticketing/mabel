@@ -48,7 +48,12 @@ router.get("/book",
 				}
 			});
 		} else {
-			api.getBookingFormData(req.user, function(data) {
+			if (typeof req.query.event_id === "undefined") {
+				return res.json({
+					"error":"event_id not provided"
+				});
+			}
+			api.getBookingFormData(req.user, req.query.event_id, function(data) {
 				res.json({
 					"status": "booking",
 					"data" : data
