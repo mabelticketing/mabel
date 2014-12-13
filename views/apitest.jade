@@ -23,7 +23,7 @@ html
 					test: function test(callback) {
 						var token = $cookies.mabelAuthToken;
 						if (token) {
-							$http.get('http://localhost:3008/api/test?access_token='+token)
+							$http.get('/api/test?access_token='+token)
 								.success(function(data) {
 									callback(null, data);
 								})
