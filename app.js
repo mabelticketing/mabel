@@ -31,5 +31,8 @@ app.use("/", APPRouter);
 app.use("/api", APIRouter);
 app.use('/assets', express.static(__dirname + '/assets'));
 
+// serve static content in assets from root
+app.use('/', express.static(__dirname + '/assets'));
+
 // listen on port 2000
 app.listen(config.port || 2000);

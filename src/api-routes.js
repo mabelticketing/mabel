@@ -67,6 +67,10 @@ router.get("/user",
 		session: false
 	}),
 	function(req, res) {
+		// make this page accessible to admins only (the admin group is group 1):
+		if (req.user.groups.indexOf(1) < 0)
+			return res.send("You do not have permission to view this page");
+
 		var conn = mysql.createConnection({
 			host: config.db_host,
 			user: config.db_user,
