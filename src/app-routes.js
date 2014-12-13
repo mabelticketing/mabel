@@ -1,7 +1,9 @@
-var express = module.parent.exports.express;
-
-var router   = express.Router();
+// imports
+var express  = module.parent.exports.express;
 var passport = require("passport");
+
+/*** APP ROUTER ***/
+var router   = express.Router();
 
 router.get("/", function(req, res) {
 	res.render("index.jade");
@@ -19,8 +21,7 @@ router.get('/login/mabel',
 		res.json({
 			"user": req.user
 		});
-	}
-);
+	});
 
 router.get('/login/raven',
 	passport.authenticate('raven'),
@@ -30,22 +31,24 @@ router.get('/login/raven',
 		res.json({
 			"user": req.user
 		});
-	}
-);
+	});
 
-router.get('/book', function(req, res) {
-	// load page that either displays queue or booking form.
-	res.render("book.jade");
-});
+router.get('/book',
+	function(req, res) {
+		// load page that either displays queue or booking form.
+		res.render("book.jade");
+	});
 
-router.get('/confirmation', function(req, res) {
-	// display confirmation page
-	res.render('confirmation.jade');
-});
+router.get('/confirmation',
+	function(req, res) {
+		// display confirmation page
+		res.render('confirmation.jade');
+	});
 
-router.get('/buy', function(req, res) {
-	// TODO: remove this? not entirely sure what it is for
-	res.render("buy.jade");
-});
+router.get('/buy',
+	function(req, res) {
+		// TODO: remove this? not entirely sure what it is for
+		res.render("buy.jade");
+	});
 
 module.exports = router;

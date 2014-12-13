@@ -16,7 +16,7 @@ html
 					apiCaller.test(function(err, data) {
 						if (!err) $scope.data = data;
 					});
-				}
+				};
 			});
 			test.factory('apiCaller', function ApiCaller($http, $cookies) {
 				return {
