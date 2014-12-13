@@ -5,6 +5,7 @@ var express = module.parent.exports.express;
 
 var router = express.Router();
 var __ = require("./strings.js");
+var Queue = require("./queue.js");
 var passport = require("passport");
 var mysql = require('mysql');
 var config = require('./config.js');
@@ -28,23 +29,37 @@ router.get("/test",
 	}
 );
 
+var buyQueue = new Queue(1);
+
 router.get("/buy",
 	passport.authenticate('bearer', {
 		session: false
 	}),
+	// have to wrap in a function because express drops the 'this' context otherwise
+	// it does this for performance reasons, so if necessary this is a place to optimise
+	function(req, res, next) {
+		buyQueue.joinQueue(req, res, next);
+	},
 	function(req, res) {
 		res.json({
-			"Welcome": __("You are authenticated!")
+			"Welcome": __("You are ready to buy!")
 		});
 	}
 );
 
-var conn = mysql.createConnection({
-		host: config.db_host,
-		user: config.db_user,
-		password: config.db_password,
-		database: config.db_db
-	});
+router.get("/finishbuy",
+	passport.authenticate('bearer', {
+		session: false
+	}),
+	function(req, res, next) {
+		buyQueue.leaveQueue(req, res, next);
+	},
+	function(req, res) {
+		res.json({
+			"Welcome": __("You have left the queue")
+		});
+	}
+);
 
 router.get("/user",
 	passport.authenticate('bearer', {
