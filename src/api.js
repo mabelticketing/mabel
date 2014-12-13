@@ -33,7 +33,7 @@ function getBookingFormData(user, event_id, callback) {
 					ticket_type.price AS price \
 				FROM group_access_right \
 				JOIN user_group \
-					ON user_group.id = group_access_right.id \
+					ON user_group.id = group_access_right.group_id \
 				JOIN ticket_type \
 					ON ticket_type.id = group_access_right.ticket_type_id \
 				WHERE ticket_type.event_id=? AND (";
