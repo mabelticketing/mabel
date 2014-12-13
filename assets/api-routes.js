@@ -72,10 +72,16 @@ router.get("/user",
 			password: config.db_password,
 			database: config.db_db
 		});
-		conn.query("SELECT * FROM user WHERE id=?", [req.params.id], function(err, rows) {
+		conn.query("SELECT * FROM user WHERE id=?", [req.query.id], function(err, rows) {
 			if (err) res.send(err);
-			var user = rows[0];
-			res.json(user);
+			if (rows.length == 0) {
+				res.json({
+					error: "user doesn't exist"
+				});
+			} else {
+				var user = rows[0];
+				res.json(user);
+			}
 		});
 		conn.end();
 	});
