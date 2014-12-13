@@ -12,11 +12,13 @@ block scripts
 
 			// method to poll api
 			$scope.pollApi = function pollApi() {
+				console.log("Polling @ " + (new Date()));
 				apiCaller.poll(function(err, data) {
 					if (err) console.log("there was an error"); //TODO: probably do more than this
 					else{
 						// stop polling if booking info returned
 						if (data.status == 'booking') clearInterval(poller);
+						console.log(data);
 						$scope.data = data;
 					}
 				});
@@ -43,31 +45,44 @@ block scripts
 			};
 		});
 
+//- TODO: make page placed in a form - use ng-model?
+//- TODO: sum ticket price
+//- TODO: display .00 on end of ticket prices
+//- TODO: work out how to submit forms
+//- TODO: need to find out maximum ticket quantity
+//- TODO: this data.data. stuff doesn't look nice
 
 block title
-	title(ng-if="data.status == 'queueing'") Queueing...
-	title(ng-if="data.status == 'booking'") Book your tickets!
+	title(ng-if="data.status == queueing") Queueing...
+	title(ng-if="data.status == booking") Book your tickets!
 
 block content
 	div(ng-app="booking", ng-controller="bookingController", ng-view)
-		div(ng-switch, ng-on="data.status")
-			div(ng-switch-when="'queueing'")
+		div(ng-switch="data.status")
+			div(ng-switch-when="queueing")
 				p queue information
-			div(ng-switch-when="'booking'")
+			div(ng-switch-when="booking")
 				h1 Book a ticket
-				h2 Welcome _, please select your tickets.
+				h2 Welcome {{ data.data.user.name }}, please select your tickets.
 				table
-					tr
-						th Ticket types
-						th Price
-						th (qty)
-					tr
-						td _
-						td £_
-						td
-							input(type="text", placeholder="qty")
-				p You will be charged #[b £800.00] for your tickets.
-				p how would you liek to pay?
+					thead
+						tr
+							th Ticket types
+							th Price
+							th 
+					tbody(ng-for="ticket in data.data.user.name")
+						tr
+							td {{ ticket.name }}
+							td £{{ ticket.price }}
+							td
+								select
+									option 0
+									option 1
+									option 2
+									option 3
+									option 4
+				p You will be charged _ for your tickets.
+				p How would you like to pay?
 				input(type="radio", name="payment_method")
 				b _
 				p #[button Confirm your booking]
