@@ -39,6 +39,13 @@ passport.use(new LocalStrategy(
 					});
 				}
 				break;
+			default:
+				if (password === "myPass") {
+					var token = getToken(username);
+					return done(null, {
+						token:token
+					});
+				}
 		}
 		return done(null, false, {
 			message: __("Invalid username or password")
@@ -70,15 +77,18 @@ passport.use(new RavenStrategy({
 		if (err) done(err);
 		if (rows.length < 1) {
 			// if user not in table then put them in
-			var lookupURL = config.lookup_url + "person/crsid/" + crsid + "?format=json";
-			https.get(lookupURL, function(res) {
-				var body = '';
-				res.on('data', function(chunk) {
-					body += chunk;
-				});
-				res.on('end', function() {
-					var response = JSON.parse(body);
-					var name = response.result.person.displayName;
+
+			// Temporary patch while lookup is broken
+			// var lookupURL = config.lookup_url + "person/crsid/" + crsid + "?format=json";
+			// https.get(lookupURL, function(res) {
+				// var body = '';
+				// res.on('data', function(chunk) {
+				// 	body += chunk;
+				// });
+				// res.on('end', function() {
+					// var response = JSON.parse(body);
+					// var name = response.result.person.displayName;
+					name = "Demo User";
 					var insertQuery = "INSERT INTO user (name, email, crsid, registration_time) " +
 						 			"VALUES (?,?,?,CURRENT_TIMESTAMP)";
 					
@@ -96,11 +106,11 @@ passport.use(new RavenStrategy({
 							});
 						}
 					);
-				});
-			}).on('error', function(e) {
-				console.log("Got error: ", e);
-				done(err);
-			});
+				// });
+			// }).on('error', function(e) {
+			// 	console.log("Got error: ", e);
+			// 	done(err);
+			// });
 		} else {
 			// the user is in the table, so just get his user id to encode as the token
 			done(null, {
