@@ -4,8 +4,13 @@ var router = express.Router();
 var passport = require("passport");
 var api = require("./api.js");
 var http = require('http');
+
 router.get("/", function(req, res) {
 	res.render("index.jade");
+});
+
+router.get("/apitest", function(req, res) {
+	res.render("apitest.jade");
 });
 
 router.get('/login/mabel',
