@@ -8,8 +8,6 @@
 	done it but it's definitely seen some weird concurrent behaviour in testing. So hard to find!
 */
 
-var __ = require("./strings.js");
-
 function Queue(maxAllowedUsers) {
 	this.maxAllowedUsers = maxAllowedUsers;
 	// I'm using an object as a set, with properties being members (properties are all set to true)
@@ -18,7 +16,7 @@ function Queue(maxAllowedUsers) {
 	this.queueingUsers = [];
 	this.mutexLocked = false;
 }
-Queue.prototype.joinQueue = function joinQueue(req, res, next) {
+Queue.prototype.joinQueue = function joinQueue(userId) {
 	// wait for the mutex to become unlocked
 	while (this.mutexLocked){}
 
@@ -26,10 +24,10 @@ Queue.prototype.joinQueue = function joinQueue(req, res, next) {
 	this.mutexLocked = true;
 
 	// Check if the user is in the queue already
-	var queuePos = this.queueingUsers.indexOf(req.user.id);
+	var queuePos = this.queueingUsers.indexOf(userId);
 	if (queuePos < 0) {
 		queuePos = this.queueingUsers.length;
-		this.queueingUsers[queuePos] = req.user.id;
+		this.queueingUsers[queuePos] = userId;
 	}
 
 	// move people from waiting list to queue
@@ -40,16 +38,19 @@ Queue.prototype.joinQueue = function joinQueue(req, res, next) {
 	}
 
 	// let the user in if he's allowed
-	if (req.user.id in this.allowedUsers) {
+	if (userId in this.allowedUsers) {
 		this.mutexLocked = false;
-		return next();
+		return {
+			queueing: false
+		};
 	} else {
 		this.mutexLocked = false;
 		// TODO: Some sort of timeout if you don't check frequently enough
-		return res.json({
-			"status": "queueing",
-			"queuePos": queuePos+1
-		});
+		return {
+			queueing: true,
+			position: queuePos + 1,
+			of: this.queueingUsers.length
+		};
 	}
 };
 Queue.prototype.leaveQueue = function leaveQueue(req, res, next) {
