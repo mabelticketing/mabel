@@ -8,6 +8,10 @@ var __       = require("./strings.js");
 var Queue    = require("./queue.js");
 var passport = require("passport");
 var api      = require("./api.js");
+var mysql = require('mysql');
+var config = require('./config.js');
+// TODO: send every route through passport.authenticate
+//       rather than doing it on each route individually
 
 router.get("/", function(req, res) {
 	res.json({
@@ -42,6 +46,7 @@ router.get("/book",
 		res.json(api.getBookingPageData());
 	}
 );
+
 router.get("/finishBook",
 	passport.authenticate('bearer', {
 		session: false
@@ -56,5 +61,30 @@ router.get("/finishBook",
 		});
 	}
 );
+
+router.get("/user",
+	passport.authenticate('bearer', {
+		session: false
+	}),
+	function(req, res) {
+		var conn = mysql.createConnection({
+			host: config.db_host,
+			user: config.db_user,
+			password: config.db_password,
+			database: config.db_db
+		});
+		conn.query("SELECT * FROM user WHERE id=?", [req.query.id], function(err, rows) {
+			if (err) res.send(err);
+			if (rows.length === 0) {
+				res.json({
+					error: "user doesn't exist"
+				});
+			} else {
+				var user = rows[0];
+				res.json(user);
+			}
+		});
+		conn.end();
+	});
 
 module.exports = router;
