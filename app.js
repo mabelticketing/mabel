@@ -19,6 +19,7 @@ var __ = require("./src/strings.js");
 app.set("views", __dirname + "/views");
 
 // set the default template engine to ejs - for static html
+app.locals.pretty = true;
 app.engine('jade', require('jade').__express);
 
 /* ROUTES */
@@ -26,8 +27,6 @@ var APPRouter = require("./src/app-routes.js");
 var APIRouter = require("./src/api-routes.js");
 
 app.use(passport.initialize());
-// passport session relies on express session
-// app.use(passport.session());
 app.use("/", APPRouter);
 app.use("/api", APIRouter);
 
