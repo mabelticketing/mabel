@@ -11,22 +11,9 @@ function APICaller($http, $cookies) {
 
 	return {
 		get: get,
-		post: post,
-		poll: poll
+		post: post
 	};
 
-	function poll(callback) {
-		var token = $cookies.mabelAuthToken;
-		if (token) {
-			$http.get('/api/book?event_id=1&access_token='+token)
-				.success(function(data) {
-					callback(null, data);
-				})
-				.error(function(err) {
-					callback(err);
-				});
-		} else console.log("error: no auth token found"); // TODO: deal with this better
-	}
 	function call(config, callback, error) {
 		$http(config)
 			.success(function(data) {
