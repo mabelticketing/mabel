@@ -38,11 +38,28 @@ body(class="skin-black")
 				block content
 					| Hello admin panel!
 	block scripts
+		// jquery
 		script(src='/components/jquery/dist/jquery.min.js')
+		
+		// bootstrap
 		script(src='/components/bootstrap/dist/js/bootstrap.min.js')
-		script(type="text/javascript", src="/components/angular/angular.js")
-		script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
-		script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
-		script(type="text/javascript", src="/components/moment/moment.js")
 		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
+
+		// angular
+		script(type="text/javascript", src="/components/angular/angular.js")
+		script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+		// bootstrapping
+		script(type = "text/javascript" src="/js/mabel.js")
+
+		// shared
+		script(type = "text/javascript" src="/js/shared/mabel.shared.js")
+		script(type = "text/javascript" src="/js/shared/datetimepicker.directive.js")
+		script(type = "text/javascript" src="/js/shared/api.factory.js")
+		
+		// admin
+		script(type = "text/javascript" src="/js/admin/mabel.admin.js")
+		script(type = "text/javascript" src="/js/admin/adminpanel.controller.js")
+			
+		// misc
+		script(type="text/javascript", src="/components/moment/moment.js")
 		script(src='/components/admin-lte/js/app.js')
