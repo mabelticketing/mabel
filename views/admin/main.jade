@@ -1,0 +1,48 @@
+doctype html
+block variables
+
+	- title = title || "Untitled Page"
+	- subtitle = subtitle || ""
+	- breadcrumb = [{name:"Dashboard"}]
+	- notifications = notifications || []
+	- sidebarItems =  sidebarItems || [{link:"#", name:title, icon:"dashboard", selected:true}]
+head
+	meta(charset='UTF-8')
+	title Mabel Ticketing | #{title}
+	meta(content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no', name='viewport')
+	block css
+		link(href='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css', rel='stylesheet', type='text/css')
+		link(href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css', rel='stylesheet', type='text/css')
+		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
+		link(href='/lib/css/adminLTE.css', rel='stylesheet', type='text/css')
+		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
+body(class="skin-black")
+	header.header
+		include ./header.jade
+	.wrapper.row-offcanvas.row-offcanvas-left
+		aside.left-side.sidebar-offcanvas
+			section.sidebar
+				include ./sidebar.jade
+		aside.right-side
+			section.content-header
+				h1 #{title}
+					small #{subtitle}
+				ol.breadcrumb
+					each val, i in breadcrumb
+						if (i<breadcrumb.length-1)
+							li
+								a(href=val.link) #{val.name}
+						else 
+							li(class="active") #{val.name}
+			section.content
+				block content
+					| Hello admin panel!
+	block scripts
+		script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js')
+		script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
+		script(type="text/javascript", src="/components/angular/angular.js")
+		script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
+		script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
+		script(type="text/javascript", src="/components/moment/moment.js")
+		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
+		script(src='/lib/js/adminLTE-app.js')

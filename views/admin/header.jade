@@ -1,0 +1,35 @@
+a.logo(href='index.html')
+	// TODO: better icon
+	| Mabel Ticketing
+nav.navbar.navbar-static-top(role='navigation')
+	a.navbar-btn.sidebar-toggle(href='#', data-toggle='offcanvas', role='button')
+		span.sr-only Toggle navigation
+		span.icon-bar
+		span.icon-bar
+		span.icon-bar
+	.navbar-right
+		ul.nav.navbar-nav
+			if notifications.length > 0
+				li.dropdown.messages-menu
+					a.dropdown-toggle(href='#', data-toggle='dropdown')
+						i.fa.fa-envelope
+						span.label.label-success #{notifications.length}
+					ul.dropdown-menu
+						li.header Notifications
+						each notification in notifications
+							li
+								if notification.link
+									a(href=notification.link)
+										p #{notification.text}
+								else 
+									p #{notification.text}
+			li.dropdown.user.user-menu
+				a.dropdown-toggle(href='#', data-toggle='dropdown')
+					i.glyphicon.glyphicon-user
+					span
+						= " " + user.name + " "
+						i.caret
+				ul.dropdown-menu
+					li.user-body
+						.pull-right
+							a.btn.btn-default.btn-flat(href='#') Sign out

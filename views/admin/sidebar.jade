@@ -1,0 +1,6 @@
+ul.sidebar-menu
+	each item in sidebarItems
+		li(class=item.selected?"active":"")
+			a(href=item.link)
+				i(class="fa fa-" + item.icon)
+				span  #{item.name}
