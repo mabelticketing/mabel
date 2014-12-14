@@ -41,9 +41,16 @@ router.get("/event-data",
 
 var bodyParser = require('body-parser');
 router.post("/event-data",
+	passport.authenticate('bearer', {
+		session: false
+	}),
 	bodyParser.json(),
 	function(req, res) {
-		api.updateEventData(req.body.event_id, req.body.toSave, function(result) {
+		// make this page accessible to admins only (the admin group is group 1):
+		if (req.user.groups.indexOf(1) < 0) {
+			return res.status(401).send("You do not have permission to access this method");
+		}
+		api.updateEventData(req.query.event_id, req.body, function(result) {
 			res.json(result);
 		});
 	}

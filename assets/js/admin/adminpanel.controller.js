@@ -1,6 +1,6 @@
 /*global moment*/
 angular.module('mabel.admin')
-	.controller("EventSettingsController", ["APICaller", EventSettingsController]);
+	.controller("EventSettingsController", EventSettingsController);
 	
 function EventSettingsController(APICaller) {
 	var vm = this;
@@ -20,12 +20,11 @@ function EventSettingsController(APICaller) {
 		formGroup.removeClass('has-info has-warning has-error has-success');
 		if (!isEqual(vm[property], vm["_" + property])) {
 			formGroup.addClass('has-info');
-			var data = {event_id:1, toSave:{}};
-
-			data.toSave[property] = vm[property];
-			APICaller.post('event-data', data, function(data){
+			var data = {};
+			data[property] = vm[property];
+			APICaller.post('event-data', {event_id:1}, data, function(result){
 				vm["_" + property] = vm[property];
-				console.log(data);
+				console.log(result);
 				formGroup.removeClass('has-info has-warning has-error has-success').addClass('has-success');
 			}, function(err) {
 				formGroup.removeClass('has-info has-warning has-error has-success').addClass('has-error');
