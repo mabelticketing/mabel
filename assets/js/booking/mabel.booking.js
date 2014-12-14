@@ -1,0 +1,1 @@
+angular.module('mabel.booking', ['mabel.shared']); 
