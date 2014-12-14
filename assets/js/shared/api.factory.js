@@ -30,9 +30,10 @@ function APICaller($http, $cookies) {
 		data.access_token = token;
 		call({method:'get', url:apiRoot + method, params:data}, callback, error);
 	}
-	function post(method, data, callback, error) {
+	function post(method, params, data, callback, error) {
+		params = params || {};
 		data = data || {};
-		data.access_token = token;
-		call({method:'post', url:apiRoot + method, data:data}, callback, error);
+		params.access_token = token;
+		call({method:'post', url:apiRoot + method, params:params, data:data}, callback, error);
 	}
 }
