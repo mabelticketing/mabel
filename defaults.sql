@@ -1,8 +1,8 @@
 insert into mabel.event (id, name, launch_time, modification_stop_time) VALUES (
 	1,
 	'Emmanuel May Ball 2015', 
-	1418428800, # 13th Dec 2014 00:00:00
-	1419465600 # 25th Dec 2014 00:00:00
+	'2014-12-13 00:00:00',
+	'2014-12-25 00:00:00'
 );
 
 insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (

@@ -30,6 +30,30 @@ router.get("/test",
 	}
 );
 
+router.get("/event-data",
+	passport.authenticate('bearer', {
+		session: false
+	}),
+	function(req, res) {
+		api.getEventData(req.query.event_id, function(result) {
+			res.json(result);
+		});
+	}
+);
+
+
+var bodyParser = require('body-parser');
+router.post("/event-data",
+	bodyParser.json(),
+	function(req, res) {
+		api.updateEventData(req.body.event_id, req.body.toSave, function(result) {
+			res.json(result);
+		});
+	}
+);
+
+
+
 // TODO: Increase number of people allowed through at a time from 1
 var bookQueue = new Queue(1);
 

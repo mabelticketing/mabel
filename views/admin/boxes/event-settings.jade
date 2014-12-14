@@ -4,15 +4,19 @@
 	//- form(editable-form)
 	.box-body
 		.form-group
-			label(for="event-name-field") Event Name: {{ctrl.eventName}}
-			input.form-control#event-name-field(type="text", ng-model="ctrl.eventName")
+			label(for="event-name-field") Event Name
+			input.form-control#event-name-field(type="text" ng-model="ctrl.name" ng-blur="ctrl.save('name', $event)")
 	.box-body
 		.form-group
-			label(for="event-launch-field") Ticket Launch Date {{ctrl.eventLaunchDate}}
-			input.form-control#event-launch-field(type='text', date="ctrl.eventLaunchDate", data-date-format="YYYY/MM/DD HH:mm", datetimepicker)
+			label(for="event-launch-field") Ticket Launch Date 
+			input.form-control#event-launch-field(type='text' date="ctrl.launch_time"
+				ng-blur="ctrl.save('launch_time', $event)"
+				data-date-format="YYYY/MM/DD HH:mm" datetimepicker)
 	.box-body
 		.form-group
-			label(for="event-close-field") Ticket Close Date {{ctrl.eventCloseDate}}
-			input.form-control#event-close-field(type='text', date="ctrl.eventCloseDate", data-date-format="YYYY/MM/DD HH:mm", datetimepicker)
+			label(for="event-close-field") Ticket Close Date
+			input.form-control#event-close-field(type='text' date="ctrl.modification_stop_time"
+				ng-blur="ctrl.save('modification_stop_time', $event)"
+				data-date-format="YYYY/MM/DD HH:mm" datetimepicker)
 	.box-footer
 		button.btn.btn-primary(type="submit") Submit
