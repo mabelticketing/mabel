@@ -22,61 +22,47 @@ block append scripts
 	script(type = "text/javascript").
 		angular.module('mabel.admin', []);
 
-		angular.module('mabel.admin')
-		.directive('dt', function() {
-			return {
-				require: '?ngModel',
-				restrict: 'A',
-				link: function($scope, element, attrs, controller) {
-					var updateModel, onblur;
-
-					if (controller !== null) {
-
-						updateModel = function() {
-							if (element.data("DateTimePicker").minViewMode === element.data("DateTimePicker").viewMode) {
-								element.data("DateTimePicker").hide();
-								element.blur();
-							}
-						};
-
-						onblur = function() {
-							var date = element.datetimepicker().data("DateTimePicker").getDate();
-							// TODO: this gets unhappy when I have set the date initially
-							return $scope.$apply(function() {
-								return controller.$setViewValue(date);
-							});
-						};
-
-						controller.$render = function() {
-							var date = controller.$viewValue;
-							if (angular.isDefined(date) && date != null && moment.isMoment(date)) {
-								element.datetimepicker().data("DateTimePicker").setDate(date);
-							} else if (angular.isDefined(date)) {
-								throw new Error('ng-model value must be a Moment - currently it is a ' + typeof date + '.');
-							}
-							return controller.$viewValue;
-						};
-					}
-					myVariable = element;
-					return attrs.$observe('dt', function(value) {
-						var x = element.datetimepicker().on('change.dp', updateModel).on('blur', onblur);
-
-						if (angular.isObject(value) || (typeof(value) === "string" && value.length > 0)) {
-							element.data("DateTimePicker").setDate(value);
-						}
-						return x;
-					});
-				}
-			};
-		});
+		angular.module('mabel.admin').directive('datetimepicker', DateTimePickerDirective);
 		angular.module('mabel.admin').controller("EventSettingsController", EventSettingsController);
-		// using Controller As so I don't need to inject $scope (or anything else)
-		EventSettingsController.$inject = []
+
 		function EventSettingsController() {
-			myExcellentVar = this;
-			this.eventName = "";
-			this.eventLaunchDate = new moment();
-			this.displayEventLaunchDate = new moment();
-			this.eventCloseDate;
-			this.displayEventCloseDate = new moment();
+			var vm = this;
+			vm.eventName = "Emmanuel College May Ball";
+			vm.eventLaunchDate = new moment("1993/8/12 13:05");
+			vm.eventCloseDate = vm.eventLaunchDate.add(2, 'M');
+		}
+		
+		function DateTimePickerDirective($timeout) {
+			return {
+				scope: {
+					date: "="
+				},
+				restrict: 'A',
+				link: function(scope, element, attrs) {
+
+					element.datetimepicker({
+						defaultDate: scope.date
+					});
+					element.on('dp.change', updateModel).on('dp.error', validateError);
+					scope.$watch('date', updatePicker);
+
+					function updateModel(e) {
+						scope.$apply(function() {
+							scope.date = e.date;
+						});
+					}
+					function validateError(e) {
+						console.error("Error parsing.",e.date);
+					}
+					function updatePicker(newValue) {
+						var datePicker = element.data("DateTimePicker")
+						if (!newValue.isSame(datePicker.getDate())) {
+							// we need to update the datepicker, but wait until the $digest cycle is finished
+							$timeout(function() {
+								datePicker.setDate(newValue);
+							});
+						}
+					}
+				}
+			}
 		}
