@@ -8,6 +8,7 @@
     "test": "echo \"We haven't got any tests yet...\" && exit 0"
   },
   "dependencies": {
+    "body-parser": "^1.10.0",
     "express": "^4.10.4",
     "jade": "^1.8.1",
     "jwt-simple": "~0.2.0",

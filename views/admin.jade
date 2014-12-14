@@ -14,24 +14,106 @@ block content
 		.col-md-12
 			include admin/boxes/event-settings.jade
 
+block append css
+	style.
+		.form-group.has-info label {
+			color: #00c0ef;
+		}
+		.form-group.has-info .form-control {
+			border-color: #00c0ef !important;
+			box-shadow: none;
+		}
+
 block append scripts
-	script(type="text/javascript").
-		$(function () {
-			$('#event-close-field').datetimepicker();
-		});
+	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
 	script(type = "text/javascript").
-		angular.module('mabel.admin', []);
+		angular.module('mabel.admin', ['mabel']);
+		
+		angular.module('mabel', ['ngCookies']);
+		angular.module('mabel').factory('APICaller', APICaller);
 
 		angular.module('mabel.admin').directive('datetimepicker', DateTimePickerDirective);
 		angular.module('mabel.admin').controller("EventSettingsController", EventSettingsController);
 
-		function EventSettingsController() {
-			var vm = this;
-			vm.eventName = "Emmanuel College May Ball";
-			vm.eventLaunchDate = new moment("1993/8/12 13:05");
-			vm.eventCloseDate = vm.eventLaunchDate.add(2, 'M');
+		function APICaller($http, $cookies) {
+			var apiRoot = '/api/';
+			var token = $cookies.mabelAuthToken;
+			if (!token) {
+				console.error("No auth token found!"); // TODO: scream louder than this
+				return {};
+			}
+
+			return {
+				get: get,
+				post: post
+			};
+			function call(config, callback, error) {
+				$http(config)
+					.success(function(data) {
+						if (data.error && error) return error(data.error);
+						callback(data);
+					})
+					.error(function(err) {
+						// TODO: handle some API errors centrally?
+						if (error) return error(err);
+					});
+			}
+			function get(method, data, callback, error) {
+				data = data || {};
+				data.access_token = token;
+				call({method:'get', url:apiRoot + method, params:data}, callback, error);
+			}
+			function post(method, data, callback, error) {
+				data = data || {};
+				data.access_token = token;
+				call({method:'post', url:apiRoot + method, data:data}, callback, error);
+			}
 		}
-		
+		function isEqual(a, b) {
+			if (typeof a === "object" && typeof b === "object") {
+				if (moment.isMoment(a)) {
+					return a.isSame(b, 'minute');
+				}
+			} else {
+				return(a === b);
+			}
+		}
+		function EventSettingsController(APICaller) {
+			var vm = this;
+			vm.save = save;
+			
+			function save(property, $event) {
+				var formGroup = $($event.target).closest(".form-group");
+				formGroup.removeClass('has-info has-warning has-error has-success');
+				if (!isEqual(vm[property], vm["_" + property])) {
+					formGroup.addClass('has-info')
+					var data = {event_id:1, toSave:{}};
+
+					data.toSave[property] = vm[property];
+					APICaller.post('event-data', data, function(data){
+						vm["_" + property] = vm[property];
+						console.log(data);
+						formGroup.removeClass('has-info has-warning has-error has-success').addClass('has-success');
+					}, function(err) {
+						formGroup.removeClass('has-info has-warning has-error has-success').addClass('has-error');
+						console.log(err);
+						alert(err);
+					});
+					console.log(property + " is being saved to value " + vm[property]);
+				}
+			}
+
+			APICaller.get('event-data', {event_id:1}, function(data){
+				moment.prototype.equals
+				vm.name = data.name;
+				vm.launch_time = new moment(data.launch_time);
+				vm.modification_stop_time = new moment(data.modification_stop_time);
+				vm._name = vm.name;
+				vm._launch_time = vm.launch_time;
+				vm._modification_stop_time = vm.modification_stop_time;
+			});
+		}
+
 		function DateTimePickerDirective($timeout) {
 			return {
 				scope: {
@@ -56,7 +138,7 @@ block append scripts
 					}
 					function updatePicker(newValue) {
 						var datePicker = element.data("DateTimePicker")
-						if (!newValue.isSame(datePicker.getDate())) {
+						if (newValue && !newValue.isSame(datePicker.getDate())) {
 							// we need to update the datepicker, but wait until the $digest cycle is finished
 							$timeout(function() {
 								datePicker.setDate(newValue);

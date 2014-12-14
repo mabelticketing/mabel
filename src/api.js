@@ -4,6 +4,32 @@
 var mysql = require("mysql");
 var config = require("./config");
 
+
+module.exports = {
+	getConnection: getConnection,
+	getBookingFormData: getBookingFormData,
+	getEventData: getEventData,
+	updateEventData: updateEventData
+};
+
+function updateEventData(event_id, toSave, callback) {
+	var conn = getConnection();
+
+	var sql = "UPDATE event SET ? WHERE id=?;";
+	console.log(toSave);
+	console.log(event_id);
+	conn.query(sql, [toSave, event_id], function(err, rows) {
+		if (err) {
+			return callback({
+				error: err
+			});
+		} else {
+			console.log(rows);
+			return callback(rows);
+		}
+	});
+	conn.end();
+}
 function getConnection() {
 	var conn = mysql.createConnection({
 		host: config.db_host,
@@ -15,6 +41,26 @@ function getConnection() {
 	return conn;
 }
 
+function getEventData(event_id, callback) {
+	var conn = getConnection();
+
+	var sql = "SELECT * FROM event WHERE id=? LIMIT 1;";
+	conn.query(sql, [event_id], function(err, rows) {
+		if (err) {
+			return callback({
+				error: err
+			});
+		} else if (rows.length === 0) {
+			return callback({
+				error: "Event doesn't exist"
+			});
+		} else {
+			return callback(rows[0]);
+		}
+	});
+	conn.end();
+}
+
 function getBookingFormData(user, event_id, callback) {
 
 	var conn = getConnection();
@@ -22,6 +68,7 @@ function getBookingFormData(user, event_id, callback) {
 	var userSQL = "SELECT * FROM user WHERE id=?";
 	conn.query(userSQL, [user.id], function(err, rows) {
 		if (err || rows.length === 0) {
+			conn.end();
 			return callback({
 				error: err || "User doesn't exist"
 			});
@@ -38,18 +85,21 @@ function getBookingFormData(user, event_id, callback) {
 					ON ticket_type.id = group_access_right.ticket_type_id \
 				WHERE ticket_type.event_id=? AND (";
 			if (user.groups.length < 1) {
+				conn.end();
 				return callback({
 					error: "The user is not a member of any groups!"
 				});
 			} else {
 				var sep = "";
-				for (var i=0; i<user.groups.length; i++) {
+				for (var i = 0; i < user.groups.length; i++) {
 					ticketSQL += sep + "user_group.id = ?";
 					sep = " OR ";
 				}
 				ticketSQL += ");";
 				conn.query(ticketSQL, [event_id].concat(user.groups), function(err, ticketRows) {
 					if (err) {
+
+						conn.end();
 						return callback({
 							error: err
 						});
@@ -61,6 +111,7 @@ function getBookingFormData(user, event_id, callback) {
 								error: err
 							});
 						}
+
 						return callback({
 							availableTickets: ticketRows,
 							user: userData,
@@ -74,9 +125,3 @@ function getBookingFormData(user, event_id, callback) {
 	});
 
 }
-
-
-module.exports = {
-	getConnection: getConnection,
-	getBookingFormData: getBookingFormData
-};
