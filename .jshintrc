@@ -1,0 +1,15 @@
+{
+    "-W009": false,
+    "unused":true, 
+    "bitwise":true, 
+    "eqeqeq":true, 
+    "undef":true, 
+    "latedef":"nofunc", 
+    "eqnull":true,
+    "multistr":true,
+    "browser": true,
+    "devel": true,
+    "node": true,
+    "jquery": true,
+    "globals": {"angular":false}
+}

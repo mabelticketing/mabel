@@ -1,6 +1,3 @@
-/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
-/* global require, module, console, __dirname */
-
 // imports
 var express   = require("express");
 var app       = express();
@@ -11,9 +8,6 @@ require("./src/passport-config.js");
 // make visible outside module
 module.exports.express = express;
 module.exports.app     = app;
-
-// import string module
-var __ = require("./src/strings.js");
 
 // set the default directory for templated pages
 app.set("views", __dirname + "/views");

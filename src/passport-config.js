@@ -1,5 +1,3 @@
-/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true, multistr:true  */
-/* global require, console */
 var config = require('./config.js');
 var passport = require('passport');
 var getConnection = require("./api.js").getConnection;
@@ -8,8 +6,6 @@ var RavenStrategy = require('passport-raven').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var jwt = require("jwt-simple");
 var __ = require("./strings.js");
-var mysql = require("mysql");
-var https = require("https");
 
 var secret = config.jwt_secret;
 

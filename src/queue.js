@@ -1,6 +1,3 @@
-/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
-/* global require, module */
-
 
 /* TODO: Is this actually thread-safe?
 	So technically, JavaScript is single-threaded, but I know from experience that one page could
