@@ -11,10 +11,10 @@ head
 	title Mabel Ticketing | #{title}
 	meta(content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no', name='viewport')
 	block css
-		link(href='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css', rel='stylesheet', type='text/css')
-		link(href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css', rel='stylesheet', type='text/css')
+		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
+		link(href='/components/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
-		link(href='/lib/css/adminLTE.css', rel='stylesheet', type='text/css')
+		link(href='/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
 		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
 body(class="skin-black")
 	header.header
@@ -38,11 +38,11 @@ body(class="skin-black")
 				block content
 					| Hello admin panel!
 	block scripts
-		script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js')
-		script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
+		script(src='/components/jquery/dist/jquery.min.js')
+		script(src='/components/bootstrap/dist/js/bootstrap.min.js')
 		script(type="text/javascript", src="/components/angular/angular.js")
 		script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
 		script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
 		script(type="text/javascript", src="/components/moment/moment.js")
 		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
-		script(src='/lib/js/adminLTE-app.js')
+		script(src='/components/admin-lte/js/app.js')
