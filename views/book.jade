@@ -23,7 +23,7 @@ block title
 	title(ng-if="data.status == booking") Book your tickets!
 
 block content
-	div(ng-app="mabel.booking", ng-controller="bookingController", ng-view)
+	div(ng-app="mabel.booking", ng-controller="BookingController", ng-view)
 		div(ng-switch="data.status")
 			div(ng-switch-when="queueing")
 				h2 Queuing...

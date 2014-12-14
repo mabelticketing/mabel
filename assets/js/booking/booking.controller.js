@@ -1,5 +1,5 @@
 angular.module('mabel.booking')
-	.controller("bookingController", BookingController);
+	.controller("BookingController", BookingController);
 
 function BookingController($scope, APICaller) {
 	/*
@@ -19,26 +19,23 @@ function BookingController($scope, APICaller) {
 	// method to poll api
 	$scope.pollApi = function pollApi() {
 		console.log("Polling @ " + (new Date()));
-		APICaller.poll(function(err, data) {
-			if (err) console.log("there was an error"); //TODO: probably do more than this
-			else{
-				// stop polling if booking info returned
-				$scope.data = data;
-				if (data.status === 'booking'){
-					clearInterval(poller);
-					console.log($scope.booking);
-					for (var i=0; i<data.data.availableTickets.length; i++) {
-						// add each ticket, quantity 0 to $scope.booking
-						// this is possibly a stupid idea, gives lots of undefineds in array
-						$scope.booking.tickets.push({
-							ticket_type_id: data.data.availableTickets[i].ticket_type_id,
-							quantity: 0,
-							price: data.data.availableTickets[i].price,
-							name: data.data.availableTickets[i].name
-						});
-					}
-					console.log($scope.booking);
+		APICaller.get("book", {event_id:1}, function(data) {
+			// stop polling if booking info returned
+			$scope.data = data;
+			if (data.status === 'booking'){
+				clearInterval(poller);
+				console.log($scope.booking);
+				for (var i=0; i<data.data.availableTickets.length; i++) {
+					// add each ticket, quantity 0 to $scope.booking
+					// this is possibly a stupid idea, gives lots of undefineds in array
+					$scope.booking.tickets.push({
+						ticket_type_id: data.data.availableTickets[i].ticket_type_id,
+						quantity: 0,
+						price: data.data.availableTickets[i].price,
+						name: data.data.availableTickets[i].name
+					});
 				}
+				console.log($scope.booking);
 			}
 		});
 	};
