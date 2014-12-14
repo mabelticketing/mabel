@@ -1,12 +1,82 @@
-extends ./main.jade
+extends ./admin/main.jade
 
-block title
-	title Mabel Admin Panel
-block scripts
-	script(src="//code.jquery.com/jquery-1.11.0.min.js")
-	script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js")
-	script(src="/assets/js/adminPanel.js")
-
+block prepend variables
+	- title = "Dashboard"
+	- subtitle = "Control Panel"
+	- user = {name:"Christopher Little"}
+	- breadcrumb = [{name:"Dashboard"}]
+	- sidebarItems = [{link:"#", name:title, icon:"dashboard", selected:true}, {link:"#", name:"Widgets", icon:"th"}]
+	// notifications will normally come from the javascript context
+	- notifications = notifications || []
 
 block content
-	h1 Admin Panel
+	.row(ng-app="mabel.admin")
+		.col-md-12
+			include admin/boxes/event-settings.jade
+
+block append scripts
+	script(type="text/javascript").
+		$(function () {
+			$('#event-close-field').datetimepicker();
+		});
+	script(type = "text/javascript").
+		angular.module('mabel.admin', []);
+
+		angular.module('mabel.admin')
+		.directive('dt', function() {
+			return {
+				require: '?ngModel',
+				restrict: 'A',
+				link: function($scope, element, attrs, controller) {
+					var updateModel, onblur;
+
+					if (controller !== null) {
+
+						updateModel = function() {
+							if (element.data("DateTimePicker").minViewMode === element.data("DateTimePicker").viewMode) {
+								element.data("DateTimePicker").hide();
+								element.blur();
+							}
+						};
+
+						onblur = function() {
+							var date = element.datetimepicker().data("DateTimePicker").getDate();
+							// TODO: this gets unhappy when I have set the date initially
+							return $scope.$apply(function() {
+								return controller.$setViewValue(date);
+							});
+						};
+
+						controller.$render = function() {
+							var date = controller.$viewValue;
+							if (angular.isDefined(date) && date != null && moment.isMoment(date)) {
+								element.datetimepicker().data("DateTimePicker").setDate(date);
+							} else if (angular.isDefined(date)) {
+								throw new Error('ng-model value must be a Moment - currently it is a ' + typeof date + '.');
+							}
+							return controller.$viewValue;
+						};
+					}
+					myVariable = element;
+					return attrs.$observe('dt', function(value) {
+						var x = element.datetimepicker().on('change.dp', updateModel).on('blur', onblur);
+
+						if (angular.isObject(value) || (typeof(value) === "string" && value.length > 0)) {
+							element.data("DateTimePicker").setDate(value);
+						}
+						return x;
+					});
+				}
+			};
+		});
+		angular.module('mabel.admin').controller("EventSettingsController", EventSettingsController);
+		// using Controller As so I don't need to inject $scope (or anything else)
+		EventSettingsController.$inject = []
+		function EventSettingsController() {
+			myExcellentVar = this;
+			this.eventName = "";
+			this.eventLaunchDate = new moment();
+			this.displayEventLaunchDate = new moment();
+			this.eventCloseDate;
+			this.displayEventCloseDate = new moment();
+		}

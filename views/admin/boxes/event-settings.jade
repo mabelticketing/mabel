@@ -1,0 +1,19 @@
+.box.box-primary(ng-controller="EventSettingsController as ctrl")
+	.box-header
+		h3.box-title Event Settings
+	//- form(editable-form)
+	.box-body
+		.form-group
+			label(for="event-name-field") Event Name: {{ctrl.eventName}}
+			input.form-control#event-name-field(type="text", ng-model="ctrl.eventName")
+	.box-body
+		.form-group
+			label(for="event-launch-field") Ticket Close Date {{ctrl.eventLaunchDate}}
+			input.form-control#event-launch-field(type='text', ng-model="ctrl.eventLaunchDate", data-date-format="YYYY/MM/DD", dt="1993/03/11")
+
+	.box-body
+		.form-group
+			label(for="event-launch-field") Ticket Close Date {{ctrl.eventCloseDate}}
+			input.form-control#event-clode-field(type='text', ng-model="ctrl.eventCloseDate", data-date-format="YYYY/MM/DD", dt="1993/03/11")
+	.box-footer
+		button.btn.btn-primary(type="submit") Submit
