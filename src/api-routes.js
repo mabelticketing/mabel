@@ -1,10 +1,7 @@
-/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
-/* global require, module, console */
-
 var express  = module.parent.exports.express;
 
 var router   = express.Router();
-var __       = require("./strings.js");
+var __       = require("./strings.js"); 
 var Queue    = require("./queue.js");
 var passport = require("passport");
 var api      = require("./api.js");

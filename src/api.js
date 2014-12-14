@@ -1,6 +1,3 @@
-/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true, multistr:true */
-/* global require, module, console */
-
 var mysql = require("mysql");
 var config = require("./config");
 

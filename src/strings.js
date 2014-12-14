@@ -1,6 +1,3 @@
-/*jshint unused:true, bitwise:true, eqeqeq:true, undef:true, latedef:true, eqnull:true */
-/* global module */
-
 var res = {
 	"You have joined the queue.": "You have now joined the queue. dfgskjdfgkjdsfgkj"
 };
