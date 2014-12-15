@@ -1,6 +1,6 @@
 var config = require('./config.js');
 var passport = require('passport');
-var getConnection = require("./api.js").getConnection;
+var getConnection = require("./api/connection.js").getConnection;
 var LocalStrategy = require('passport-local').Strategy;
 var RavenStrategy = require('passport-raven').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
