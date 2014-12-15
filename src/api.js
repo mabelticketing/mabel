@@ -1,62 +1,25 @@
-var mysql = require("mysql");
-var config = require("./config");
 
+/* API Structure
+	api
+		event
+			get (GET)
+			update (PUT)
+		user
+			get (GET)
+			update (PUT)
+		payment_method
+			get
+		ticket
+			available
+				get
+*/
 
 module.exports = {
-	getConnection: getConnection,
-	getBookingFormData: getBookingFormData,
-	getEventData: getEventData,
-	updateEventData: updateEventData
+	event          : require("./api/event.js"),
+	user           : require("./api/user.js"),
+	ticket_type    : require("./api/ticket_type.js"),
+	payment_method : require("./api/payment_method.js")
 };
-
-function updateEventData(event_id, toSave, callback) {
-	var conn = getConnection();
-
-	var sql = "UPDATE event SET ? WHERE id=?;";
-	console.log(toSave);
-	console.log(event_id);
-	conn.query(sql, [toSave, event_id], function(err, rows) {
-		if (err) {
-			return callback({
-				error: err
-			});
-		} else {
-			console.log(rows);
-			return callback(rows);
-		}
-	});
-	conn.end();
-}
-function getConnection() {
-	var conn = mysql.createConnection({
-		host: config.db_host,
-		user: config.db_user,
-		password: config.db_password,
-		database: config.db_db
-	});
-	conn.connect();
-	return conn;
-}
-
-function getEventData(event_id, callback) {
-	var conn = getConnection();
-
-	var sql = "SELECT * FROM event WHERE id=? LIMIT 1;";
-	conn.query(sql, [event_id], function(err, rows) {
-		if (err) {
-			return callback({
-				error: err
-			});
-		} else if (rows.length === 0) {
-			return callback({
-				error: "Event doesn't exist"
-			});
-		} else {
-			return callback(rows[0]);
-		}
-	});
-	conn.end();
-}
 
 function getBookingFormData(user, event_id, callback) {
 

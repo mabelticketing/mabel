@@ -18,8 +18,11 @@ function BookingController($scope, APICaller) {
 
 	// method to poll api
 	$scope.pollApi = function pollApi() {
+
 		console.log("Polling @ " + (new Date()));
-		APICaller.get("book", {event_id:1}, function(data) {
+		
+		APICaller.get("book", {event_id:1}, function(err, data) {
+			if (err) console.log("err"); // error handling
 			// stop polling if booking info returned
 			$scope.data = data;
 			if (data.status === 'booking'){
@@ -54,7 +57,7 @@ function BookingController($scope, APICaller) {
 	var poller = setInterval($scope.pollApi(), 30000);
 
 	$scope.submitBooking = function submitBooking() {
-		apiCaller.submit($scope.booking, function(err, result) {
+		APICaller.submit($scope.booking, function(err, result) {
 			if (err) console.log("err"); // error handling
 			// TODO: DO SOMETHING WITH RESULT
 		});

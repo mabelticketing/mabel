@@ -1,70 +1,91 @@
-var express  = module.parent.exports.express;
+var express = module.parent.exports.express;
 
-var router   = express.Router();
-var __       = require("./strings.js"); 
-var Queue    = require("./queue.js");
+var router = express.Router();
+var __ = require("./strings.js");
+var Queue = require("./queue.js");
 var passport = require("passport");
-var api      = require("./api.js");
+var api = require("./api.js");
 var mysql = require('mysql');
 var config = require('./config.js');
-// TODO: send every route through passport.authenticate
-//       rather than doing it on each route individually
+var bodyParser = require('body-parser');
 
-router.get("/", function(req, res) {
-	res.json({
-		"Welcome": __("Welcome to the api, Strider")
-	});
+
+/* RESPONSIBILITY OF THIS FILE IS AUTHENTICATION AND MARSHALLING FOR HTTP */
+
+
+router
+	.use(
+		passport.authenticate('bearer', {
+			session: false
+		})
+)
+	.use(
+		bodyParser.json()
+);
+
+function checkGroup(req, res, groupId) {
+	if (req.user.groups.indexOf(groupId) < 0) {
+		res
+			.status(401)
+			.send("You do not have permission to access this resource");
+		return false;
+	}
+	return true;
+}
+
+function checkAdmin(req, res) {
+	return checkGroup(req, res, 1);
+}
+
+function marshallResult(res) {
+	return function(err, result) {
+		if (err) return res.status(500).send(err);
+		res.json(result);
+	};
+}
+/* event */
+
+router.get("/event/:id", function(req, res) {
+	api.event.get(req.params.id, marshallResult(res));
 });
 
-router.get("/test",
-	passport.authenticate('bearer', {
-		session: false
-	}),
-	function(req, res) {
-		res.json({
-			"user": req.user
-		});
-	}
-);
+router.post("/event/:id", function(req, res) {
+	if (!checkAdmin(req, res)) return;
+	api.event.update(req.params.id, req.body, marshallResult(res));
+});
 
-router.get("/event-data",
-	passport.authenticate('bearer', {
-		session: false
-	}),
-	function(req, res) {
-		api.getEventData(req.query.event_id, function(result) {
-			res.json(result);
-		});
-	}
-);
+/* user */
 
+router.get("/user/:id", function(req, res) {
+	api.user.get(req.params.id, marshallResult(res));
+});
 
-var bodyParser = require('body-parser');
-router.post("/event-data",
-	passport.authenticate('bearer', {
-		session: false
-	}),
-	bodyParser.json(),
-	function(req, res) {
-		// make this page accessible to admins only (the admin group is group 1):
-		if (req.user.groups.indexOf(1) < 0) {
-			return res.status(401).send("You do not have permission to access this method");
-		}
-		api.updateEventData(req.query.event_id, req.body, function(result) {
-			res.json(result);
-		});
-	}
-);
+router.get("/user", function(req, res) {
+	if (!checkAdmin(req, res)) return;
+	api.user.getAll(marshallResult(res));
+});
 
+/* payment_method */
+
+router.get("/payment_method/:id", function(req, res) {
+	api.payment_method.get(req.params.id, marshallResult(res));
+});
+
+router.get("/payment_method", function(req, res) {
+	api.payment_method.getAll(marshallResult(res));
+});
+
+/* ticket_type */
+
+router.get("/ticket_type", function(req, res) {
+	api.ticket_type.getAll(req.user, req.query.event_id, marshallResult(res));
+});
 
 
 // TODO: Increase number of people allowed through at a time from 1
 var bookQueue = new Queue(1);
 
 router.get("/book",
-	passport.authenticate('bearer', {
-		session: false
-	}),
 	function(req, res) {
 		var result = bookQueue.joinQueue(req.user.id);
 		if (result.queueing) {
@@ -78,13 +99,25 @@ router.get("/book",
 		} else {
 			if (typeof req.query.event_id === "undefined") {
 				return res.json({
-					"error":"event_id not provided"
+					"error": "event_id not provided"
 				});
 			}
-			api.getBookingFormData(req.user, req.query.event_id, function(data) {
-				res.json({
-					"status": "booking",
-					"data" : data
+			// TODO: These can be obtained in individual requests, do we want that duped?
+			api.ticket_type.getAll(req.user, req.query.event_id, function(err1, availableTickets) {
+				if (err1) return res.status(500).send(err1);
+				api.user.get(req.user.id, function(err2, user) {
+					if (err2) return res.status(500).send(err2);
+					api.payment_method.getAll(function(err3, payment_methods) {
+						if (err3) return res.status(500).send(err3);
+						res.json({
+							"status": "booking",
+							"data": {
+								user: user,
+								availableTickets: availableTickets,
+								payment_methods: payment_methods
+							}
+						});
+					});
 				});
 			});
 		}
@@ -105,34 +138,5 @@ router.get("/finishBook",
 		});
 	}
 );
-
-router.get("/user",
-	passport.authenticate('bearer', {
-		session: false
-	}),
-	function(req, res) {
-		// make this page accessible to admins only (the admin group is group 1):
-		if (req.user.groups.indexOf(1) < 0)
-			return res.send("You do not have permission to view this page");
-
-		var conn = mysql.createConnection({
-			host: config.db_host,
-			user: config.db_user,
-			password: config.db_password,
-			database: config.db_db
-		});
-		conn.query("SELECT * FROM user WHERE id=?", [req.query.id], function(err, rows) {
-			if (err) res.send(err);
-			if (rows.length === 0) {
-				res.json({
-					error: "user doesn't exist"
-				});
-			} else {
-				var user = rows[0];
-				res.json(user);
-			}
-		});
-		conn.end();
-	});
 
 module.exports = router;

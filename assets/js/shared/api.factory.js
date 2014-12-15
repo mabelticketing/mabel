@@ -6,34 +6,48 @@ function APICaller($http, $cookies) {
 	var token = $cookies.mabelAuthToken;
 	if (!token) {
 		console.error("No auth token found!"); // TODO: scream louder than this
-		return {};
+		// break the call function
+		call = function(method, resource, params, data, callback) {
+			callback("Can't call without auth token!");
+		};
 	}
-
-	return {
+	myCaller = 
+	{
 		get: get,
+		put: put,
 		post: post
 	};
-
-	function call(config, callback, error) {
+	return myCaller;
+	function call(method, resource, params, data, callback) {
+		data = data || {};
+		params = params || {};
+		params.access_token = token;
+		var config = {
+			method: method,
+			url: apiRoot + resource,
+			params: params,
+			data: data
+		};
 		$http(config)
 			.success(function(data) {
-				if (data.error && error) return error(data.error);
-				callback(data);
+				if (data.error && callback) return callback(data.error);
+				callback(null, data);
 			})
 			.error(function(err) {
 				// TODO: handle some API errors centrally?
-				if (error) return error(err);
+				if (callback) return callback(err);
 			});
 	}
-	function get(method, data, callback, error) {
-		data = data || {};
-		data.access_token = token;
-		call({method:'get', url:apiRoot + method, params:data}, callback, error);
+
+	function get(resource, data, callback) {
+		call('get', resource, data, {}, callback);
 	}
-	function post(method, params, data, callback, error) {
-		params = params || {};
-		data = data || {};
-		params.access_token = token;
-		call({method:'post', url:apiRoot + method, params:params, data:data}, callback, error);
+
+	function put(resource, params, data, callback) {
+		call('put', resource, params, data, callback);
+	}
+
+	function post(resource, params, data, callback) {
+		call('post', resource, params, data, callback);
 	}
 }
