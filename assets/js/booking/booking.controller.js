@@ -10,10 +10,14 @@ function BookingController($scope, APICaller) {
 
 	// stores page data
 	$scope.data = {};
+	$scope.meta = {
+		bookingSum: 0,
+		ticketQuantity: 0,
+	};
 	$scope.booking = {
-		sum: 0,
 		tickets: [],
-		donate: true
+		donate: true,
+		payment_method: 0
 	};
 
 	// method to poll api
@@ -43,25 +47,33 @@ function BookingController($scope, APICaller) {
 		});
 	};
 
-	// i'm not sure this is the best way to achieve this
-	$scope.sum = function sum() {
-		var total = 0;
-		for (var i=0; i<$scope.booking.tickets.length; i++) {
-			total += parseInt($scope.booking.tickets[i].quantity) * $scope.booking.tickets[i].price;
-			if ($scope.booking.donate === true) total += parseInt($scope.booking.tickets[i].quantity);
-		}
-		$scope.booking.sum = total;
-	};
-
 	// set up polling at intervals
 	var poller = setInterval($scope.pollApi(), 30000);
 
+	// booking submission method
 	$scope.submitBooking = function submitBooking() {
 		APICaller.submit($scope.booking, function(err, result) {
 			if (err) console.log("err"); // error handling
 			// TODO: DO SOMETHING WITH RESULT
 		});
 	};
+
+	// update meta information method
+	$scope.updateMeta = function updateMeta() {
+		var bookingSum = 0;
+		var ticketQuantity = 0;
+		var tickets = $scope.booking.tickets;
+		for (var i=0; i<tickets.length; i++) {
+			bookingSum += parseInt(tickets[i].quantity) * tickets[i].price;
+			ticketQuantity += tickets[i].quantity;
+			if ($scope.booking.donate === true) bookingSum += parseInt(tickets[i].quantity);
+		}
+		$scope.meta.bookingSum = bookingSum;
+		$scope.meta.ticketQuantity = ticketQuantity;
+	};
+
+	// TODO: delete this method
+	$scope.help = function help() { console.log($scope.meta); };
 
 
 }
