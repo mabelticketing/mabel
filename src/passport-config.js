@@ -9,34 +9,6 @@ var __ = require("./strings.js");
 
 var secret = config.jwt_secret;
 
-// the token contains the user ID and also the groups which the user is a member of
-function getToken(userId, callback) {
-	var conn = getConnection();
-
-	// try to find user in db with crsid
-	var sql = "SELECT user_group.id AS group_id FROM user_group \
-		JOIN user_group_membership \
-		ON (user_group.id=user_group_membership.group_id) \
-		WHERE user_id=?";
-
-	conn.query(sql, [userId], function(err, rows) {
-		var groups = [];
-		for (var i = 0; i < rows.length; i++) {
-			groups.push(rows[i].group_id);
-		}
-		// TODO: compress this somewhat?
-		var tokenObj = {
-			authenticated: true,
-			id: userId,
-			groups: groups
-		};
-		callback(jwt.encode(tokenObj, secret));
-	});
-
-	conn.end();
-
-}
-
 // configure trivial passport authentication strategy
 passport.use(new LocalStrategy(
 	function(email, password, done) {
@@ -193,3 +165,32 @@ passport.serializeUser(function(user, done) {
 	// we do this to keep the session size small
 	done(null, user);
 });
+
+
+// the token contains the user ID and also the groups which the user is a member of
+function getToken(userId, callback) {
+	var conn = getConnection();
+
+	// try to find user in db with crsid
+	var sql = "SELECT user_group.id AS group_id FROM user_group \
+		JOIN user_group_membership \
+		ON (user_group.id=user_group_membership.group_id) \
+		WHERE user_id=?";
+
+	conn.query(sql, [userId], function(err, rows) {
+		var groups = [];
+		for (var i = 0; i < rows.length; i++) {
+			groups.push(rows[i].group_id);
+		}
+		// TODO: compress this somewhat?
+		var tokenObj = {
+			authenticated: true,
+			id: userId,
+			groups: groups
+		};
+		callback(jwt.encode(tokenObj, secret));
+	});
+
+	conn.end();
+
+}
