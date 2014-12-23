@@ -2,6 +2,10 @@
   "name": "Mabel",
   "version": "0.1.0",
   "description": "May ball ticketing system",
+  "contributors": [
+    "Christopher Little <cl554@cam.ac.uk> (www.clittle.com)",
+    "Thomas Le Feuvre <tjlefeuvre@gmail.com> (www.thomaslefeuvre.com)"
+  ],
   "start": "app.js",
   "scripts": {
     "start": "node app.js",
