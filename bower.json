@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "homepage": "https://github.com/hephistocles/mabel",
   "authors": [
-    "Christopher Little <cl554@cam.ac.uk> (www.clittle.com)",
-    "Thomas Le Feuvre <tjlefeuvre@gmail.com> (www.thomaslefeuvre.com)"
+    "Christopher Little <cl554@cam.ac.uk> (http://clittle.com)",
+    "Thomas Le Feuvre <tjlefeuvre@gmail.com> (http://thomaslefeuvre.com)"
   ],
   "description": "May Ball Ticketing",
   "moduleType": [
