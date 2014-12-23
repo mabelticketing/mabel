@@ -5,9 +5,6 @@ var passport = require("passport");
 /*** APP ROUTER ***/
 var router   = express.Router();
 
-var api = require("./api.js");
-var http = require('http');
-
 router.get("/", function(req, res) {
 	res.render("index.jade");
 });
