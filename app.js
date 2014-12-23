@@ -18,7 +18,7 @@ app.engine('jade', require('jade').__express);
 
 /* ROUTES */
 var APPRouter = require("./src/app-routes.js");
-var APIRouter = require("./src/api-routes.js");
+var APIRouter = require("./src/api/routes.js");
 
 app.use(passport.initialize());
 app.use("/", APPRouter);

@@ -15,10 +15,10 @@
 */
 
 module.exports = {
-	event          : require("./api/event.js"),
-	user           : require("./api/user.js"),
-	ticket_type    : require("./api/ticket_type.js"),
-	payment_method : require("./api/payment_method.js")
+	event          : require("./impl/event.js"),
+	user           : require("./impl/user.js"),
+	ticket_type    : require("./impl/ticket_type.js"),
+	payment_method : require("./impl/payment_method.js")
 };
 
 function getBookingFormData(user, event_id, callback) {

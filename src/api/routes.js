@@ -1,86 +1,45 @@
-var express = module.parent.exports.express;
+var express = require("express");
+var passport = require("passport");
+var bodyParser = require('body-parser');
+
+var api = require("./api.js");
+var __ = require("../strings.js");
+var Queue = require("../queue.js");
 
 var router = express.Router();
-var __ = require("./strings.js");
-var Queue = require("./queue.js");
-var passport = require("passport");
-var api = require("./api.js");
-var mysql = require('mysql');
-var config = require('./config.js');
-var bodyParser = require('body-parser');
 
 
 /* RESPONSIBILITY OF THIS FILE IS AUTHENTICATION AND MARSHALLING FOR HTTP */
 
+module.exports                = router;
 
+// TODO: I don't know if these functions should really be in here
+module.exports.checkGroup     = checkGroup;
+module.exports.checkAdmin     = checkAdmin;
+module.exports.marshallResult = marshallResult;
+
+// all API routes should be authenticated with an access_token
 router
 	.use(
 		passport.authenticate('bearer', {
 			session: false
 		})
-)
+	)
 	.use(
 		bodyParser.json()
-);
+	);
 
-function checkGroup(req, res, groupId) {
-	if (req.user.groups.indexOf(groupId) < 0) {
-		res
-			.status(401)
-			.send("You do not have permission to access this resource");
-		return false;
-	}
-	return true;
-}
+router.use("/event",
+	require("./routes/event.js"));
 
-function checkAdmin(req, res) {
-	return checkGroup(req, res, 1);
-}
+router.use("/user",
+	require("./routes/user.js"));
 
-function marshallResult(res) {
-	return function(err, result) {
-		if (err) return res.status(500).send(err);
-		res.json(result);
-	};
-}
-/* event */
+router.use("/ticket_type",
+	require("./routes/ticket_type.js"));
 
-router.get("/event/:id", function(req, res) {
-	api.event.get(req.params.id, marshallResult(res));
-});
-
-router.post("/event/:id", function(req, res) {
-	if (!checkAdmin(req, res)) return;
-	api.event.update(req.params.id, req.body, marshallResult(res));
-});
-
-/* user */
-
-router.get("/user/:id", function(req, res) {
-	api.user.get(req.params.id, marshallResult(res));
-});
-
-router.get("/user", function(req, res) {
-	if (!checkAdmin(req, res)) return;
-	api.user.getAll(marshallResult(res));
-});
-
-/* payment_method */
-
-router.get("/payment_method/:id", function(req, res) {
-	api.payment_method.get(req.params.id, marshallResult(res));
-});
-
-router.get("/payment_method", function(req, res) {
-	api.payment_method.getAll(marshallResult(res));
-});
-
-/* ticket_type */
-
-router.get("/ticket_type", function(req, res) {
-	api.ticket_type.getAll(req.user, req.query.event_id, marshallResult(res));
-});
-
+router.use("/payment_method",
+	require("./routes/payment_method.js"));
 
 // TODO: Increase number of people allowed through at a time from 1
 var bookQueue = new Queue(1);
@@ -139,4 +98,22 @@ router.get("/finishBook",
 	}
 );
 
-module.exports = router;
+function checkGroup(groupId) {
+	return function(req, res, next) {
+		if (req.user.groups.indexOf(groupId) < 0) {
+			next("You do not have permission to access this resource");
+		}
+		next();
+	};
+}
+
+function checkAdmin() {
+	return checkGroup(1);
+}
+
+function marshallResult(res) {
+	return function(err, result) {
+		if (err) return res.status(500).send(err);
+		res.json(result);
+	};
+}
