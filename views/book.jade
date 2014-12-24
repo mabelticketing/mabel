@@ -19,8 +19,8 @@ block scripts
 
 
 block title
-	title(ng-if="data.status == queueing") Queueing...
-	title(ng-if="data.status == booking") Book your tickets!
+	title(ng-if="data.status == 'queueing'") Queueing...
+	title(ng-if="data.status == 'booking'") Book your tickets!
 
 block content
 	div(ng-app="mabel.booking", ng-controller="BookingController", ng-view)
@@ -29,54 +29,46 @@ block content
 				h2 Queuing...
 				p You are currently in position {{ data.data.position }}.
 			div(ng-switch-when="booking")
-				form(ng-submit="submitBooking()")
-					h1 Welcome {{ data.data.user.name }}, please select your tickets.
-					p We recommend that you do this promptly to give you the best chance at nabbing tickets.
+				form(ng-submit="submitBooking()", novalidate)
+					h1 Booking
+					h2 Welcome {{ data.data.user.name }}, please select your tickets.
 					table
 						thead
 							tr
-								th Ticket types
-								th Price
-								th Qty.
+								th(style="width:200px;text-align:left;") Ticket types
+								th(style="width:100px;text-align:left;") Price
+								th(style="width:100px;text-align:left;") Qty.
 						tbody(ng-repeat="ticket in data.data.availableTickets")
 							tr
 								td {{ ticket.name }}
 								td £{{ ticket.price }}
 								td
-									select(name="qty-{{ ticket.ticket_type_id }}", ng-change="sum()", ng-model="booking.tickets[$index].quantity")
-										option(value="0") 0
-										option(value="1") 1
-										option(value="2") 2
-										option(value="3") 3
-										option(value="4") 4
+									input(type="hidden", ng-model="booking.tickets[$index].ticket_type_id", value="ticket.ticket_type_id")
+									select(ng-change="updateMeta()", ng-model="booking.tickets[$index].quantity")
+										option(ng-value="0") 0
+										option(ng-value="1") 1
+										option(ng-value="2") 2
+										option(ng-value="3") 3
+										option(ng-value="4") 4
 					h2 Charitable donation
 					label
-						p #[input(type="checkbox", name="", ng-change="sum()", ng-model="booking.donate")] I wish to make a charitable donation of #[b £1.00] per ticket to your Charitable Causes.
+						p #[input(type="checkbox", name="", ng-change="updateMeta()", ng-model="booking.donate")] I wish to make a charitable donation of #[b £1.00] per ticket to your Charitable Causes.
+					
+					h2 Summary
+					div(ng-if="meta.ticketQuantity > 0")
+						h3 Your tickets
+						ul
+							li(ng-repeat="ticket in booking.tickets", ng-if="ticket.quantity > 0") {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
+							li(ng-if="booking.donate") Charitable donation @ £1.00 per ticket
+						p Total cost: £{{ meta.bookingSum | number:2 }}
+					div(ng-if="meta.ticketQuantity == 0")
+						p
+							em You haven't selected any tickets for us to summarise :(
 					h2 Payment Method
 					p Please choose a payment method from the options below.
 					p(ng-repeat="method in data.data.payment_methods")
 						label
-							input(type="radio", name="payment_method")
+							input(type="radio", ng-model="booking.payment_method", ng-value="method.id")
 							span #[b {{ method.name }}] - {{ method.description }}
+					p(ng-if="booking.payment_method != 0") #[input(type="submit", value="Confirm")]
 
-					h2 Summary
-
-					h3 Your tickets
-					ul
-						li(ng-repeat="ticket in booking.tickets", ng-if="ticket.quantity > 0") {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
-						li(ng-if="booking.donate") Charitable donation @ £1.00 per ticket
-					//- show table if some tickets selected, otherwise show nothing
-					//- show totals
-					//- show paymentmethod
-
-					p Total cost: £{{ booking.sum | number:2 }}
-					p #[input(type="submit", value="Confirm")]
-
-//- TODO: make page placed in a form - use ng-model?
-//- TODO: sum ticket price
-//- TODO: display .00 on end of ticket prices
-//- TODO: work out how to submit forms
-//- TODO: need to find out maximum ticket quantity
-//- TODO: this data.data. stuff doesn't look nice
-//- TODO: charitable donation box
-//- TODO: finish queue
