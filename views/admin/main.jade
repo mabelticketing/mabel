@@ -11,6 +11,10 @@ head
 	title Mabel Ticketing | #{title}
 	meta(content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no', name='viewport')
 	block css
+		style(type="text/css").
+			.ng-cloak {
+				display:none!important;
+			}
 		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
 		link(href='/components/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
@@ -19,7 +23,7 @@ head
 body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
 	header.header
 		include ./header.jade
-	.wrapper.row-offcanvas.row-offcanvas-left(ng-switch="adminPage.pageStatus")
+	.wrapper.row-offcanvas.row-offcanvas-left(ng-switch="adminPage.pageStatus" class="ng-cloak" ng-cloak)
 		aside.left-side.sidebar-offcanvas
 			section.sidebar
 				include ./sidebar.jade

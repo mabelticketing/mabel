@@ -23,8 +23,8 @@ nav.navbar.navbar-static-top(role='navigation')
 										p #{notification.text}
 								else 
 									p #{notification.text}
-			li.dropdown.user.user-menu(ng-if="adminPage.pageStatus === 2 || adminPage.pageStatus === 3")
-				a.dropdown-toggle(href='#', data-toggle='dropdown')
+			li.dropdown.user.user-menu(ng-if="adminPage.pageStatus === 2 || adminPage.pageStatus === 3" class="ng-cloak" ng-cloak)
+				a.dropdown-toggle(href='#' data-toggle='dropdown')
 					i.glyphicon.glyphicon-user
 					span 
 						| {{adminPage.user.name}}
