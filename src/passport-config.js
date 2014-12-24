@@ -45,11 +45,6 @@ passport.use(new LocalStrategy(
 							});
 						}
 					);
-					// });
-					// }).on('error', function(e) {
-					// 	console.log("Got error: ", e);
-					// 	done(err);
-					// });
 					conn.end();
 				} else {
 					// the user is in the table, so just get his user id to encode as the token
@@ -81,7 +76,10 @@ passport.use(new RavenStrategy({
 	// try to find user in db with crsid
 	conn.query("SELECT * FROM user WHERE crsid=?", [crsid], function(err, rows) {
 		// pass errors through middleware
-		if (err) done(err);
+		if (err) {
+			conn.end();
+			return done(err);
+		}
 		if (rows.length < 1) {
 			// if user not in table then put them in
 
@@ -95,16 +93,16 @@ passport.use(new RavenStrategy({
 			// res.on('end', function() {
 			// var response = JSON.parse(body);
 			// var name = response.result.person.displayName;
-			var name = "Demo User";
+			var name = "Raven User";
 			var insertQuery = "INSERT INTO user (name, email, crsid, registration_time) " +
 				"VALUES (?,?,?,CURRENT_TIMESTAMP)";
 
 			// TODO: We have a bit more Ibis stuff to process to allocate user groups
 
-			conn.query(insertQuery, [name, "demo@cam.ac.uk", crsid],
+			conn.query(insertQuery, [name, crsid + "@cam.ac.uk", crsid],
 				function(err, result) {
 					// pass errors through middleware
-					if (err) done(err);
+					if (err) return done(err);
 
 					// now finally return the page to the user
 
@@ -115,11 +113,7 @@ passport.use(new RavenStrategy({
 					});
 				}
 			);
-			// });
-			// }).on('error', function(e) {
-			// 	console.log("Got error: ", e);
-			// 	done(err);
-			// });
+			conn.end();
 		} else {
 			// the user is in the table, so just get his user id to encode as the token
 			
@@ -128,10 +122,10 @@ passport.use(new RavenStrategy({
 					token: token,
 				});
 			});
+			conn.end();
 		}
 	});
 
-	conn.end();
 }));
 
 // passport bearer strategy

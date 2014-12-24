@@ -12,10 +12,13 @@ html
 				else var expires = "";
 				document.cookie = name+"="+value+expires+"; path=/";
 			}
-			createCookie("mabelAuthToken", "#{token}",1);
+			createCookie("mabelAuthToken", "",-1);
 	body
-		h1 Login Successful.
-		p token is #{token}
-		a(href="/admin") Admin Panel
+		h1 Logout successful.
+		a(href="/admin") Admin Panel 
 		br
 		a(href="/") Home Page
+		br
+		a(href="/login/raven") Login with Raven
+		br
+		a(href="/login/mabel") Login with Mabel
