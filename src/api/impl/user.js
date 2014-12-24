@@ -8,10 +8,18 @@ module.exports = {
 
 function get(user_id, callback) {
 	var sql = "SELECT * FROM user WHERE id=?;";
-	runSql(sql, [user_id], function(err, rows) {
+	runSql(sql, [user_id], function(err, users) {
 		if (err) return callback(err);
-		if (rows.length !== 1) return callback({error:rows.length + " users match"});
-		callback(null, rows[0]);
+		if (users.length !== 1) return callback({error:users.length + " users match"});
+		var groupSql = "SELECT * FROM user_group_membership WHERE user_id=?;";
+		runSql(groupSql, [user_id], function(err, groups) {
+			if (err) return callback(err);
+			users[0].groups = [];
+			for (var i=0; i<groups.length; i++) {
+				users[0].groups.push(groups[i].group_id);
+			}
+			callback(null, users[0]);
+		});
 	});
 }
 function getAll(callback) {

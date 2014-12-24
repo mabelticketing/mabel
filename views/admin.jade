@@ -1,18 +1,22 @@
 extends ./admin/main.jade
 
 block prepend variables
+	// these variable will normally be overridden by subpages
 	- title = "Dashboard"
 	- subtitle = "Control Panel"
-	- user = {name:"Christopher Little"}
 	- breadcrumb = [{name:"Dashboard"}]
 	- sidebarItems = [{link:"#", name:title, icon:"dashboard", selected:true}, {link:"#", name:"Widgets", icon:"th"}]
-	// notifications will normally come from the javascript context
+
+	// notifications and user will normally come from the app-routes context
 	- notifications = notifications || []
 
 block content
-	.row(ng-app="mabel.admin")
+	.row
 		.col-md-12
 			include admin/boxes/event-settings.jade
+
+block append scripts
+	script(type = "text/javascript" src="/js/admin/eventsettings.controller.js")
 
 block append css
 	style.
