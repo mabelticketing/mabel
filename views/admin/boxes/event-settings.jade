@@ -1,20 +1,20 @@
-.box.box-primary(ng-controller="EventSettingsController as ctrl")
+.box.box-primary(ng-controller="EventSettingsController as eventSettings")
 	.box-header
 		h3.box-title Event Settings
 	//- form(editable-form)
 	.box-body
 		.form-group
 			label(for="event-name-field") Event Name
-			input.form-control#event-name-field(type="text" ng-model="ctrl.name" ng-blur="ctrl.save('name', $event)")
+			input.form-control#event-name-field(type="text" ng-model="eventSettings.name" ng-blur="eventSettings.save('name', $event)")
 	.box-body
 		.form-group
 			label(for="event-launch-field") Ticket Launch Date 
-			input.form-control#event-launch-field(type='text' date="ctrl.launch_time"
-				ng-blur="ctrl.save('launch_time', $event)"
+			input.form-control#event-launch-field(type='text' date="eventSettings.launch_time"
+				ng-blur="eventSettings.save('launch_time', $event)"
 				data-date-format="YYYY/MM/DD HH:mm" datetimepicker)
 	.box-body
 		.form-group
 			label(for="event-close-field") Ticket Close Date
-			input.form-control#event-close-field(type='text' date="ctrl.modification_stop_time"
-				ng-blur="ctrl.save('modification_stop_time', $event)"
+			input.form-control#event-close-field(type='text' date="eventSettings.modification_stop_time"
+				ng-blur="eventSettings.save('modification_stop_time', $event)"
 				data-date-format="YYYY/MM/DD HH:mm" datetimepicker)

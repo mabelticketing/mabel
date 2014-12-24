@@ -26,8 +26,8 @@ nav.navbar.navbar-static-top(role='navigation')
 			li.dropdown.user.user-menu
 				a.dropdown-toggle(href='#', data-toggle='dropdown')
 					i.glyphicon.glyphicon-user
-					span
-						= " " + user.name + " "
+					span 
+						| {{adminPage.user.name}}
 						i.caret
 				ul.dropdown-menu
 					li.user-body

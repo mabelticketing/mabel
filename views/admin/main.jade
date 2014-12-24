@@ -16,14 +16,17 @@ head
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
 		link(href='/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
 		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
-body(class="skin-black")
+body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
 	header.header
 		include ./header.jade
-	.wrapper.row-offcanvas.row-offcanvas-left
+	.wrapper.row-offcanvas.row-offcanvas-left(ng-switch="adminPage.isAdmin")
 		aside.left-side.sidebar-offcanvas
 			section.sidebar
 				include ./sidebar.jade
-		aside.right-side
+		aside.right-side(ng-switch-when="false")
+			section.content 
+				h2 You are not authorised to view this page.
+		aside.right-side(ng-switch-when="true")
 			section.content-header
 				h1 #{title}
 					small #{subtitle}
@@ -38,6 +41,8 @@ body(class="skin-black")
 				block content
 					| Hello admin panel!
 	block scripts
+		// TODO?: Can/should bower do automatic incuding/dependency resolution for us?
+
 		// jquery
 		script(src='/components/jquery/dist/jquery.min.js')
 			
@@ -62,4 +67,4 @@ body(class="skin-black")
 		
 		// admin
 		script(type = "text/javascript" src="/js/admin/mabel.admin.js")
-		script(type = "text/javascript" src="/js/admin/adminpanel.controller.js")
+		script(type = "text/javascript" src="/js/admin/adminpage.controller.js")

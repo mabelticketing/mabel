@@ -1,4 +1,4 @@
-/*global moment*/
+/* global moment */
 angular.module('mabel.admin')
 	.controller("EventSettingsController", EventSettingsController);
 

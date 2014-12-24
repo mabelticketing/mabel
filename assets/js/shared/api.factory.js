@@ -11,13 +11,12 @@ function APICaller($http, $cookies) {
 			callback("Can't call without auth token!");
 		};
 	}
-	myCaller = 
-	{
+	
+	return {
 		get: get,
 		put: put,
 		post: post
 	};
-	return myCaller;
 	function call(method, resource, params, data, callback) {
 		data = data || {};
 		params = params || {};
