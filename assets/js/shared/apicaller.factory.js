@@ -4,7 +4,7 @@ angular.module('mabel.shared')
 function APICaller($http, $cookies) {
 	var apiRoot = '/api/';
 	var token = $cookies.mabelAuthToken;
-	if (!token) {
+	if (token === undefined || token === null || token.length < 1) {
 		console.error("No auth token found!"); // TODO: scream louder than this
 		// break the call function
 		call = function(method, resource, params, data, callback) {
@@ -15,8 +15,10 @@ function APICaller($http, $cookies) {
 	return {
 		get: get,
 		put: put,
-		post: post
+		post: post,
+		hasToken: !(token === undefined || token === null || token.length < 1) 
 	};
+	
 	function call(method, resource, params, data, callback) {
 		data = data || {};
 		params = params || {};

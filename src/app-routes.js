@@ -26,6 +26,11 @@ router.get('/login/raven',
 		res.render("loginConfirmation.jade", {token:req.user.token});
 	}
 );
+router.get('/logout',
+	function(req, res) {
+		res.render("logout.jade");
+	}
+);
 
 router.get('/admin', function(req, res) {
 	res.render("admin.jade");

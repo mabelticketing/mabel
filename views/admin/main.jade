@@ -19,14 +19,21 @@ head
 body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
 	header.header
 		include ./header.jade
-	.wrapper.row-offcanvas.row-offcanvas-left(ng-switch="adminPage.isAdmin")
+	.wrapper.row-offcanvas.row-offcanvas-left(ng-switch="adminPage.pageStatus")
 		aside.left-side.sidebar-offcanvas
 			section.sidebar
 				include ./sidebar.jade
-		aside.right-side(ng-switch-when="false")
+		aside.right-side(ng-switch-when="0")
+			section.content 
+				h2 Loading...
+		aside.right-side(ng-switch-when="1")
+			section.content 
+				h2 You are not logged in.
+				a(href="/login") Click here to log in.
+		aside.right-side(ng-switch-when="2")
 			section.content 
 				h2 You are not authorised to view this page.
-		aside.right-side(ng-switch-when="true")
+		aside.right-side(ng-switch-when="3")
 			section.content-header
 				h1 #{title}
 					small #{subtitle}
@@ -63,7 +70,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		// shared
 		script(type = "text/javascript" src="/js/shared/mabel.shared.js")
 		script(type = "text/javascript" src="/js/shared/datetimepicker.directive.js")
-		script(type = "text/javascript" src="/js/shared/api.factory.js")
+		script(type = "text/javascript" src="/js/shared/apicaller.factory.js")
 		
 		// admin
 		script(type = "text/javascript" src="/js/admin/mabel.admin.js")
