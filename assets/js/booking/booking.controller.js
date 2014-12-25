@@ -42,7 +42,7 @@ function BookingController($scope, APICaller, $interval) {
 	});
 
 	// join the queue
-	APICaller.post("booking/queue/1", function(err, data) {
+	APICaller.get("booking/open/1", function(err, data) {
 		if (err) console.log("err"); // error handling
 		
 		// set up polling at intervals
@@ -62,7 +62,8 @@ function BookingController($scope, APICaller, $interval) {
 	/*** FUNCTION DEFINITIONS ***/
 
 	function processStatus(status) {
-		if (status.ready) {
+		console.log(status);
+		if (status.open) {
 			// show the booking page and stuff
 			console.log("Show booking page");
 
@@ -105,7 +106,8 @@ function BookingController($scope, APICaller, $interval) {
 		} else {
 			// show some kind of error message or rejoin the queue
 			console.log("Not in the queue!");
-
+			vm.status = "unavailable";
+			vm.reason = status.reason;
 		}
 	}
 
