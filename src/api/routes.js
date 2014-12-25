@@ -41,6 +41,9 @@ router.use("/ticket_type",
 router.use("/payment_method",
 	require("./routes/payment_method.js"));
 
+router.use("/booking",
+	require("./routes/booking.js"));
+
 // TODO: Increase number of people allowed through at a time from 1
 var bookQueue = new Queue(1);
 
