@@ -54,7 +54,13 @@ function canBook(user_id, event_id, callback) {
 			if (!status.queueing) {
 				return callback(null, {open: false, reason:__("User is not in the queue")});
 			} else {
-				return callback(null, {open:false, reason:__("User is not at the head of queue (%s/%s)", status.position, status.of)});
+				return callback(null, {
+					open: false,
+					queueing: true,
+					position: status.position,
+					of: status.of,
+					reason: __("User is not at the head of queue (%s/%s)", status.position, status.of)
+				});
 			}
 		}
 

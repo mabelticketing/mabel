@@ -29,6 +29,10 @@ block content
 				h2 Queuing...
 				p You are currently in position {{ bookingCtrl.queue.position }} of {{ bookingCtrl.queue.of }}.
 
+			div(ng-switch-when="unavailable")
+				h2 Booking is currently unavailable
+				p {{bookingCtrl.reason}}
+
 			div(ng-switch-when="booking")
 				form(ng-submit="bookingCtrl.submitBooking()" novalidate)
 
