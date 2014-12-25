@@ -2,18 +2,13 @@ var express = require("express");
 var passport = require("passport");
 var bodyParser = require('body-parser');
 
-var api = require("./api.js");
-var __ = require("../strings.js");
-var Queue = require("../queue.js");
-
 var router = express.Router();
 
-
-/* RESPONSIBILITY OF THIS FILE IS AUTHENTICATION AND MARSHALLING FOR HTTP */
+/* RESPONSIBILITY OF THE ROUTES FILES IS AUTHENTICATION AND MARSHALLING FOR HTTP */
 
 module.exports                = router;
 
-// TODO: I don't know if these functions should really be in here
+// TODO: I don't know if these functions should really be in here or in some helper module
 module.exports.checkGroup     = checkGroup;
 module.exports.checkAdmin     = checkAdmin;
 module.exports.marshallResult = marshallResult;
@@ -43,63 +38,6 @@ router.use("/payment_method",
 
 router.use("/booking",
 	require("./routes/booking.js"));
-
-// TODO: Increase number of people allowed through at a time from 1
-var bookQueue = new Queue(1);
-
-router.get("/book",
-	function(req, res) {
-		var result = bookQueue.joinQueue(req.user.id);
-		if (result.queueing) {
-			res.json({
-				"status": "queueing",
-				"data": {
-					position: result.position,
-					of: result.of
-				}
-			});
-		} else {
-			if (typeof req.query.event_id === "undefined") {
-				return res.json({
-					"error": "event_id not provided"
-				});
-			}
-			// TODO: These can be obtained in individual requests, do we want that duped?
-			api.ticket_type.getAll(req.user, req.query.event_id, function(err1, availableTickets) {
-				if (err1) return res.status(500).send(err1);
-				api.user.get(req.user.id, function(err2, user) {
-					if (err2) return res.status(500).send(err2);
-					api.payment_method.getAll(function(err3, payment_methods) {
-						if (err3) return res.status(500).send(err3);
-						res.json({
-							"status": "booking",
-							"data": {
-								user: user,
-								availableTickets: availableTickets,
-								payment_methods: payment_methods
-							}
-						});
-					});
-				});
-			});
-		}
-	}
-);
-
-router.get("/finishBook",
-	passport.authenticate('bearer', {
-		session: false
-	}),
-	function(req, res, next) {
-		bookQueue.leaveQueue(req, res, next);
-	},
-	function(req, res) {
-		res.json({
-			"status": "none", // TODO: Better status?
-			"content": __("You have left the queue")
-		});
-	}
-);
 
 function checkGroup(groupId) {
 	return function(req, res, next) {

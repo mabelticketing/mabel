@@ -6,9 +6,9 @@ var router = express.Router({
 });
 module.exports = router;
 
-router.route("/")
+router.route("/:event_id")
 	.get(
 		function(req, res) {
-			api.ticket_type.getAll(req.user, req.query.event_id, apiRouter.marshallResult(res));
+			api.ticket_type.getAll(req.user, req.params.event_id, apiRouter.marshallResult(res));
 		}
 	);

@@ -16,59 +16,77 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/mabel.booking.js")
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
-
-
 block title
-	title(ng-if="data.status == 'queueing'") Queueing...
-	title(ng-if="data.status == 'booking'") Book your tickets!
+	//- TODO: This is outside of scope for bookingCtrl
+	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
+	title(ng-if="bookingCtrl.status == 'booking'") Book your tickets!
 
 block content
-	div(ng-app="mabel.booking", ng-controller="BookingController", ng-view)
-		div(ng-switch="data.status")
+	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)
+		div(ng-switch="bookingCtrl.status")
+			
 			div(ng-switch-when="queueing")
 				h2 Queuing...
-				p You are currently in position {{ data.data.position }}.
+				p You are currently in position {{ bookingCtrl.queue.position }} of {{ bookingCtrl.queue.of }}.
+
 			div(ng-switch-when="booking")
-				form(ng-submit="submitBooking()", novalidate)
+				form(ng-submit="bookingCtrl.submitBooking()" novalidate)
+
 					h1 Booking
-					h2 Welcome {{ data.data.user.name }}, please select your tickets.
+					h2 Welcome {{ bookingCtrl.user.name }}, please select your tickets.
+					
 					table
 						thead
 							tr
 								th(style="width:200px;text-align:left;") Ticket types
 								th(style="width:100px;text-align:left;") Price
 								th(style="width:100px;text-align:left;") Qty.
-						tbody(ng-repeat="ticket in data.data.availableTickets")
+
+						tbody(ng-repeat="ticket in bookingCtrl.available_tickets")
 							tr
 								td {{ ticket.name }}
 								td £{{ ticket.price }}
 								td
-									input(type="hidden", ng-model="booking.tickets[$index].ticket_type_id", value="ticket.ticket_type_id")
-									select(ng-change="updateMeta()", ng-model="booking.tickets[$index].quantity")
+									input(type="hidden" 
+										ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
+										value="ticket.ticket_type_id")
+									select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
 										option(ng-value="0") 0
 										option(ng-value="1") 1
 										option(ng-value="2") 2
 										option(ng-value="3") 3
 										option(ng-value="4") 4
+
 					h2 Charitable donation
 					label
-						p #[input(type="checkbox", name="", ng-change="updateMeta()", ng-model="booking.donate")] I wish to make a charitable donation of #[b £1.00] per ticket to your Charitable Causes.
+						p 
+							input(type="checkbox" name=""	
+								ng-model="bookingCtrl.booking.donate")
+							| I wish to make a charitable donation of #[b £1.00] per ticket to your Charitable Causes.
 					
 					h2 Summary
-					div(ng-if="meta.ticketQuantity > 0")
+					div(ng-if="bookingCtrl.meta.ticketQuantity > 0")
 						h3 Your tickets
 						ul
-							li(ng-repeat="ticket in booking.tickets", ng-if="ticket.quantity > 0") {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
-							li(ng-if="booking.donate") Charitable donation @ £1.00 per ticket
-						p Total cost: £{{ meta.bookingSum | number:2 }}
-					div(ng-if="meta.ticketQuantity == 0")
+							li(ng-repeat="ticket in bookingCtrl.booking.tickets"
+								ng-if="ticket.quantity > 0") 
+								| {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
+							
+							li(ng-if="bookingCtrl.booking.donate") Charitable donation @ £1.00 per ticket
+						
+						p Total cost: £{{ bookingCtrl.meta.bookingSum | number:2 }}
+					
+					div(ng-if="bookingCtrl.meta.ticketQuantity == 0")
 						p
 							em You haven't selected any tickets for us to summarise :(
+					
 					h2 Payment Method
 					p Please choose a payment method from the options below.
-					p(ng-repeat="method in data.data.payment_methods")
+					p(ng-repeat="method in bookingCtrl.payment_methods")
 						label
-							input(type="radio", ng-model="booking.payment_method", ng-value="method.id")
+							input(type="radio"
+								ng-model="bookingCtrl.booking.payment_method"
+								ng-value="method.id")
 							span #[b {{ method.name }}] - {{ method.description }}
-					p(ng-if="booking.payment_method != 0") #[input(type="submit", value="Confirm")]
+					p(ng-if="bookingCtrl.booking.payment_method != -1") #[input(type="submit", value="Confirm")]
 

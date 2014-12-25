@@ -41,14 +41,44 @@ function APICaller($http, $cookies) {
 	}
 
 	function get(resource, data, callback) {
+		if (callback === undefined) {
+			callback = data;
+			data = {};
+		}
 		call('get', resource, data, {}, callback);
 	}
 
+	// function put(resource, callback)
+	// function put(resource, data, callback)
 	function put(resource, params, data, callback) {
+		if (callback === undefined) {
+			if (data === undefined) {
+				callback = params;
+				data = {};
+				params = {};
+			} else {
+				callback = data;
+				data = params;
+				params = {};
+			}
+		}
 		call('put', resource, params, data, callback);
 	}
 
+	// function post(resource, callback)
+	// function post(resource, data, callback)
 	function post(resource, params, data, callback) {
+		if (callback === undefined) {
+			if (data === undefined) {
+				callback = params;
+				data = {};
+				params = {};
+			} else {
+				callback = data;
+				data = params;
+				params = {};
+			}
+		}
 		call('post', resource, params, data, callback);
 	}
 }

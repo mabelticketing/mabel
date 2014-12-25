@@ -48,7 +48,7 @@ Queue.prototype.joinQueue = function joinQueue(userId) {
 
 	// Check if the user is in the queue already
 	var queuePos = this.queueingUsers.indexOf(userId);
-	if (queuePos < 0) {
+	if (queuePos < 0 && !(userId in this.allowedUsers)) {
 		queuePos = this.queueingUsers.length;
 		this.queueingUsers[queuePos] = userId;
 	}

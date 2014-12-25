@@ -21,16 +21,17 @@ function joinQueue(user_id, event_id) {
 	return bookQueue.joinQueue(user_id);
 }
 
+// TODO: Do something with event_id	
 function getStatus(user_id, event_id) {
 	return bookQueue.getStatus(user_id);
 }
 
+// TODO: Do something with event_id	
 function leaveQueue(user_id, event_id) {
-	console.log("Leaving");
 	return bookQueue.leaveQueue(user_id);
 }
 
-function canBook(user, event_id, callback) {
+function canBook(user_id, event_id, callback) {
 	// check if the event booking start date is in the past
 	var eventSql = "SELECT * FROM event WHERE id=?";
 	runSql(eventSql, [event_id], function(err, eventDetails) {
@@ -47,8 +48,8 @@ function canBook(user, event_id, callback) {
 			return callback(null, {open:false, reason:__("Booking has closed")});
 		}
 
-		// check if the user is at the front of the queue
-		var status = getStatus(user.id);
+		// check if the user is at the front of the queue (join if not in queue)
+		var status = joinQueue(user_id, event_id);
 		if (!status.ready) {
 			if (!status.queueing) {
 				return callback(null, {open: false, reason:__("User is not in the queue")});
@@ -59,6 +60,6 @@ function canBook(user, event_id, callback) {
 
 		// TODO: check if there are any ticket types available to this user's groups
 		
-		return(null, {open:true});
+		return callback(null, {open:true});
 	});
 }
