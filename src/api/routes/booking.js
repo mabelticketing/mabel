@@ -17,22 +17,30 @@ router.route("/:event_id")
 			});
 
 		},
+		function(req, res, next) {
+			// TODO: actually post the booking in req.body
+			console.log(req.body);
+			next();
+		},
 		function(req, res) {
-			// actually post the booking
-
+			// leave the queue
+			var result = api.booking.leaveQueue(req.user.id, req.params.event_id);
+			result.success = true;
+			res.json(result);
 		}
 	);
 
 // determine whether the current user is able to book or not
-router.route("/:event_id/open")
+router.route("/open/:event_id")
 	.get(
 		function(req, res) {
-			api.booking.canBook(req.user, req.params.event_id, apiRouter.marshallResult(res));
+			console.log("Received");
+			api.booking.canBook(req.user.id, req.params.event_id, apiRouter.marshallResult(res));
 		}
 	);
 
 // determine whether the current user is able to book or not
-router.route("/:event_id/queue")
+router.route("/queue/:event_id")
 	// TODO: Do something with event_id
 	.post( // join the queue
 		function(req, res) {
