@@ -13,6 +13,32 @@ function Queue(maxAllowedUsers) {
 	this.queueingUsers = [];
 	this.mutexLocked = false;
 }
+
+Queue.prototype.getStatus = function getStatus(userId) {
+	// NB I'm not using a mutex here but I'm only reading so that's sort of fine
+	if (userId in this.allowedUsers) {
+		return {
+			ready: true,
+			queueing: true
+		};
+	}
+
+	var queuePos = this.queueingUsers.indexOf(userId);
+	if (queuePos < 0) {
+		return {
+			ready: false,
+			queueing: false
+		};
+	} else {
+		return {
+			ready: false,
+			queueing: true,
+			position: queuePos + 1,
+			of: this.queueingUsers.length
+		};
+	}
+};
+
 Queue.prototype.joinQueue = function joinQueue(userId) {
 	// wait for the mutex to become unlocked
 	while (this.mutexLocked){}
@@ -38,19 +64,21 @@ Queue.prototype.joinQueue = function joinQueue(userId) {
 	if (userId in this.allowedUsers) {
 		this.mutexLocked = false;
 		return {
-			queueing: false
+			ready:true,
+			queueing: true
 		};
 	} else {
 		this.mutexLocked = false;
 		// TODO: Some sort of timeout if you don't check frequently enough
 		return {
+			ready:false,
 			queueing: true,
 			position: queuePos + 1,
 			of: this.queueingUsers.length
 		};
 	}
 };
-Queue.prototype.leaveQueue = function leaveQueue(req, res, next) {
+Queue.prototype.leaveQueue = function leaveQueue(user_id) {
 	// wait for the mutex to become unlocked
 	while (this.mutexLocked){}
 
@@ -58,7 +86,7 @@ Queue.prototype.leaveQueue = function leaveQueue(req, res, next) {
 	this.mutexLocked = true;
 
 	// Check if the user is in the queue already
-	var queuePos = this.queueingUsers.indexOf(req.user.id);
+	var queuePos = this.queueingUsers.indexOf(user_id);
 	if (queuePos >= 0) {
 
 		// remove the user from the queue
@@ -66,13 +94,16 @@ Queue.prototype.leaveQueue = function leaveQueue(req, res, next) {
 	}
 
 	// Note that the user shouldn't ever be both in the queue and in allowed users, but I'm being thorough
-	if (req.user.id in this.allowedUsers) {
-		delete this.allowedUsers[req.user.id];
+	if (user_id in this.allowedUsers) {
+		delete this.allowedUsers[user_id];
 		this.currentAllowedUsers--;
 	}
 
 	this.mutexLocked = false;
-	next();
+	return {
+		queueing: false,
+		ready:false
+	};
 };
 
 module.exports = Queue;
