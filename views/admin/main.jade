@@ -15,6 +15,9 @@ head
 			.ng-cloak {
 				display:none!important;
 			}
+			.box-title small {
+				color: inherit;
+			}
 		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
 		link(href='/components/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
@@ -68,12 +71,14 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		// angular
 		script(type="text/javascript", src="/components/angular/angular.js")
 		script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+		script(type="text/javascript" src="/components/angular-resource/angular-resource.js")
 		script(type="text/javascript" src="/components/ng-table/ng-table.min.js")
 		// bootstrapping
 		script(type = "text/javascript" src="/js/mabel.js")
 
 		// shared
 		script(type = "text/javascript" src="/js/shared/mabel.shared.js")
+		script(type = "text/javascript" src="/js/shared/mabeltoken.factory.js")
 		script(type = "text/javascript" src="/js/shared/datetimepicker.directive.js")
 		script(type = "text/javascript" src="/js/shared/apicaller.factory.js")
 		

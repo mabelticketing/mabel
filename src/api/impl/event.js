@@ -17,5 +17,9 @@ function get(event_id, callback) {
 
 function update(event_id, data, callback) {
 	var sql = "UPDATE event SET ? WHERE id=?;";
-	runSql(sql, [data, event_id], callback);
+	// return the upated object if the update was successful
+	runSql(sql, [data, event_id], function(err) {
+		if (err) return callback(err);
+		get(event_id, callback);
+	});
 }

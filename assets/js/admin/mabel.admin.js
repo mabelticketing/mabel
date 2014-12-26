@@ -1,1 +1,1 @@
-angular.module('mabel.admin', ['mabel.shared', 'ngTable']); 
+angular.module('mabel.admin', ['mabel.shared', 'ngTable', 'ngResource']); 
