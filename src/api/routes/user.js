@@ -6,19 +6,6 @@ var router = express.Router({
 });
 module.exports = router;
 
-function checkGroup(groupId) {
-	return function(req, res, next) {
-		if (req.user.groups.indexOf(groupId) < 0) {
-			next("You do not have permission to access this resource");
-		}
-		next();
-	};
-}
-
-function checkAdmin() {
-	return checkGroup(1);
-}
-
 router.route("/me")
 	.get(
 		function(req, res) {
@@ -46,6 +33,12 @@ router.route("/")
 	.get(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			api.user.getAll(apiRouter.marshallResult(res));
+			var opts = {};
+			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
+			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
+			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
+			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
+		
+			api.user.getAll(opts, apiRouter.marshallResult(res));
 		}
 	);

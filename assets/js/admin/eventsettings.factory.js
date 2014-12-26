@@ -1,3 +1,4 @@
+/* global moment */
 angular.module('mabel.admin')
 	.factory('EventSettings', EventSettings);
 
