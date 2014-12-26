@@ -1,15 +1,16 @@
 .box.box-primary(ng-controller="UserListController as userList")
 	.box-header
 		h3.box-title Users
-	//- form(editable-form)
 	.box-body.table-responsive.no-padding
-		table.table.table-hover(ng-table="userList.tableParams")
+		table.table.table-hover(ng-table="userList.tableParams" show-filter="true" )
 			tbody
 				tr(ng-repeat="user in $data")
-					td(data-title="'ID'") {{ user.id }}
-					td(data-title="'Name'") {{ user.name }}
-					td(data-title="'Email'") 
+					td(data-title="'ID'" sortable="'id'" filter="{'id':'text'}") {{ user.id }}
+					td(data-title="'Name'" sortable="'name'" filter="{'name':'text'}") {{ user.name }}
+					td(data-title="'Email'" sortable="'email'" filter="{'email':'text'}") 
 						a(href='mailto:{{user.email}}') {{ user.email }}
+					td(data-title="'CRSID'" sortable="'crsid'" filter="{'crsid':'text'}") {{ user.crsid }}
+					td(data-title="'Registration Date'" sortable="'registration_time'" filter="{'registration_date':'text'}") {{ user.registration_time }}
 					td(data-title="'Actions'")
 						button Edit
 						button Tickets

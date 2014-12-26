@@ -22,6 +22,69 @@ function get(user_id, callback) {
 		});
 	});
 }
-function getAll(callback) {
-	runSql("SELECT * FROM user;", callback);
+
+function mult(arr, times) {
+	var newArr = [];
+	for (var i=0; i<times; i++) {
+		newArr = newArr.concat(arr);
+	}
+	return newArr;
+}
+
+function getAll(opts, callback) {
+	var conn = connection.getConnection();
+	var sql = "SELECT * from user";
+
+	var whereClause = "";
+	if (opts.filter !== undefined) {
+		var wheres = [];
+		var hasWhere = false;
+		for (var i in opts.filter) {
+			if (opts.filter[i].length < 1) continue;
+			hasWhere = true;
+			wheres.push(conn.escapeId(i) + " LIKE " +  conn.escape('%' + opts.filter[i] + '%'));
+		}
+		if (hasWhere) {
+			whereClause = " WHERE " + wheres.join(" AND ");
+		}
+	}
+
+	if (opts.size !== undefined) {
+		sql += " JOIN (SELECT COUNT(*) AS count FROM user" + whereClause + ") AS c";
+	}
+	sql += whereClause;
+
+	if (opts.order !== undefined) {
+		var orders = [];
+		var hasOrder = false;
+		for (var p in opts.order) {
+			var dir;
+			hasOrder = true;
+			if (opts.order[p].match(/^asc$/i) !== null) {
+				dir = "ASC";
+			} else if (opts.order[p].match(/^desc$/i) !== null) {
+				dir = "DESC";
+			} else {
+				callback("Unrecognised order direction '" + opts.order[p] + "'");
+			}
+			orders.push(conn.escapeId(p) + " " +  dir);
+		}
+		if (hasOrder) {
+			sql += " ORDER BY " + orders.join(", ");
+		}
+	}
+
+	if (opts.size !== undefined) {
+		sql += " LIMIT ";
+		if (opts.from !== undefined) {
+			sql += conn.escape(opts.from) + ",";
+		}
+		sql += conn.escape(opts.size);
+	}
+	sql += ";";
+	conn.query(sql, function(err, rows) {
+		if (err) return callback(err);
+		callback(null, rows);
+	});
+	conn.end();
 }
