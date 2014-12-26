@@ -25,7 +25,7 @@ function DateTimePickerDirective($timeout) {
 			}
 			function updatePicker(newValue) {
 				var datePicker = element.data("DateTimePicker");
-				if (newValue && !newValue.isSame(datePicker.getDate())) {
+				if (newValue && !datePicker.getDate().isSame(newValue)) {
 					// we need to update the datepicker, but wait until the $digest cycle is finished
 					$timeout(function() {
 						datePicker.setDate(newValue);

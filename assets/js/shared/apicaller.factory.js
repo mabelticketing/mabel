@@ -1,9 +1,9 @@
 angular.module('mabel.shared')
 	.factory('APICaller', APICaller);
 
-function APICaller($http, $cookies) {
+function APICaller($http, MabelToken) {
 	var apiRoot = '/api/';
-	var token = $cookies.mabelAuthToken;
+	var token = MabelToken;
 	if (token === undefined || token === null || token.length < 1) {
 		console.error("No auth token found!"); // TODO: scream louder than this
 		// break the call function
