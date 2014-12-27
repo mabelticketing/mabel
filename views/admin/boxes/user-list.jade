@@ -24,7 +24,7 @@
 			tfoot
 				tr(ng-mouseenter="userList.showTip('new')"
 					ng-mouseleave="userList.hideTip('new')"
-					ng-click="userList.newUser._status=''	")
+					ng-click="userList.newUser._status=''")
 					td(data-title="' '" style="min-width:35px")
 						span.badge(ng-class="{'bg-green':userList.newUser._status==='success','bg-red':userList.newUser._status==='error','bg-yellow':userList.newUser._status==='pending'}" 
 							style="color:transparent!important;" id="badge-new"
