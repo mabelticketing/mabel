@@ -1,25 +1,34 @@
-angular.module('mabel.admin')
+angular.module('mabel.shared')
 	.factory('User', User);
 
-function User($resource, $timeout, $rootScope, MabelToken, $http) {
+function User($resource, $timeout, $rootScope, MabelToken) {
 
 	var UserResource = $resource('/api/user/:id', {
 		access_token: MabelToken,
 		id: '@id',
 	}, 
-	// custom actions
 	{
-		// this is replacing query for us
+		// this is what 'query' normally does, but we want to overwrite query later
 		'getAll': {
 			method: 'GET',
 			isArray: true
+		},
+		'current': {
+			method: 'GET',
+			url: '/api/user/me'
 		}
-		// TODO: overr-ride get to add change watch
-		// TODO: Add new current user method
 	});
 	
 	// replace query with a function that sets up watches on the resources for us
-	UserResource.query = function(parameters, success, error) {
+	UserResource.query = queryUsers;
+	// wrap $delete with our own function which first clears the watchs set up in query
+	UserResource.prototype.delete = deleteUser;
+	// wrap $save with our own function which sets user._status for indicators
+	UserResource.prototype.save = saveUser;
+
+	return UserResource;
+
+	function queryUsers(parameters, success, error) {
 		UserResource.getAll(parameters, function(value, responseHeaders) {
 			// set up a watch on new resources
 			function getValue(i) {
@@ -33,8 +42,12 @@ function User($resource, $timeout, $rootScope, MabelToken, $http) {
 			}
 			success(value, responseHeaders);
 		}, error);
-	};
-	UserResource.prototype.save = function(success, error) {
+	}
+	function deleteUser(success, error) {
+		if (typeof this.clearWatch === "function") this.clearWatch();
+		this.$delete(success, error);
+	}
+	function saveUser(success, error) {
 		this._status = "pending";
 		this._error = "";
 		var user = this;
@@ -46,13 +59,7 @@ function User($resource, $timeout, $rootScope, MabelToken, $http) {
 			user._error = response.data;
 			if (error !== undefined) error(response.data);
 		});
-	};
-	UserResource.prototype.delete = function(success, error) {
-		if (typeof this.clearWatch === "function") this.clearWatch();
-		this.$delete(success, error);
-	};
-	return UserResource;
-
+	}
 	function userChange(stopTimer) {
 		return function(user, old) {
 			// I'm only interested in saving on actual changes
