@@ -5,6 +5,7 @@ module.exports = {
 	get: get,
 	getAll: getAll,
 	insert: insert,
+	del: del,
 	update: update
 };
 
@@ -43,6 +44,23 @@ function insert(user, callback) {
 	});
 }
 
+function del(user_id, callback) {
+	var sql = "DELETE FROM user_group_membership WHERE user_id=?; ";
+	sql += "DELETE FROM transaction WHERE user_id = ?; ";
+	sql += "DELETE FROM ticket WHERE booking_user_id = ?; ";
+	sql += "DELETE FROM user WHERE id = ?; ";
+	runSql(sql, [user_id, user_id, user_id, user_id], function(err, result){
+		if (err) return callback(err);
+		callback(null, {});
+	}, true);
+}
+
+//TODO: We want users of different event sites to be separate
+/*
+	- create a default group for each event
+	- add users to the appropriate group when they log into a new event site
+	- api.users.getAll should return just the users within that group
+*/
 function getAll(opts, callback) {
 	var conn = connection.getConnection();
 	var sql = "SELECT * from user";
