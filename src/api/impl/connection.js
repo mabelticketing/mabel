@@ -25,7 +25,7 @@ function runSql(sql, a, b) {
 	}
 	var conn = getConnection();
 	conn.query(sql, function(err, rows) {
-		if (err) return callback(err);
+		if (err) return callback(err.message);
 		callback(null, rows);
 	});
 	conn.end();

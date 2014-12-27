@@ -3,10 +3,26 @@ angular.module('mabel.admin')
 
 function UserListController(User, ngTableParams) {
 	var vm = this;
+	vm.newUser = new User();
+	vm.showTip = function(id) {
+		$('#badge-' + id).tooltip('show');
+	};
+	vm.hideTip = function(id) {
+		$('#badge-' + id).tooltip('hide');
+	};
+	vm.submitNew = function(id) {
+		vm.newUser.saveWithStatus(function(user) {
+			vm.newUser = new User();
+			vm.tableParams.reload();
+			vm.newUser._status = "success";
+			vm.newUser._error = "Successfully added " + user.name;
+		});
+	};
 
+	userList = vm;
 	vm.tableParams = new ngTableParams({
 		page: 1, // show first page
-		count: 2, // count per page
+		count: 5, // count per page
 		sorting: {
 			id: 'asc'
 		}
@@ -31,6 +47,8 @@ function UserListController(User, ngTableParams) {
 					params.total(0);
 					$defer.resolve([]);
 				}
+				$('[data-toggle="tooltip"]').tooltip();
+				
 			});
 		}
 	});
