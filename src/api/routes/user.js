@@ -6,6 +6,16 @@ var router = express.Router({
 });
 module.exports = router;
 
+function toDBUser(obj) {
+	return {
+		id: obj.id,
+		name: obj.name,
+		crsid: obj.crsid,
+		email: obj.email,
+		registration_time: obj.registration_time
+	};
+}
+
 router.route("/me")
 	.get(
 		function(req, res) {
@@ -27,6 +37,20 @@ router.route("/:id")
 		function(req, res) {
 			api.user.get(req.params.id, apiRouter.marshallResult(res));
 		}
+	)
+	.post(
+		function(req, res, next) {
+			if (parseInt(req.params.id) === req.user.id) {
+				// authorised because I can update my own details
+				next();
+			} else {
+				// Requesting someone else's details, so only allowed if I am admin
+				return (apiRouter.checkAdmin())(req, res, next);
+			} 
+		},
+		function(req, res) {
+			api.user.update(toDBUser(req.body), apiRouter.marshallResult(res));
+		}
 	);
 
 router.route("/")
@@ -40,5 +64,11 @@ router.route("/")
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
 			api.user.getAll(opts, apiRouter.marshallResult(res));
+		}
+	)
+	.put(
+		apiRouter.checkAdmin(),
+		function(req, res) {
+			api.user.insert(toDBUser(req.body), apiRouter.marshallResult(res));
 		}
 	);
