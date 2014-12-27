@@ -3,7 +3,9 @@ var runSql = connection.runSql;
 
 module.exports = {
 	get: get,
-	getAll: getAll
+	getAll: getAll,
+	insert: insert,
+	update: update
 };
 
 function get(user_id, callback) {
@@ -23,12 +25,22 @@ function get(user_id, callback) {
 	});
 }
 
-function mult(arr, times) {
-	var newArr = [];
-	for (var i=0; i<times; i++) {
-		newArr = newArr.concat(arr);
-	}
-	return newArr;
+function update(user, callback) {
+	var sql = "UPDATE user SET ? WHERE id=?;";
+	runSql(sql, [user, user.id], function(err) {
+		if (err) return callback(err);
+		
+		get(user.id, callback);
+	});
+}
+
+function insert(user, callback) {
+	var sql = "INSERT INTO user SET ?;";
+	runSql(sql, [user], function(err, result) {
+		if (err) return callback(err);
+		
+		get(result.insertId, callback);
+	});
 }
 
 function getAll(opts, callback) {
