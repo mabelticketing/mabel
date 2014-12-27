@@ -44,7 +44,7 @@ function canBook(user_id, event_id, callback) {
 			return callback(null, {open:false, reason:__("Booking is not yet open")});
 		}
 		
-		if (now > eventDetails[0].modification_stop_time) {
+		if (now > eventDetails[0].close_time) {
 			return callback(null, {open:false, reason:__("Booking has closed")});
 		}
 

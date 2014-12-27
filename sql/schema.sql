@@ -18,8 +18,8 @@ drop table if exists event;
 create table event (
 	id int auto_increment not null,
 	name varchar(100) not null,
-	launch_time timestamp not null,
-	modification_stop_time timestamp not null,
+	launch_time int not null,
+	close_time int not null,
 	primary key (id)
 );
 
@@ -50,7 +50,7 @@ create table user (
 	name varchar(100) not null,
 	email varchar(100) not null,
 	crsid varchar(8),
-	registration_time timestamp not null,
+	registration_time int not null,
 	primary key (id)
 );
 
@@ -61,7 +61,7 @@ create table ticket (
 	booking_user_id int not null,
 	ticket_type_id int not null,
 	status_id int not null,
-	book_time timestamp,
+	book_time int,
 	primary key (id),
 	FOREIGN KEY (booking_user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
@@ -117,7 +117,7 @@ create table transaction (
 	user_id int not null,
 	value DECIMAL(6,2) not null,
 	payment_method_id int not null,
-	transaction_time timestamp not null,
+	transaction_time int not null,
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)

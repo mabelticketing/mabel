@@ -2,7 +2,6 @@ angular.module('mabel.shared')
 	.factory('User', User);
 
 function User($resource, $timeout, $rootScope, MabelToken) {
-
 	var UserResource = $resource('/api/user/:id', {
 		access_token: MabelToken,
 		id: '@id',
@@ -20,16 +19,17 @@ function User($resource, $timeout, $rootScope, MabelToken) {
 	});
 	
 	// replace query with a function that sets up watches on the resources for us
+	// TODO: Maybe we need to wrap other sources (e.g. get) with $watch like we have for query
 	UserResource.query = queryUsers;
 	// wrap $delete with our own function which first clears the watchs set up in query
-	UserResource.prototype.delete = deleteUser;
+	UserResource.prototype.delete = deleteIt;
 	// wrap $save with our own function which sets user._status for indicators
-	UserResource.prototype.save = saveUser;
+	UserResource.prototype.save = save;
 
 	return UserResource;
 
 	function queryUsers(parameters, success, error) {
-		UserResource.getAll(parameters, function(value, responseHeaders) {
+		return UserResource.getAll(parameters, function(value, responseHeaders) {
 			// set up a watch on new resources
 			function getValue(i) {
 				return function() {
@@ -38,16 +38,16 @@ function User($resource, $timeout, $rootScope, MabelToken) {
 			}
 			for (var i=0; i<value.length; i++) {
 				var stopTimer;
-				value[i].clearWatch = $rootScope.$watch(getValue(i), userChange(stopTimer), true);
+				value[i]._clearWatch = $rootScope.$watch(getValue(i), change(stopTimer), true);
 			}
-			success(value, responseHeaders);
+			if (success !== undefined) success(value, responseHeaders);
 		}, error);
 	}
-	function deleteUser(success, error) {
-		if (typeof this.clearWatch === "function") this.clearWatch();
+	function deleteIt(success, error) {
+		if (typeof this._clearWatch === "function") this._clearWatch();
 		this.$delete(success, error);
 	}
-	function saveUser(success, error) {
+	function save(success, error) {
 		this._status = "pending";
 		this._error = "";
 		var user = this;
@@ -60,12 +60,14 @@ function User($resource, $timeout, $rootScope, MabelToken) {
 			if (error !== undefined) error(response.data);
 		});
 	}
-	function userChange(stopTimer) {
+	function change(stopTimer) {
 		return function(user, old) {
 			// I'm only interested in saving on actual changes
 			if (old === user) return;
 
 			// need to check properties as well, because === just compares refs
+			// TODO: I think registration_time is breaking things on the server, 
+			// maybe because server time and DB timezones are not the same?
 			if (old.crsid === user.crsid && 
 				old.email === user.email &&
 				old.name === user.name &&
