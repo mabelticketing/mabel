@@ -10,12 +10,20 @@ function UserListController(User, ngTableParams) {
 	vm.hideTip = function(id) {
 		$('#badge-' + id).tooltip('hide');
 	};
-	vm.submitNew = function(id) {
-		vm.newUser.saveWithStatus(function(user) {
+	vm.submitNew = function() {
+		vm.newUser.save(function(user) {
 			vm.newUser = new User();
 			vm.tableParams.reload();
 			vm.newUser._status = "success";
 			vm.newUser._error = "Successfully added " + user.name;
+		});
+	};
+	vm.delete = function(user) {
+		user.delete(function(){
+			vm.tableParams.reload();
+		}, function(result, headers) {
+			user._status = "error";
+			user._error = result.data;
 		});
 	};
 
@@ -33,6 +41,11 @@ function UserListController(User, ngTableParams) {
 			var pageSize = params.count();
 			var filter = params.filter();
   			var sorting = params.sorting();
+
+  			// clear previous watches
+  			for (var i=0; i<params.data.length; i++) {
+  				if (params.data[i].clearWatch !== undefined) params.data[i].clearWatch();
+  			}
 
 			User.query({
 				from: (pageNumber-1) * pageSize,

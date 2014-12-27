@@ -29,12 +29,12 @@ function User($resource, $timeout, $rootScope, MabelToken, $http) {
 			}
 			for (var i=0; i<value.length; i++) {
 				var stopTimer;
-				$rootScope.$watch(getValue(i), userChange(stopTimer), true);
+				value[i].clearWatch = $rootScope.$watch(getValue(i), userChange(stopTimer), true);
 			}
 			success(value, responseHeaders);
 		}, error);
 	};
-	UserResource.prototype.saveWithStatus = function(success, error) {
+	UserResource.prototype.save = function(success, error) {
 		this._status = "pending";
 		this._error = "";
 		var user = this;
@@ -47,7 +47,10 @@ function User($resource, $timeout, $rootScope, MabelToken, $http) {
 			if (error !== undefined) error(response.data);
 		});
 	};
-
+	UserResource.prototype.delete = function(success, error) {
+		if (typeof this.clearWatch === "function") this.clearWatch();
+		this.$delete(success, error);
+	};
 	return UserResource;
 
 	function userChange(stopTimer) {
@@ -66,7 +69,7 @@ function User($resource, $timeout, $rootScope, MabelToken, $http) {
 
 			// only update server periodically else we'll make too many calls
 			stopTimer = $timeout(function() {
-				user.saveWithStatus();
+				user.save();
 			}, 500);
 		};
 	}

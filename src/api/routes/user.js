@@ -51,6 +51,13 @@ router.route("/:id")
 		function(req, res) {
 			api.user.update(toDBUser(req.body), apiRouter.marshallResult(res));
 		}
+	)
+	.delete(
+		// only admins can delete (can't delete self)
+		apiRouter.checkAdmin(),
+		function(req, res) {
+			api.user.del(req.params.id, apiRouter.marshallResult(res));
+		}
 	);
 
 router.route("/")

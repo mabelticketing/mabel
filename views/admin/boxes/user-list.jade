@@ -10,7 +10,7 @@
 					td(data-title="' '" style="min-width:35px")
 						span.badge(ng-class="{'bg-green':user._status==='success','bg-red':user._status==='error','bg-yellow':user._status==='pending'}" 
 							style="color:transparent!important;" id="badge-{{user.id}}"
-							data-toggle="tooltip" title="{{user._error}}" data-placement="right" data-trigger="manual") {{ ((user._status !== undefined)? ".":"") }}
+							data-toggle="tooltip" title="{{user._error}}" data-placement="right" data-trigger="manual") {{ ((user._status !== undefined && user._status.length>1)? ".":"") }}
 					td(data-title="'ID'" sortable="'id'" filter="{'id':'text'}") {{ user.id }}
 					td(data-title="'Name'" sortable="'name'" filter="{'name':'text'}")
 						input(type="text" ng-model="user.name")
@@ -20,13 +20,15 @@
 					td(data-title="'Registration Date'" sortable="'registration_time'" filter="{'registration_date':'text'}") {{ user.registration_time }}
 					td(data-title="'Actions'")
 						button Tickets
+						button(ng-click="userList.delete(user)") Delete
 			tfoot
 				tr(ng-mouseenter="userList.showTip('new')"
-					ng-mouseleave="userList.hideTip('new')")
+					ng-mouseleave="userList.hideTip('new')"
+					ng-click="userList.newUser._status=''	")
 					td(data-title="' '" style="min-width:35px")
 						span.badge(ng-class="{'bg-green':userList.newUser._status==='success','bg-red':userList.newUser._status==='error','bg-yellow':userList.newUser._status==='pending'}" 
 							style="color:transparent!important;" id="badge-new"
-							data-toggle="tooltip" title="{{userList.newUser._error}}" data-placement="right" data-trigger="manual") {{ ((userList.newUser._status !== undefined)? ".":"") }}
+							data-toggle="tooltip" title="{{userList.newUser._error}}" data-placement="right" data-trigger="manual") {{ ((userList.newUser._status !== undefined && userList.newUser._status.length>1)? ".":"") }}
 					td
 						| New User: 
 					td
