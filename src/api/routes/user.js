@@ -66,7 +66,7 @@ router.route("/")
 			api.user.getAll(opts, apiRouter.marshallResult(res));
 		}
 	)
-	.put(
+	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
 			api.user.insert(toDBUser(req.body), apiRouter.marshallResult(res));
