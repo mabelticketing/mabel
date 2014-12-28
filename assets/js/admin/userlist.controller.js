@@ -4,6 +4,7 @@ angular.module('mabel.admin')
 function UserListController(User, ngTableParams) {
 	var vm = this;
 	vm.newUser = new User();
+	vm.newUser.registration_time = moment();
 	vm.showTip = function(id) {
 		$('#badge-' + id).tooltip('show');
 	};
@@ -13,6 +14,7 @@ function UserListController(User, ngTableParams) {
 	vm.submitNew = function() {
 		vm.newUser.save(function(user) {
 			vm.newUser = new User();
+			vm.newUser.registration_time = moment();
 			vm.tableParams.reload();
 			vm.newUser._status = "success";
 			vm.newUser._error = "Successfully added " + user.name;

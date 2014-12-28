@@ -6,7 +6,8 @@
 			tbody
 				tr(ng-repeat="user in $data track by user.id" 
 					ng-mouseenter="userList.showTip(user.id)"
-					ng-mouseleave="userList.hideTip(user.id)")
+					ng-mouseleave="userList.hideTip(user.id)"
+					ng-click="user._status=''")
 					td(data-title="' '" style="min-width:35px")
 						span.badge(ng-class="{'bg-green':user._status==='success','bg-red':user._status==='error','bg-yellow':user._status==='pending'}" 
 							style="color:transparent!important;" id="badge-{{user.id}}"
@@ -17,7 +18,7 @@
 					td(data-title="'Email'" sortable="'email'" filter="{'email':'text'}") 
 						a(href='mailto:{{user.email}}') {{ user.email }}
 					td(data-title="'CRSID'" sortable="'crsid'" filter="{'crsid':'text'}") {{ user.crsid }}
-					td(data-title="'Registration Date'" sortable="'registration_time'" filter="{'registration_date':'text'}") {{ user.registration_time }}
+					td(data-title="'Registration Date'" sortable="'registration_time'" filter="{'registration_date':'text'}") {{ user.registration_time.format('lll') }}
 					td(data-title="'Actions'")
 						button Tickets
 						button(ng-click="userList.delete(user)") Delete
