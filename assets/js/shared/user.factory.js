@@ -11,7 +11,8 @@ function User(MabelToken, MabelResource) {
 		{
 			'current': {
 				method: 'GET',
-				url: 'api/user/me'
+				url: 'api/user/me',
+				mabelSerialize: true
 			}
 		},
 		{
