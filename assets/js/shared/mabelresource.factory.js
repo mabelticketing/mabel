@@ -43,29 +43,42 @@ function MabelResource($http, $resource, $rootScope, $timeout) {
 		};
 	}
 
-	function getActions(serialize, unserialize, extra) {
+	function getActions(serialize, unserialize, extras) {
 		var actions = {
 			'_get': {
 				method: 'GET',
-				transformRequest: [serialize].concat($http.defaults.transformRequest),
-				transformResponse: $http.defaults.transformResponse.concat([unserialize])
+				mabelSerialize: true
 			},
 			'_query': {
 				method: 'GET',
 				isArray: true,
-				transformRequest: [serializeArray(serialize)].concat($http.defaults.transformRequest),
-				transformResponse: $http.defaults.transformResponse.concat([unserializeArray(unserialize)])
+				mabelSerialize: true
 			},
 			'save': {
 				method: 'POST',
-				transformRequest: [serialize].concat($http.defaults.transformRequest),
-				transformResponse: $http.defaults.transformResponse.concat([unserialize])
+				mabelSerialize: true
 			}
 		};
-		if (extra !== undefined) {
-			for (var action in extra) {
-				// TODO Maybe something about default transformations as above
-				actions[action] = extra[action];
+		if (extras !== undefined) {
+			for (var i in extras) {
+				actions[i] = extras[i];
+			}
+		}
+		for (var j in actions) {
+			var action = actions[j];
+			if (action.mabelSerialize !== undefined && action.mabelSerialize === true) {
+				
+				var defaultRequest = action.transformRequest || $http.defaults.transformRequest;
+				var defaultResponse = action.transformResponse || $http.defaults.transformResponse;
+				
+				if (action.isArray !== undefined && action.isArray === true) {
+					action.transformRequest = [serializeArray(serialize)].concat(defaultRequest);
+					action.transformResponse = defaultResponse.concat([unserializeArray(unserialize)]);
+				
+				} else {
+					action.transformRequest = [serialize].concat(defaultRequest);
+					action.transformResponse = defaultResponse.concat([unserialize]);
+				}
 			}
 		}
 		return actions;
