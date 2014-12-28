@@ -33,22 +33,25 @@ insert into mabel.ticket_status (name) VALUES ('Confirmed');
 insert into mabel.ticket_status (name) VALUES ('Cancelled');
 insert into mabel.ticket_status (name) VALUES ('Admitted');
 
-insert into mabel.user (id, name, email, crsid) VALUES (
+insert into mabel.user (id, name, email, crsid, registration_time) VALUES (
 	1,
 	'Christopher Little',
 	'cl554@cam.ac.uk',
-	'cl554'
+	'cl554',
+	UNIX_TIMESTAMP()
 );
-insert into mabel.user (id, name, email, crsid) VALUES (
+insert into mabel.user (id, name, email, crsid, registration_time) VALUES (
 	2,
 	'Thomas Le Feuvre',
 	'tl368@cam.ac.uk',
-	'tl368'
+	'tl368',
+	UNIX_TIMESTAMP()
 );
-insert into mabel.user (id, name, email) VALUES (
+insert into mabel.user (id, name, email, registration_time) VALUES (
 	3,
 	'Andrew Hardwurk',
-	'worker@clittle.com'
+	'worker@clittle.com',
+	UNIX_TIMESTAMP()
 );
 
 insert into mabel.user_group (id, name, description) VALUES (
