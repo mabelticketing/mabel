@@ -40,7 +40,7 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 
 		for (var action in actions) {
 			var originalMethod = Resource[action];
-			Resource[action] = getWrapper(Resource, action, originalMethod);
+			Resource[action] = getWrapper(Resource, actions[action], originalMethod);
 		}
 		var methods = getWrapperMethods(Resource, areEqual);
 
@@ -190,9 +190,9 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 			// we might send the save request and then receive updated data,
 			// which will trigger another save, which might arrive before the
 			// first save has returned, and loop...
-			// if (newValue._abort !== undefined) {
-			// 	newValue._abort();
-			// }
+			if (newValue._abort !== undefined) {
+				newValue._abort();
+			}
 
 			// changes have not yet been persisted, so show this
 			newValue._status = "pending";
@@ -203,7 +203,7 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 			stopTimer = $timeout(function() {
 				var promise = newValue.save();
 				promise.then(function() {
-						console.log("success");
+						console.log("success at changing");
 					},
 					function() {
 						console.log("fail");
