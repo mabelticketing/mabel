@@ -14,16 +14,26 @@ function AdminPageController(MabelToken, User) {
 	vm.pageStatus = pageStatus.loading;
 
 	if (MabelToken !== null) {
-		vm.user = User.current(function(data) {
-			// success
-			vm.pageStatus = (data.groups.indexOf(1) < 0 ? 
-								pageStatus.unauthorised : pageStatus.authorised);
-
-		}, function(err) {
-			// error
-			vm.pageStatus = pageStatus.unauthorised;
-			console.log(err);
+		vm.user = User.current(function() {
+			console.log("success");
+		}, function() {
+			console.log("fail");
 		});
+		var promise = vm.user.$promise;
+
+		promise.then(
+			function(data) {
+				// success
+				vm.pageStatus = (data.groups.indexOf(1) < 0 ? 
+									pageStatus.unauthorised : pageStatus.authorised);
+
+			},
+			function(err) {
+				// error
+				vm.pageStatus = pageStatus.unauthorised;
+				console.log(err);
+			}
+		);
 	} else {
 		vm.pageStatus = pageStatus.logged_out;
 	}
