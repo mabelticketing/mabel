@@ -18,11 +18,10 @@ angular.module('mabel.shared')
 		  friendly version (e.g. with moment objects replaced by timestamps)
 		- unserialize: a method which undoes whatever serialize did
 */
+function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 
-function MabelResource($http, $resource, $rootScope, $timeout) {
-	
 	// this is the function which will be injected to our resource factories
-	return function (url, params, actions, config) {
+	return function(url, params, actions, config) {
 
 		// setup some sensible defaults for the config in case they're ommitted
 		var areEqual = config.areEqual || function(A, B) {
@@ -35,54 +34,72 @@ function MabelResource($http, $resource, $rootScope, $timeout) {
 			return obj;
 		};
 
+		// our MabelResource overrides the default set of $resource actions
+		actions = getActions(actions, serialize, unserialize);
+		var Resource = $resource(url, params, actions);
 
-		return wrap(
-			$resource(
-				url, params,
-				// our MabelResource overrides the default set of $resource actions
-				getActions(serialize, unserialize, actions)
-			),
-			areEqual);
-	};
+		for (var action in actions) {
+			var originalMethod = Resource[action];
+			Resource[action] = getWrapper(Resource, action, originalMethod);
+		}
+		var methods = getWrapperMethods(Resource, areEqual);
 
-	function wrap(Resource, areEqual) {
-		Resource.get = get;
-		Resource.query = query;
-		Resource.prototype.delete = deleteIt;
-		Resource.prototype.save = save;
+		// override get and query methods
+		Resource.get = methods.get;
+		Resource.query = methods.query;
+		Resource.prototype.remove = methods.remove;
+		Resource.prototype.delete = methods.delete;
+		Resource.prototype.save = methods.save;
 
 		return Resource;
+	};
 
-		function get(parameters, success, error) {
-			return Resource._get(parameters, function(value, responseHeaders) {
+	// generate some wrappers for some of the default resource methods
+	function getWrapperMethods(Resource, areEqual) {
+		return {
+			save: save,
+			remove: remove,
+			delete: remove,
+			query: query,
+			get: get
+		};
 
-				// start watching so we can update the server
-				// $rootScope.$watch can take a string or a function as the
-				// first argument. If it's a string, it will watch the
-				// property within the scope, which isn't what we want here.
-				// If it's a function, it will check the return value of the
-				// function after each update cycle, to see if that has
-				// changed. That's what we want here, so we end up with this
-				// trivial function.
-				function getValue() {
-					return value;
-				}
+		// our save wrapper updates _status and _error as appropriate, before
+		// calling the normal callback as well.
+		function save() {
+			// save is called as an instance method
+			var resource = this;
 
-				var stopTimer;
-				var clearWatch = $rootScope.$watch(getValue, change(stopTimer), true);
+			if (!resource.hasOwnProperty('_status')) {
+				// this object doesn't have '_status' set yet for some reason
+				// (probably it was created via new Resource() rather than
+				// through .get() or .query())
+				defineMeta(resource);
+			}
 
-				// define non-enumerable properties so they won't show up in the DB
-				defineMeta(value);
-				value._clearWatch = clearWatch;
-
-				if (success !== undefined) success(value, responseHeaders);
-			}, error);
+			var promise = resource.$save.apply(resource, arguments);
+			return promise.then(function() {
+				resource._status = "success";
+			}, function(response) {
+				resource._status = "error";
+				resource._error = response.data;
+			});
+		}
+		// this wrapper for delete just removes the watch before deleting (if
+		// one has been set)
+		function remove() {
+			// remove is called as an instance method
+			var resource = this;
+			if (typeof resource._clearWatch === "function") resource._clearWatch();
+			resource.$delete.apply(resource, arguments);
 		}
 
 		// Our wrapper for query sets up a watch on each of the new resources when they arrive
-		function query(parameters, success, error) {
-			return Resource._query(parameters, function(value, responseHeaders) {
-				
+		function query() {
+			// query is called as a class method, so we use Resource
+			var resource = Resource._query.apply(this, arguments);
+			var promise = resource.$promise;
+			promise.then(function(value) {
 				// We here have to wrap our trivial function (see big comment
 				// in get wrapper above) because otherwise we will have a
 				// problem with i. By the time the callback is actually
@@ -96,130 +113,138 @@ function MabelResource($http, $resource, $rootScope, $timeout) {
 						return value[i];
 					};
 				}
-				
+
 				for (var i = 0; i < value.length; i++) {
-					var stopTimer;
-					var clearWatch = $rootScope.$watch(getValue(i), change(stopTimer), true);
+					var clearWatch = $rootScope.$watch(getValue(i), change(areEqual), true);
 
 					// define non-enumerable properties so they won't show up in the DB
 					defineMeta(value[i]);
 					value[i]._clearWatch = clearWatch;
 				}
-				if (success !== undefined) success(value, responseHeaders);
-			}, error);
+				return value;
+			});
+			return resource;
 		}
 
-		// this wrapper for delete just removes the watch before deleting (if
-		// one has been set)
-		function deleteIt(success, error) {
-			if (typeof this._clearWatch === "function") this._clearWatch();
-			this.$delete(success, error);
-		}
+		// Our wrapper for query sets up a watch on each of the new resources when they arrive
+		function get() {
+			// query is called as a class method, so we use Resource
+			var resource = Resource._get.apply(this, arguments);
+			var promise = resource.$promise;
+			promise.then(function(value) {
 
-		// this function defines some non-enumerable properties which will be
-		// useful for us. It's important that they're non-enumerable,
-		// otherwise node-mysql might naively try to save them to the database	
-		function defineMeta(obj) {
-			Object.defineProperty(obj, '_status', {
-				value: '',
-				enumerable: false,
-				writable: true
-			});
-			Object.defineProperty(obj, '_error', {
-				value: '',
-				enumerable: false,
-				writable: true
-			});
-			Object.defineProperty(obj, '_clearWatch', {
-				value: null,
-				enumerable: false,
-				writable: true
-			});
-		}
-
-		// our save wrapper updates _status and _error as appropriate, before
-		// calling the normal callback as well.
-		function save(success, error) {
-			var resource = this;
-
-			if (!resource.hasOwnProperty('_status')) {
-				// this object doesn't have '_status' set yet for some reason
-				// (probably it was created via new Resource() rather than
-				// through .get() or .query())
-				defineMeta(resource);
-			}
-
-			resource._save(function() {
-				resource._status = "success";
-				if (success !== undefined) success(resource);
-			}, function(response) {
-				resource._status = "error";
-				resource._error = response.data;
-				if (error !== undefined) error(response.data);
-			});
-		}
-
-		// `change` constructs a de-bouncing change watcher
-		function change(stopTimer) {
-
-			// called when $watch indicates a change. This function checks
-			// whether the change is actually meaningful, and if so, prepares
-			// to save the resource via the API. We use $timeout to bunch
-			// changes together (debouncing) in order to avoid sending loads
-			// of requests
-			return function(newValue, oldValue) {
-				// I'm only interested in saving on actual changes
-				if (oldValue === newValue) return;
-
-				// need to check details as well, because === just compares refs
-				if (areEqual(oldValue, newValue)) return;
-
-				if (!newValue.hasOwnProperty('_status')) {
-					// this object doesn't have '_status' set yet for some reason
-					// (probably it was created via new Resource() rather than
-					// through .get() or .query())
-					defineMeta(newValue);
+				// start watching so we can update the server
+				// $rootScope.$watch can take a string or a function as the
+				// first argument. If it's a string, it will watch the
+				// property within the scope, which isn't what we want here.
+				// If it's a function, it will check the return value of the
+				// function after each update cycle, to see if that has
+				// changed. That's what we want here, so we end up with this
+				// trivial function.
+				function getValue() {
+					return value;
 				}
 
-				// changes have not yet been persisted, so show this
-				newValue._status = "pending";
-				newValue._error = "";
+				var clearWatch = $rootScope.$watch(getValue, change(areEqual), true);
 
-				// only update server periodically else we'll make too many calls
-				if (stopTimer !== undefined) $timeout.cancel(stopTimer);
-				stopTimer = $timeout(function() {
-					newValue.save();
-				}, 500);
-			};
+				// define non-enumerable properties so they won't show up in the DB
+				defineMeta(value);
+				value._clearWatch = clearWatch;
+				return value;
+			});
+			return resource;
 		}
 	}
 
-	function getActions(serialize, unserialize, extras) {
+
+	// constructs a de-bouncing change watcher, using areEqual to
+	// determine if an object has changed
+	function change(areEqual) {
+
+		var stopTimer;
+
+		// called when $watch indicates a change. This function checks
+		// whether the change is actually meaningful, and if so, prepares
+		// to save the resource via the API. We use $timeout to bunch
+		// changes together (debouncing) in order to avoid sending loads
+		// of requests
+		return function(newValue, oldValue) {
+			// I'm only interested in saving on actual changes
+			if (oldValue === newValue) return;
+
+			// need to check details as well, because === just compares refs
+			if (areEqual(oldValue, newValue)) return;
+
+			if (!newValue.hasOwnProperty('_status')) {
+				// this object doesn't have '_status' set yet for some reason
+				// (probably it was created via new Resource() rather than
+				// through .get() or .query())
+				defineMeta(newValue);
+			}
+
+			// changes have not yet been persisted, so show this
+			newValue._status = "pending";
+			newValue._error = "";
+
+			// only update server periodically else we'll make too many calls
+			if (stopTimer !== undefined) $timeout.cancel(stopTimer);
+			stopTimer = $timeout(function() {
+				var promise = newValue.save();
+				var newPromise = promise.then(function() {
+						console.log("success");
+					},
+					function() {
+						console.log("fail");
+					});
+			}, 500);
+		};
+	}
+
+	// this function defines some non-enumerable properties which will be
+	// useful for us. It's important that they're non-enumerable,
+	// otherwise node-mysql might naively try to save them to the database	
+	function defineMeta(obj) {
+		Object.defineProperty(obj, '_status', {
+			value: '',
+			enumerable: false,
+			writable: true
+		});
+		Object.defineProperty(obj, '_error', {
+			value: '',
+			enumerable: false,
+			writable: true
+		});
+		Object.defineProperty(obj, '_clearWatch', {
+			value: null,
+			enumerable: false,
+			writable: true
+		});
+	}
+
+	// return set of actions combining default actions with the given extras,
+	// augmented with the given (un)serialize methods which will be called for
+	// each of the requests made through this resource
+	function getActions(extras, serialize, unserialize) {
 
 		// _get does what $resource.get would normally do, but we are
 		// going to over-write .get with our own method later.
 		// Also set up serialization here
-
 		var actions = {
 			'_get': {
 				method: 'GET',
-				mabelSerialize: true
+				mabelSerialize: true,
 			},
 			'_query': {
 				method: 'GET',
 				isArray: true,
 				mabelSerialize: true
 			},
-			'_save': {
+			'save': {
 				method: 'POST',
 				mabelSerialize: true
 			}
 		};
-		if (extras !== undefined) {
-			for (var i in extras) {
-				actions[i] = extras[i];
-			}
-		}
+		angular.extend(actions, extras);
 
 		// for every action, if mabelSerialize has been set to true, we add
 		// our serialize methods to the transformRequest/Response as
@@ -227,14 +252,14 @@ function MabelResource($http, $resource, $rootScope, $timeout) {
 		for (var j in actions) {
 			var action = actions[j];
 			if (action.mabelSerialize !== undefined && action.mabelSerialize === true) {
-				
+
 				var defaultRequest = action.transformRequest || $http.defaults.transformRequest;
 				var defaultResponse = action.transformResponse || $http.defaults.transformResponse;
-				
+
 				if (action.isArray !== undefined && action.isArray === true) {
 					action.transformRequest = [serializeArray(serialize)].concat(defaultRequest);
 					action.transformResponse = defaultResponse.concat([unserializeArray(unserialize)]);
-				
+
 				} else {
 					action.transformRequest = [serialize].concat(defaultRequest);
 					action.transformResponse = defaultResponse.concat([unserialize]);
@@ -244,12 +269,136 @@ function MabelResource($http, $resource, $rootScope, $timeout) {
 		return actions;
 	}
 
+	// creates a wrapper around a resource action method which augments the
+	// returned promise with an abort() method to cancel the action	
+	function getWrapper(Resource, action, originalMethod) {
+		return function() {
+
+			// interpret arguments as angular does itself
+			var args = getActionParams(arguments,
+				/^(POST|PUT|PATCH)$/i.test(action.method));
+
+			// only pass on the params and data to the original method
+			// (we will take charge of calling callbacks ourselves)
+			var newArguments = [];
+			if (args.params !== undefined) newArguments.push(args.params);
+			if (args.data !== undefined) newArguments.push(args.data);
+
+			// create a new promise which we can control via deferred. 
+			var deferred = $q.defer();
+
+			var value, // the current resource
+				innerPromise, // the promise of the inner action method
+				returnValue; // the value this method will return
+
+			// A static method call returns a resource, but an instance call just
+			// returns the promise
+			var result = originalMethod.apply(this, newArguments);
+			if (this instanceof Resource) {
+
+				// the easy case - don't need to create a new resource
+				innerPromise = result;
+				value = args.data;
+
+				// instance call returns the promise
+				returnValue = deferred.promise;
+			} else {
+
+				// Create a new resource to return.
+				// We make a copy rather than modifying innerRes directly
+				// because innerRes will be 'filled in' when innerRes.$promise
+				// resolves. This is undesirable - if we've aborted the
+				// request then we don't expect the resource to change in the
+				// future
+				value = angular.copy(result);
+				innerPromise = result.$promise;
+
+				// static call returns the new resource itself
+				returnValue = value;
+			}
+
+			// deferred.promise should resolve as soon as innerRes.$promise
+			// does, but we can also cancel it via deferred.reject() manually.
+			innerPromise.then(function(newResource) {
+
+				// We would like the resource we prepared earlier to get
+				// 'filled in', so we copy the contents of innerRes into it,
+				// before triggering the promise resolutions with it
+				angular.extend(value, newResource);
+				deferred.resolve(value);
+			}, function() {
+				deferred.reject.apply(deferred, arguments);
+			});
+
+			// attach the callbacks to our promise, and augment the returned
+			// promise with our hallowed abort method.
+			deferred.promise.then(args.success, args.error);
+			deferred.promise.abort = function() {
+				deferred.reject('Aborted');
+			};
+			value.$promise = deferred.promise;
+
+			return returnValue;
+		};
+	}
+	
+	// extracts arguments in the same way angular-resource.js does
+	function getActionParams(args, hasBody) {
+		var a1 = args[0],
+			a2 = args[1],
+			a3 = args[2],
+			a4 = args[3];
+		// (v1.3.8 ~line 523)				
+		var params, data, error, success;
+		/* jshint -W086 */
+		/* (purposefully fall through case statements) */
+		switch (arguments.length) {
+			case 4:
+				error = a4;
+				success = a3;
+				//fallthrough
+			case 3:
+			case 2:
+				if (typeof a2 === "function") {
+					if (typeof a1 === "function") {
+						success = a1;
+						error = a2;
+						break;
+					}
+
+					success = a2;
+					error = a3;
+					//fallthrough
+				} else {
+					params = a1;
+					data = a2;
+					success = a3;
+					break;
+				}
+			case 1:
+				if (typeof a1 === "function") success = a1;
+				else if (hasBody) data = a1;
+				else params = a1;
+				break;
+			case 0:
+				break;
+		}
+		/* jshint +W086 */
+		/* (purposefully fall through case statements) */
+		return {
+			params: params,
+			data: data,
+			error: error,
+			success: success
+		};
+	}
+
 	// generalises the given serialize method into one which will work on an array of resources
 	function serializeArray(serialize) {
 		return function(objs) {
 			if (objs === undefined) return objs;
 			var _objs = [];
-			for (var i=0; i<objs.length; i++) {
+			for (var i = 0; i < objs.length; i++) {
 				_objs[i] = serialize(objs[i]);
 			}
 			return _objs;
@@ -261,7 +410,7 @@ function MabelResource($http, $resource, $rootScope, $timeout) {
 		return function(objs) {
 			if (objs === undefined) return objs;
 			var _objs = [];
-			for (var i=0; i<objs.length; i++) {
+			for (var i = 0; i < objs.length; i++) {
 				_objs[i] = unserialize(objs[i]);
 			}
 			return _objs;
