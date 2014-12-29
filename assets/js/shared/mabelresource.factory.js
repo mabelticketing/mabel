@@ -81,6 +81,10 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 			return promise.then(function() {
 				resource._status = "success";
 			}, function(response) {
+				if (response === "aborted") {
+					// we don't need to notify the user of aborted requests
+					return;
+				}
 				resource._status = "error";
 				resource._error = response.data;
 			});
@@ -182,6 +186,14 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 				defineMeta(newValue);
 			}
 
+			// if there is a pending request - cancel it! If we don't cancel,
+			// we might send the save request and then receive updated data,
+			// which will trigger another save, which might arrive before the
+			// first save has returned, and loop...
+			// if (newValue._abort !== undefined) {
+			// 	newValue._abort();
+			// }
+
 			// changes have not yet been persisted, so show this
 			newValue._status = "pending";
 			newValue._error = "";
@@ -190,7 +202,7 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 			if (stopTimer !== undefined) $timeout.cancel(stopTimer);
 			stopTimer = $timeout(function() {
 				var promise = newValue.save();
-				var newPromise = promise.then(function() {
+				promise.then(function() {
 						console.log("success");
 					},
 					function() {
@@ -334,8 +346,14 @@ function MabelResource($http, $resource, $rootScope, $timeout, $q) {
 			// promise with our hallowed abort method.
 			deferred.promise.then(args.success, args.error);
 			deferred.promise.abort = function() {
-				deferred.reject('Aborted');
+				deferred.reject('aborted');
+				delete value.abort;
 			};
+			Object.defineProperty(value, '_abort', {
+				value: deferred.promise.abort,
+				enumerable: false,
+				writable: true
+			});
 			value.$promise = deferred.promise;
 
 			return returnValue;
