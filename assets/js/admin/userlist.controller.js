@@ -1,3 +1,4 @@
+/* global moment */
 angular.module('mabel.admin')
 	.controller("UserListController", UserListController);
 
@@ -12,7 +13,10 @@ function UserListController(User, ngTableParams) {
 		$('#badge-' + id).tooltip('hide');
 	};
 	vm.submitNew = function() {
-		vm.newUser.save(function(user) {
+		var promise = vm.newUser.save();
+
+		promise.then(function(user) {
+			// reset the new user for next entry
 			vm.newUser = new User();
 			vm.newUser.registration_time = moment();
 			vm.tableParams.reload();
@@ -20,16 +24,18 @@ function UserListController(User, ngTableParams) {
 			vm.newUser._error = "Successfully added " + user.name;
 		});
 	};
+	vm.save = function(user) {
+		user.save();
+	};
 	vm.delete = function(user) {
-		user.delete(function(){
+		user.$delete(function(){
 			vm.tableParams.reload();
-		}, function(result, headers) {
+		}, function(result) {
 			user._status = "error";
 			user._error = result.data;
 		});
 	};
 
-	userList = vm;
 	vm.tableParams = new ngTableParams({
 		page: 1, // show first page
 		count: 5, // count per page
