@@ -51,7 +51,9 @@ create table user (
 	email varchar(100) not null,
 	crsid varchar(8),
 	registration_time int not null,
-	primary key (id)
+	primary key (id),
+	unique(email),
+	unique(crsid)
 );
 
 ### TICKET ###
