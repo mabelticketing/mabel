@@ -1,7 +1,7 @@
 .box.box-solid(ng-controller="EventSettingsController as eventSettings" 
 	class="box-primary"
 	ng-class="{'box-success':eventSettings.settings._status==='success','box-danger':eventSettings.settings._status==='error','box-warning':eventSettings.settings._status==='pending'}"
-	ng-click="eventSettings.settings._status=''")
+	ng-click="eventSettings.resetStatus()")
 	.box-header(data-toggle="tooltip" title="{{eventSettings.settings._error}}" data-placement="bottom")
 		h3.box-title Event Settings 
 			small {{eventSettings.subtitle}}
@@ -9,14 +9,16 @@
 	.box-body
 		.form-group
 			label(for="event-name-field") Event Name
-			input.form-control#event-name-field(type="text" ng-model="eventSettings.settings.name" ng-focus="eventSettings.resetStatus()")
+			input.form-control#event-name-field(type="text" ng-model="eventSettings.settings.name")
 	.box-body
 		.form-group
 			label(for="event-launch-field") Ticket Launch Date 
-			input.form-control#event-launch-field(type='text' date="eventSettings.settings.launch_time" ng-focus="eventSettings.resetStatus()"
+			input.form-control#event-launch-field(type='text' date="eventSettings.settings.launch_time"
 				data-date-format="DD MMM YYYY HH:mm" datetimepicker)
 	.box-body
 		.form-group
 			label(for="event-close-field") Ticket Close Date
-			input.form-control#event-close-field(type='text' date="eventSettings.settings.close_time" ng-focus="eventSettings.resetStatus()"
+			input.form-control#event-close-field(type='text' date="eventSettings.settings.close_time"
 				data-date-format="DD MMM YYYY HH:mm" datetimepicker)
+	.box-footer
+		button.btn.btn-default(ng-click="eventSettings.settings.save()") Save

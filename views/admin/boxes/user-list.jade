@@ -21,6 +21,7 @@
 					td(data-title="'Registration Date'" sortable="'registration_time'" filter="{'registration_date':'text'}") {{ user.registration_time.format('lll') }}
 					td(data-title="'Actions'")
 						button Tickets
+						button(ng-click="userList.save(user)") Save Changes
 						button(ng-click="userList.delete(user)") Delete
 			tfoot
 				tr(ng-mouseenter="userList.showTip('new')"
