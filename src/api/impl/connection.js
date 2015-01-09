@@ -74,6 +74,7 @@ function runSql() {
 					throw new Error("Invalid usage for runSql", arguments);
 			}
 			break;
+		case 1: break;
 		default:
 			throw new Error("Invalid usage for runSql", arguments);
 	}

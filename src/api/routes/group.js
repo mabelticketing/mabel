@@ -11,4 +11,26 @@ router.route("/")
 		function(req, res) {
 			apiRouter.marshallPromise(res, api.user.group.getAll());
 		}
+	)
+	.post(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.user.group.insert(req.body));
+		}
+	);
+
+router.route("/:id")
+	.get(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.user.group.get(req.params.id));
+		}
+	)
+	.post(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.user.group.update(req.params.id, req.body));
+		}
+	)
+	.delete(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.user.group.del(req.params.id));
+		}
 	);
