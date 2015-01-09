@@ -65,6 +65,7 @@ function marshallResult(res) {
 
 function marshallPromise(res, promise) {
 	promise.then(function(value) {
+		if (value === undefined) value = {};
 		res.json(value);
 	}, function(err) {
 		res.status(500).send(err);
