@@ -12,6 +12,7 @@ module.exports                = router;
 module.exports.checkGroup     = checkGroup;
 module.exports.checkAdmin     = checkAdmin;
 module.exports.marshallResult = marshallResult;
+module.exports.marshallPromise = marshallPromise;
 
 // all API routes should be authenticated with an access_token
 router
@@ -60,4 +61,12 @@ function marshallResult(res) {
 		if (err) return res.status(500).send(err);
 		res.json(result);
 	};
+}
+
+function marshallPromise(res, promise) {
+	promise.then(function(value) {
+		res.json(value);
+	}, function(err) {
+		res.status(500).send(err);
+	});
 }
