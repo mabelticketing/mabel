@@ -1,19 +1,3 @@
-
-/* API Structure
-	api
-		event
-			get (GET)
-			update (PUT)
-		user
-			get (GET)
-			update (PUT)
-		payment_method
-			get
-		ticket
-			available
-				get
-*/
-
 module.exports = {
 	event          : require("./impl/event.js"),
 	user           : require("./impl/user.js"),

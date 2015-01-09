@@ -3,19 +3,16 @@
 	ng-class="{'box-success':eventSettings.settings._status==='success','box-danger':eventSettings.settings._status==='error','box-warning':eventSettings.settings._status==='pending'}"
 	ng-click="eventSettings.resetStatus()")
 	.box-header(data-toggle="tooltip" title="{{eventSettings.settings._error}}" data-placement="bottom")
-		h3.box-title Event Settings 
-			small {{eventSettings.subtitle}}
+		h3.box-title Event Settings
 	//- form(editable-form)
 	.box-body
 		.form-group
 			label(for="event-name-field") Event Name
 			input.form-control#event-name-field(type="text" ng-model="eventSettings.settings.name")
-	.box-body
 		.form-group
 			label(for="event-launch-field") Ticket Launch Date 
 			input.form-control#event-launch-field(type='text' date="eventSettings.settings.launch_time"
 				data-date-format="DD MMM YYYY HH:mm" datetimepicker)
-	.box-body
 		.form-group
 			label(for="event-close-field") Ticket Close Date
 			input.form-control#event-close-field(type='text' date="eventSettings.settings.close_time"

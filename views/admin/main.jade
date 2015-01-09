@@ -21,6 +21,7 @@ head
 		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
 		link(href='/components/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
+		link(href='/components/iCheck/skins/minimal/blue.css', rel='stylesheet', type='text/css')
 		link(href='/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
 		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
 body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
@@ -62,11 +63,12 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 			
 		// misc
 		script(type="text/javascript", src="/components/moment/moment.js")
+		script(type="text/javascript", src="/components/iCheck/icheck.min.js")
 		
 		// bootstrap
 		script(src='/components/bootstrap/dist/js/bootstrap.min.js')
 		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
-		script(src='/components/admin-lte/js/app.js')
+		script(src='/components/admin-lte/js/AdminLTE/app.js')
 
 		// angular
 		script(type="text/javascript", src="/components/angular/angular.js")
@@ -79,6 +81,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		// shared
 		script(type = "text/javascript" src="/js/shared/mabel.shared.js")
 		script(type = "text/javascript" src="/js/shared/mabeltoken.factory.js")
+		script(type = "text/javascript" src="/js/shared/icheck.directive.js")
 		script(type = "text/javascript" src="/js/shared/datetimepicker.directive.js")
 		script(type = "text/javascript" src="/js/shared/mabelresource.factory.js")
 		script(type = "text/javascript" src="/js/shared/user.factory.js")

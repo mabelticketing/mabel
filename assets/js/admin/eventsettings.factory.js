@@ -10,7 +10,6 @@ function EventSettings(MabelToken, MabelResource) {
 		}, 
 		{}, // no custom actions for this resource
 		{
-			areEqual: areEqual,
 			serialize: serialize,
 			unserialize: unserialize
 		}
@@ -50,15 +49,5 @@ function EventSettings(MabelToken, MabelResource) {
 		ev.close_time = serializeTime(event.close_time);
 
 		return ev;
-	}
-
-	function areEqual(A, B) {
-		return A.name === B.name &&
-			// consider two times equivalent if they're within a minute of
-			// each other.
-			// we can't use === because they might be different
-			// objects representing the same time
-			A.launch_time.isSame(B.launch_time, 'minutes') &&
-			A.close_time.isSame(B.close_time, 'minutes');
 	}
 }

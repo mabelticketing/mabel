@@ -17,7 +17,6 @@ function User(MabelToken, MabelResource) {
 			}
 		},
 		{
-			areEqual: areEqual,
 			serialize: serialize,
 			unserialize: unserialize
 		}
@@ -55,17 +54,5 @@ function User(MabelToken, MabelResource) {
 		_user.registration_time = serializeTime(user.registration_time);
 
 		return _user;
-	}
-
-	function areEqual(A, B) {
-		return A.crsid === B.crsid &&
-			A.email === B.email &&
-			A.name === B.name &&
-			A.id === B.id &&
-			// consider two times equivalent if they're within a minute of
-			// each other.
-			// we can't use === because they might be different
-			// objects representing the same time
-			A.registration_time.isSame(B.registration_time, 'minutes');
 	}
 }

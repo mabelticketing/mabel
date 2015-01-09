@@ -1,13 +1,16 @@
 var connection = require("./connection.js");
 var runSql = connection.runSql;
+var Q = require("q");
 
-module.exports = {
+var api = {
 	get: get,
 	getAll: getAll,
 	insert: insert,
 	del: del,
-	update: update
+	update: update,
+	group: require("./usergroup.js")
 };
+module.exports = api;
 
 function get(user_id, callback) {
 	var sql = "SELECT * FROM user WHERE id=?;";
@@ -27,12 +30,28 @@ function get(user_id, callback) {
 }
 
 function update(user, callback) {
+	var userGroups;
+	if (user.groups !== undefined) {
+		userGroups = user.groups;
+		delete user.groups;
+	}
+
 	var sql = "UPDATE user SET ? WHERE id=?;";
-	runSql(sql, [user, user.id], function(err) {
-		if (err) return callback(err);
-		
+	var promise = runSql(sql, [user, user.id]);
+
+	if (userGroups !== undefined) {
+		var groupPromise = api.group.setGroups(user, userGroups);
+		// only resolve once the group has been updated too
+		promise = Q.all([promise, groupPromise]);
+	}
+
+	promise.then(function() {
 		get(user.id, callback);
+	}, function(err) {
+		callback(err);
 	});
+
+	return promise;
 }
 
 function insert(user, callback) {
