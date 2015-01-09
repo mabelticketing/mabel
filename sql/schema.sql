@@ -87,7 +87,8 @@ create table user_group_membership (
 	group_id int not null,
 	primary key (id),
 	FOREIGN KEY (group_id) REFERENCES user_group(id),
-	FOREIGN KEY (user_id) REFERENCES user(id)
+	FOREIGN KEY (user_id) REFERENCES user(id),
+	unique(user_id, group_id)
 );
 
 ### GROUP ACCESS RIGHTS ###

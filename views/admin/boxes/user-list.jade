@@ -7,21 +7,18 @@
 				tr(ng-repeat="user in $data track by user.id" 
 					ng-mouseenter="userList.showTip(user.id)"
 					ng-mouseleave="userList.hideTip(user.id)"
-					ng-click="user._status=''")
+					ng-click="user._status=''; userList.selectUser(user);")
 					td(data-title="' '" style="min-width:35px")
 						span.badge(ng-class="{'bg-green':user._status==='success','bg-red':user._status==='error','bg-yellow':user._status==='pending'}" 
 							style="color:transparent!important;" id="badge-{{user.id}}"
 							data-toggle="tooltip" title="{{user._error}}" data-placement="right" data-trigger="manual") {{ ((user._status !== undefined && user._status.length>1)? ".":"") }}
 					td(data-title="'ID'" sortable="'id'" filter="{'id':'text'}") {{ user.id }}
-					td(data-title="'Name'" sortable="'name'" filter="{'name':'text'}")
-						input(type="text" ng-model="user.name")
+					td(data-title="'Name'" sortable="'name'" filter="{'name':'text'}") {{user.name}}
 					td(data-title="'Email'" sortable="'email'" filter="{'email':'text'}") 
 						a(href='mailto:{{user.email}}') {{ user.email }}
 					td(data-title="'CRSID'" sortable="'crsid'" filter="{'crsid':'text'}") {{ user.crsid }}
-					td(data-title="'Registration Date'" sortable="'registration_time'" filter="{'registration_date':'text'}") {{ user.registration_time.format('lll') }}
 					td(data-title="'Actions'")
 						button Tickets
-						button(ng-click="userList.save(user)") Save Changes
 						button(ng-click="userList.delete(user)") Delete
 			tfoot
 				tr(ng-mouseenter="userList.showTip('new')"
@@ -39,6 +36,5 @@
 						input(type="email" ng-model="userList.newUser.email" name="email")
 					td
 						input(type="text" ng-model="userList.newUser.crsid" name="crsid")
-					td
 					td
 						button(ng-click="userList.submitNew()") Add

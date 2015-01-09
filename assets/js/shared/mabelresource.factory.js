@@ -64,6 +64,7 @@ function MabelResource($http, $resource) {
 			var promise = resource.$save.apply(resource, arguments);
 			return promise.then(function() {
 				resource._status = "success";
+				resource._error = "";
 			}, function(response) {
 				if (response === "aborted") {
 					// we don't need to notify the user of aborted requests

@@ -12,15 +12,19 @@ block prepend variables
 
 block content
 	.row
-		.col-md-12
+		.col-md-6
 			include admin/boxes/event-settings.jade
+		.col-md-6
+			include admin/boxes/user-detail.jade
 	.row
 		.col-md-12
 			include admin/boxes/user-list.jade
 
 block append scripts
+	script(type = "text/javascript" src="/js/shared/usergroup.factory.js")
 	script(type = "text/javascript" src="/js/admin/eventsettings.factory.js")
 	script(type = "text/javascript" src="/js/admin/eventsettings.controller.js")
+	script(type = "text/javascript" src="/js/admin/userdetail.controller.js")
 	script(type = "text/javascript" src="/js/admin/userlist.controller.js")
 
 block append css

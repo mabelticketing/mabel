@@ -2,10 +2,13 @@
 angular.module('mabel.admin')
 	.controller("UserListController", UserListController);
 
-function UserListController(User, ngTableParams) {
+function UserListController(User, ngTableParams, $rootScope) {
 	var vm = this;
 	vm.newUser = new User();
 	vm.newUser.registration_time = moment();
+	vm.selectUser = function(user) {
+		$rootScope.$emit('mabel.userList.userSelected', user);
+	};
 	vm.showTip = function(id) {
 		$('#badge-' + id).tooltip('show');
 	};

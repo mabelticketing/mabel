@@ -27,6 +27,9 @@ router
 router.use("/event",
 	require("./routes/event.js"));
 
+router.use("/user/group",
+	require("./routes/group.js"));
+
 router.use("/user",
 	require("./routes/user.js"));
 

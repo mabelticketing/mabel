@@ -6,16 +6,6 @@ var router = express.Router({
 });
 module.exports = router;
 
-function toDBUser(obj) {
-	return {
-		id: obj.id,
-		name: obj.name,
-		crsid: obj.crsid,
-		email: obj.email,
-		registration_time: obj.registration_time
-	};
-}
-
 router.route("/me")
 	.get(
 		function(req, res) {
@@ -49,7 +39,7 @@ router.route("/:id")
 			} 
 		},
 		function(req, res) {
-			api.user.update(toDBUser(req.body), apiRouter.marshallResult(res));
+			api.user.update(req.body, apiRouter.marshallResult(res));
 		}
 	)
 	.delete(
@@ -76,6 +66,6 @@ router.route("/")
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			api.user.insert(toDBUser(req.body), apiRouter.marshallResult(res));
+			api.user.insert(req.body, apiRouter.marshallResult(res));
 		}
 	);
