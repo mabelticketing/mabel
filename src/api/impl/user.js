@@ -55,6 +55,7 @@ function update(user, callback) {
 }
 
 function insert(user, callback) {
+	// TODO: strip group from user and insert separately
 	var sql = "INSERT INTO user SET ?;";
 	runSql(sql, [user], function(err, result) {
 		if (err) return callback(err);

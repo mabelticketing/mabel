@@ -9,6 +9,6 @@ module.exports = router;
 router.route("/")
 	.get(
 		function(req, res) {
-			api.user.group.getAll(apiRouter.marshallResult(res));
+			apiRouter.marshallPromise(res, api.user.group.getAll());
 		}
 	);

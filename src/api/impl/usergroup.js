@@ -6,9 +6,9 @@ module.exports = {
 	setGroups: setGroups
 };
 
-function getAll(callback) {
+function getAll() {
 	// TODO: visibility of groups for admins of different events?
-	runSql("SELECT * FROM user_group", callback);
+	return runSql("SELECT * FROM user_group");
 }
 
 function setGroups(user, groups) {
@@ -25,4 +25,8 @@ function setGroups(user, groups) {
 	}
 	// make sure to enable multi-statement
 	return runSql(sql, data, true);
+}
+
+function get() {
+
 }
