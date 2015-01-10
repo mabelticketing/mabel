@@ -2,37 +2,4 @@
 	.box-header
 		h3.box-title Groups
 	.box-body.table-responsive.no-padding
-		table.table.table-hover(ng-table="userGroup.tableParams" show-filter="true" )
-			tbody
-				tr(ng-repeat="group in $data track by group.id" 
-					ng-mouseenter="userGroup.showTip(group.id)"
-					ng-mouseleave="userGroup.hideTip(group.id)"
-					ng-click="group._status='';")
-					td(data-title="' '" style="min-width:35px")
-						span.badge(ng-class="{'bg-green':group._status==='success','bg-red':group._status==='error','bg-yellow':group._status==='pending'}" 
-							style="color:transparent!important;" id="usergroup-badge-{{group.id}}"
-							data-toggle="tooltip" title="{{group._error}}" data-placement="right" data-trigger="manual") {{ ((group._status !== undefined && group._status.length>1)? ".":"") }}
-					td(data-title="'ID'" sortable="'id'" filter="{'id':'text'}") {{ group.id }}
-					td(data-title="'Description'" sortable="'description'" filter="{'description':'text'}") {{group.description}}
-					td(data-title="'Name'" sortable="'name'" filter="{'name':'text'}") {{group.name}}
-					td(data-title="'Actions'")
-						button Save
-						button Cancel
-						button Edit
-						button(ng-click="userGroup.delete(group)") Delete
-			tfoot
-				tr(ng-mouseenter="userGroup.showTip('new')"
-					ng-mouseleave="userGroup.hideTip('new')"
-					)
-					td(data-title="' '" style="min-width:35px")
-						span.badge(ng-class="{'bg-green':userGroup.newGroup._status==='success','bg-red':userGroup.newGroup._status==='error','bg-yellow':userGroup.newGroup._status==='pending'}" 
-							style="color:transparent!important;" id="usergroup-badge-new"
-							data-toggle="tooltip" title="{{userGroup.newGroup._error}}" data-placement="right" data-trigger="manual") {{ ((userGroup.newGroup._status !== undefined && userGroup.newGroup._status.length>1)? ".":"") }}
-					td
-						| New Group: 
-					td
-						input(type="text" ng-model="userGroup.newGroup.description" name="description")
-					td
-						input(type="text" ng-model="userGroup.newGroup.name" name="name")
-					td
-						button(ng-click="userGroup.submitNew()") Add
+		mabel-table(resource="userGroup.resource", initialisor="userGroup.initialisor", columns="userGroup.columns")

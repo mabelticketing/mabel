@@ -64,6 +64,20 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		// misc
 		script(type="text/javascript", src="/components/moment/moment.js")
 		script(type="text/javascript", src="/components/iCheck/icheck.min.js")
+		script#mabel-table-header(type='text/ng-template' )
+			tr
+				th 
+				th.header(ng-repeat='column in columns',
+					ng-class="{ 'sortable': column.sortable, 'sort-asc': tableParams.isSortBy(column.sortable, 'asc'), 'sort-desc': tableParams.isSortBy(column.sortable, 'desc') }",
+					ng-click="tableParams.sorting(column.sortable, tableParams.isSortBy(column.sortable, 'asc') ? 'desc' : 'asc')")
+					{{column.title}}
+				th Actions 
+			tr.ng-table-filters(ng-show='show_filter')
+				th
+				th.filter(ng-repeat='column in columns')
+					div(ng-repeat='(name, filter) in column.filter')
+						input.input-filter.form-control(type="text", name="{{name}}", ng-model="tableParams.filter()[name]" ng-if="filter==='text'")
+
 		
 		// bootstrap
 		script(src='/components/bootstrap/dist/js/bootstrap.min.js')
@@ -74,7 +88,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		script(type="text/javascript", src="/components/angular/angular.js")
 		script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
 		script(type="text/javascript" src="/components/angular-resource/angular-resource.js")
-		script(type="text/javascript" src="/components/ng-table/ng-table.min.js")
+		script(type="text/javascript" src="/components/ng-table/ng-table.js")
 		// bootstrapping
 		script(type = "text/javascript" src="/js/mabel.js")
 
