@@ -1,0 +1,27 @@
+table.table.table-hover(ng-table="tableParams", template-header="mabel-table-header", show-filter="true")
+	tbody
+		tr(ng-repeat="item in $data track by item.id")
+			td(style="min-width:35px")
+				span.badge(ng-class="{'bg-green':item._status==='success','bg-red':item._status==='error','bg-yellow':item._status==='pending'}" 
+					style="color:transparent!important;" class="badge-{{item.id}}"
+					data-toggle="tooltip" title="{{item._error}}" data-placement="right" data-trigger="manual") {{ ((item._status !== undefined && item._status.length>1)? ".":"") }}
+			td(ng-repeat="column in columns" sortable="column.name" filter="column.filter") {{ item[column.name] }}
+			td(data-title="'Actions'")
+				button Save
+				button Cancel
+				button Edit
+				button(ng-click="delete(item)") Delete
+	tfoot
+		tr(ng-mouseenter="showTip('new')"
+			ng-mouseleave="hideTip('new')"
+			)
+			td(data-title="' '" style="min-width:35px")
+				span.badge(ng-class="{'bg-green':newItem._status==='success','bg-red':newItem._status==='error','bg-yellow':newItem._status==='pending'}" 
+					style="color:transparent!important;" class="badge-new"
+					data-toggle="tooltip" title="{{newItem._error}}" data-placement="right" data-trigger="manual") {{ ((newItem._status !== undefined && newItem._status.length>1)? ".":"") }}
+			td
+				| New Item: 
+			td(ng-repeat="column in columns" ng-if="column.type!==undefined")
+				input(type="{{column.type}}" ng-model="newItem[column.name]" name="{{column.name}}")
+			td
+				button(ng-click="submitNew()") Add
