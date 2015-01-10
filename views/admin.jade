@@ -15,17 +15,20 @@ block content
 		.col-md-6
 			include admin/boxes/event-settings.jade
 		.col-md-6
-			include admin/boxes/user-detail.jade
+			include admin/boxes/user-group.jade
 	.row
-		.col-md-12
+		.col-md-8
 			include admin/boxes/user-list.jade
+		.col-md-4
+			include admin/boxes/user-detail.jade
 
 block append scripts
 	script(type = "text/javascript" src="/js/shared/usergroup.factory.js")
 	script(type = "text/javascript" src="/js/admin/eventsettings.factory.js")
 	script(type = "text/javascript" src="/js/admin/eventsettings.controller.js")
-	script(type = "text/javascript" src="/js/admin/userdetail.controller.js")
+	script(type = "text/javascript" src="/js/admin/usergroups.controller.js")
 	script(type = "text/javascript" src="/js/admin/userlist.controller.js")
+	script(type = "text/javascript" src="/js/admin/userdetail.controller.js")
 
 block append css
 	style.
