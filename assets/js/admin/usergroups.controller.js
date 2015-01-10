@@ -1,43 +1,37 @@
-/* global moment */
 angular.module('mabel.admin')
-	.controller("UserListController", UserListController);
+	.controller("UserGroupsController", UserGroupsController);
 
-function UserListController(User, ngTableParams, $rootScope) {
+function UserGroupsController(UserGroup, ngTableParams) {
 	var vm = this;
-	vm.newUser = new User();
-	vm.newUser.defineMeta();
-	vm.newUser.registration_time = moment();
-	vm.selectUser = function(user) {
-		$rootScope.$emit('mabel.userList.userSelected', user);
-	};
+	vm.newGroup = new UserGroup();
+	vm.newGroup.defineMeta();
 	vm.showTip = function(id) {
-		$('#user-badge-' + id).tooltip('show');
+		$('#usergroup-badge-' + id).tooltip('show');
 	};
 	vm.hideTip = function(id) {
-		$('#user-badge-' + id).tooltip('hide');
+		$('#usergroup-badge-' + id).tooltip('hide');
 	};
 	vm.submitNew = function() {
-		var promise = vm.newUser.save();
+		var promise = vm.newGroup.save();
 
-		promise.then(function(user) {
-			// reset the new user for next entry
-			vm.newUser = new User();
-		vm.newUser.defineMeta();
-			vm.newUser.registration_time = moment();
+		promise.then(function(group) {
+			// reset the new group for next entry
+			vm.newGroup = new UserGroup();
+			vm.newGroup.defineMeta();
 			vm.tableParams.reload();
-			vm.newUser._status = "success";
-			vm.newUser._error = "Successfully added " + user.name;
+			vm.newGroup._status = "success";
+			vm.newGroup._error = "Successfully added " + group.name;
 		});
 	};
-	vm.save = function(user) {
-		user.save();
+	vm.save = function(group) {
+		group.save();
 	};
-	vm.delete = function(user) {
-		user.$delete(function(){
+	vm.delete = function(group) {
+		group.$delete(function(){
 			vm.tableParams.reload();
 		}, function(result) {
-			user._status = "error";
-			user._error = result.data;
+			group._status = "error";
+			group._error = result.data;
 		});
 	};
 
@@ -60,7 +54,7 @@ function UserListController(User, ngTableParams, $rootScope) {
   				if (params.data[i].clearWatch !== undefined) params.data[i].clearWatch();
   			}
 
-			User.query({
+			UserGroup.query({
 				from: (pageNumber-1) * pageSize,
 				size: pageSize,
 				order: sorting,

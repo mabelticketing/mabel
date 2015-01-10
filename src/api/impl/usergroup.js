@@ -10,9 +10,65 @@ module.exports = {
 	update: update
 };
 
-function getAll() {
+function getFilteredSQL(table, opts, conn) {
+	var sql = "SELECT * from " + table;
+
+	var whereClause = "";
+	if (opts.filter !== undefined) {
+		var wheres = [];
+		var hasWhere = false;
+		for (var i in opts.filter) {
+			if (opts.filter[i].length < 1) continue;
+			hasWhere = true;
+			wheres.push(conn.escapeId(i) + " LIKE " +  conn.escape('%' + opts.filter[i] + '%'));
+		}
+		if (hasWhere) {
+			whereClause = " WHERE " + wheres.join(" AND ");
+		}
+	}
+
+	if (opts.size !== undefined) {
+		sql += " JOIN (SELECT COUNT(*) AS count FROM " + table + whereClause + ") AS c";
+	}
+	sql += whereClause;
+
+	if (opts.order !== undefined) {
+		var orders = [];
+		var hasOrder = false;
+		for (var p in opts.order) {
+			var dir;
+			hasOrder = true;
+			if (opts.order[p].match(/^asc$/i) !== null) {
+				dir = "ASC";
+			} else if (opts.order[p].match(/^desc$/i) !== null) {
+				dir = "DESC";
+			}
+			orders.push(conn.escapeId(p) + " " +  dir);
+		}
+		if (hasOrder) {
+			sql += " ORDER BY " + orders.join(", ");
+		}
+	}
+
+	if (opts.size !== undefined) {
+		sql += " LIMIT ";
+		if (opts.from !== undefined) {
+			sql += conn.escape(opts.from) + ",";
+		}
+		sql += conn.escape(opts.size);
+	}
+	sql += ";";
+	return sql;
+}
+
+function getAll(opts) {
 	// TODO: visibility of groups for admins of different events?
-	return runSql("SELECT * FROM user_group;");
+
+	var conn = connection.getConnection();
+	var sql = getFilteredSQL("user_group", opts, conn);
+	conn.end();
+
+	return runSql(sql, true);
 }
 
 function setGroups(user, groups) {
@@ -41,7 +97,10 @@ function insert(group) {
 }
 
 function get(group_id) {
-	return runSql("SELECT * FROM user_group WHERE id=?;", [group_id]);
+	var promise = runSql("SELECT * FROM user_group WHERE id=? LIMIT 1;", [group_id]);
+	return promise.then(function(value) {
+		return value[0];
+	});
 }
 
 function del(group_id) {

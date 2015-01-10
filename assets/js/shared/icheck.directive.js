@@ -13,7 +13,6 @@ function icheckDirective($timeout, $parse) {
                     $(element).iCheck('update');
                 });
 
-                console.log($(element));
                 return $(element).iCheck({
                     checkboxClass: 'icheckbox_minimal-blue',
                     radioClass: 'iradio_minimal-blue'

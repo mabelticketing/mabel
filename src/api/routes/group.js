@@ -9,7 +9,14 @@ module.exports = router;
 router.route("/")
 	.get(
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.user.group.getAll());
+
+			var opts = {};
+			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
+			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
+			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
+			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
+		
+			apiRouter.marshallPromise(res, api.user.group.getAll(opts));
 		}
 	)
 	.post(

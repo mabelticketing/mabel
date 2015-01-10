@@ -10,7 +10,7 @@ function UserDetailController(User, UserGroup, $scope, $rootScope) {
 	var unbind = $rootScope.$on('mabel.userList.userSelected', function(e, user){
 		if (unbindGroupWatch !== undefined) unbindGroupWatch();
 
-		populateWithUser(User.get({id:user.id}))
+		populateWithUser(User.get({id:user.id}));
 	});
 
 	$scope.$on('$destroy', function() {
@@ -27,10 +27,7 @@ function UserDetailController(User, UserGroup, $scope, $rootScope) {
 
 	function populateWithUser(user) {
 		vm.user = user;
-		myUser = user;
 		user.$promise.then(function() {
-
-			console.log(user);
 
 			// we need an object with properties to bind to group checkboxes
 			Object.defineProperty(user, "groups_obj", {
