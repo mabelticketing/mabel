@@ -15,17 +15,16 @@ function MabelTable(ngTableParams, $rootScope) {
 			var vm = $scope;
 
 			vm.showTip = function(id) {
+				console.log('show .badge-' + id);
 				element.find('.badge-' + id).tooltip('show');
-				console.log("showing " + id);
 			};
 			vm.hideTip = function(id) {
+				console.log('hide .badge-' + id);
 				element.find('.badge-' + id).tooltip('hide');
-				console.log("hiding " + id);
 			};
 
 			if ($scope.clickEvent !== undefined) {
 				vm.selectItem = function(item) {
-					console.log("Dispatching event", $scope.clickEvent);
 					$rootScope.$emit($scope.clickEvent, item);
 				};
 			}
@@ -43,6 +42,31 @@ function MabelTable(ngTableParams, $rootScope) {
 					vm.newItem._status = "success";
 					vm.newItem._error = "Successfully added new item.";
 				});
+			};
+			vm.startEdit = function(item) {
+				item.$edit = true;
+				item.$backup = angular.copy(item);
+			};
+			vm.saveEdit = function(item) {
+				item.fake = 5;
+				var promise = item.save();
+				var original = item.$backup;
+
+				promise.then(function() {
+					delete item.$backup;
+					item.$edit = false;
+				}, function() {
+					// the response in this case will have reset the item
+					item.$backup = original;
+				});
+			};
+			vm.cancelEdit = function(item) {
+				if (item.$backup !== undefined) {
+					var backup = item.$backup;
+					delete item.$backup;
+					angular.copy(backup, item);
+				}
+				item.$edit = false;
 			};
 			vm.save = function(item) {
 				item.save();
@@ -76,14 +100,13 @@ function MabelTable(ngTableParams, $rootScope) {
 						filter: filter
 					}, function(data) {
 						if (data.length > 0) {
-							params.total(data[0].count);
+							params.total(data[0].$count);
 							$defer.resolve(data);
 						} else {
 							params.total(0);
 							$defer.resolve([]);
 						}
 						$('[data-toggle="tooltip"]').tooltip();
-
 					});
 				}
 			});

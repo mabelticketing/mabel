@@ -9,7 +9,15 @@ module.exports = {
 	del: del,
 	update: update
 };
-
+function stripMeta(obj) {
+	// delete any properties which start with $ or _
+	for (var i in obj) {
+		if (i.indexOf("_") === 0 || i.indexOf("$") === 0) {
+			delete obj[i];
+		}
+	}
+	return obj;
+}
 function getFilteredSQL(table, opts, conn) {
 	var sql = "SELECT * from " + table;
 
@@ -28,7 +36,7 @@ function getFilteredSQL(table, opts, conn) {
 	}
 
 	if (opts.size !== undefined) {
-		sql += " JOIN (SELECT COUNT(*) AS count FROM " + table + whereClause + ") AS c";
+		sql += " JOIN (SELECT COUNT(*) AS $count FROM " + table + whereClause + ") AS c";
 	}
 	sql += whereClause;
 
@@ -89,7 +97,7 @@ function setGroups(user, groups) {
 
 function insert(group) {
 	var sql = "INSERT INTO user_group SET ?;";
-	var promise = runSql(sql, [group]);
+	var promise = runSql(sql, [stripMeta(group)]);
 
 	return promise.then(function(result) {
 		return get(result.insertId);
@@ -111,12 +119,10 @@ function del(group_id) {
 }
 
 function update(group_id, group) {
-
 	var sql = "UPDATE user_group SET ? WHERE id=?;";
-	var promise = runSql(sql, [group, group_id]);
+	var promise = runSql(sql, [stripMeta(group), group_id]);
 
 	return promise.then(function() {
 		return get(group.id);
 	});
-
 }

@@ -15,6 +15,7 @@ router.route("/:id")
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
+			return res.status(500).send("poop");
 			api.event.update(req.params.id, req.body, apiRouter.marshallResult(res));
 		}
 	);
