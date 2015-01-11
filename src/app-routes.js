@@ -11,7 +11,6 @@ router.get("/", function(req, res) {
 
 router.get(/^\/views\/(.*)$/,
 	function(req, res) {
-		console.log("YER", req.params[0]);
 		res.render(req.params[0] + ".jade");
 	}
 );

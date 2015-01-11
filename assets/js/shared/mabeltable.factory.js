@@ -2,21 +2,6 @@ angular.module('mabel.shared')
 	.directive('mabelTable', MabelTable);
 
 function MabelTable(ngTableParams, $rootScope) {
-	var headerTemplate = "<script id=\"sample_ng_header\" type=\"text/ng-template\"> \
-  <tr> \
-    <th> </th> \
-    <th ng-repeat=\"column in columns\" ng-class=\"{ 'sortable': column.sortable, 'sort-asc': tableParams.isSortBy(column.sortable, 'asc'), 'sort-desc': tableParams.isSortBy(column.sortable, 'desc') }\" ng-click=\"tableParams.sorting(column.sortable, tableParams.isSortBy(column.sortable, 'asc') ? 'desc' : 'asc')\" class=\"header\">{{column.title}}</th> \
-    <th>Actions </th> \
-  </tr> \
-  <tr ng-show=\"show_filter\" class=\"ng-table-filters\"> \
-    <th></th> \
-    <th ng-repeat=\"column in columns\" class=\"filter\"> \
-      <div ng-repeat=\"(name, filter) in column.filter\"> \
-        <input type=\"text\" name=\"{{name}}\" ng-model=\"tableParams.filter()[name]\" ng-if=\"filter==='text'\" class=\"input-filter form-control\"/> \
-      </div> \
-    </th> \
-  </tr> \
-</script>";
 	return {
 		restrict: 'AE',
 		templateUrl: '/views/admin/boxes/mabeltable',
@@ -29,14 +14,13 @@ function MabelTable(ngTableParams, $rootScope) {
 		link: function($scope, element) {
 			var vm = $scope;
 
-			vm.headerTemplate = headerTemplate;
-			evm = vm;
-
 			vm.showTip = function(id) {
 				element.find('.badge-' + id).tooltip('show');
+				console.log("showing " + id);
 			};
 			vm.hideTip = function(id) {
 				element.find('.badge-' + id).tooltip('hide');
+				console.log("hiding " + id);
 			};
 
 			if ($scope.clickEvent !== undefined) {

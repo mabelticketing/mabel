@@ -11,6 +11,7 @@ function UserListController(User) {
 		u.registration_time = moment();
 		return u;
 	};
+	vm.clickEvent = 'mabel.userList.userSelected';
 	vm.columns = [
 		{
 			title: 'ID',
