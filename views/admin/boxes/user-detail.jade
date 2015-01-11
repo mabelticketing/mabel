@@ -5,8 +5,10 @@
 	.box-header(data-toggle="tooltip" title="{{userDetail.user._error}}" data-placement="bottom")
 		h3.box-title User Detail
 	//- form(editable-form)
-	.box-body(ng-show="userDetail.user === undefined || userDetail.user.id === undefined")
-		div Please select a user below
+	.box-body(ng-show="userDetail.user === undefined")
+		div Please select a user.
+	.box-body(ng-show="userDetail.user.id === undefined")
+		div.italic Loading...
 	.box-body(ng-show="userDetail.user !== undefined && userDetail.user.id !== undefined")
 		.form-group
 			label(for="user-id-field") ID 
