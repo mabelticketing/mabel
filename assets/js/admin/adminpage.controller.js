@@ -12,6 +12,9 @@ function AdminPageController(MabelToken, User) {
 
 	var vm = this;
 	vm.pageStatus = pageStatus.loading;
+	vm.alert = function(thing){
+		console.log(thing);
+	};
 
 	if (MabelToken !== null) {
 		vm.user = User.current(function() {

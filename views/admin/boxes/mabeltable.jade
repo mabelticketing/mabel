@@ -1,6 +1,10 @@
 table.table.table-hover(ng-table="tableParams", template-header="mabel-table-header", show-filter="true")
 	tbody
-		tr(ng-repeat="item in $data track by item.id")
+		tr(ng-repeat="item in $data track by item.id"
+			ng-click="selectItem(item); console.log(item);"
+			ng-mouseenter="showTip(item.id)"
+			ng-mouseleave="hideTip(item.id)"
+			)
 			td(style="min-width:35px")
 				span.badge(ng-class="{'bg-green':item._status==='success','bg-red':item._status==='error','bg-yellow':item._status==='pending'}" 
 					style="color:transparent!important;" class="badge-{{item.id}}"
