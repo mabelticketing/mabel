@@ -19,9 +19,8 @@ head
 				color: inherit;
 			}
 		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
-		link(href='/components/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
-		link(href='/components/iCheck/skins/minimal/blue.css', rel='stylesheet', type='text/css')
+		link(href='/components/admin-lte/css/iCheck/minimal/blue.css', rel='stylesheet', type='text/css')
 		link(href='/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
 		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
 body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
@@ -63,7 +62,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 			
 		// misc
 		script(type="text/javascript", src="/components/moment/moment.js")
-		script(type="text/javascript", src="/components/iCheck/icheck.min.js")
+		script(type="text/javascript", src="/components/admin-lte/js/plugins/iCheck/icheck.min.js")
 		script#mabel-table-header(type='text/ng-template')
 			tr
 				th 
@@ -77,6 +76,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 				th.filter(ng-repeat='column in columns')
 					div(ng-repeat='(name, filter) in column.filter')
 						input.input-filter.form-control(type="text", name="{{name}}", ng-model="tableParams.filter()[name]" ng-if="filter==='text'")
+				th
 
 		
 		// bootstrap
