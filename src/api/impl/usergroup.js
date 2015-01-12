@@ -9,71 +9,12 @@ module.exports = {
 	del: del,
 	update: update
 };
-function stripMeta(obj) {
-	// delete any properties which start with $ or _
-	for (var i in obj) {
-		if (i.indexOf("_") === 0 || i.indexOf("$") === 0) {
-			delete obj[i];
-		}
-	}
-	return obj;
-}
-function getFilteredSQL(table, opts, conn) {
-	var sql = "SELECT * from " + table;
-
-	var whereClause = "";
-	if (opts.filter !== undefined) {
-		var wheres = [];
-		var hasWhere = false;
-		for (var i in opts.filter) {
-			if (opts.filter[i].length < 1) continue;
-			hasWhere = true;
-			wheres.push(conn.escapeId(i) + " LIKE " +  conn.escape('%' + opts.filter[i] + '%'));
-		}
-		if (hasWhere) {
-			whereClause = " WHERE " + wheres.join(" AND ");
-		}
-	}
-
-	if (opts.size !== undefined) {
-		sql += " JOIN (SELECT COUNT(*) AS $count FROM " + table + whereClause + ") AS c";
-	}
-	sql += whereClause;
-
-	if (opts.order !== undefined) {
-		var orders = [];
-		var hasOrder = false;
-		for (var p in opts.order) {
-			var dir;
-			hasOrder = true;
-			if (opts.order[p].match(/^asc$/i) !== null) {
-				dir = "ASC";
-			} else if (opts.order[p].match(/^desc$/i) !== null) {
-				dir = "DESC";
-			}
-			orders.push(conn.escapeId(p) + " " +  dir);
-		}
-		if (hasOrder) {
-			sql += " ORDER BY " + orders.join(", ");
-		}
-	}
-
-	if (opts.size !== undefined) {
-		sql += " LIMIT ";
-		if (opts.from !== undefined) {
-			sql += conn.escape(opts.from) + ",";
-		}
-		sql += conn.escape(opts.size);
-	}
-	sql += ";";
-	return sql;
-}
 
 function getAll(opts) {
 	// TODO: visibility of groups for admins of different events?
 
 	var conn = connection.getConnection();
-	var sql = getFilteredSQL("user_group", opts, conn);
+	var sql = connection.getFilteredSQL("user_group", opts, conn);
 	conn.end();
 
 	return runSql(sql, true);
@@ -97,7 +38,7 @@ function setGroups(user, groups) {
 
 function insert(group) {
 	var sql = "INSERT INTO user_group SET ?;";
-	var promise = runSql(sql, [stripMeta(group)]);
+	var promise = runSql(sql, [group]);
 
 	return promise.then(function(result) {
 		return get(result.insertId);
@@ -120,7 +61,7 @@ function del(group_id) {
 
 function update(group_id, group) {
 	var sql = "UPDATE user_group SET ? WHERE id=?;";
-	var promise = runSql(sql, [stripMeta(group), group_id]);
+	var promise = runSql(sql, [group, group_id]);
 
 	return promise.then(function() {
 		return get(group.id);

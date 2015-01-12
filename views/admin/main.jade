@@ -53,7 +53,6 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 							li(class="active") #{val.name}
 			section.content
 				block content
-					| Hello admin panel!
 	block scripts
 		// TODO?: Can/should bower do automatic incuding/dependency resolution for us?
 
@@ -79,16 +78,18 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 				th
 
 		
-		// bootstrap
-		script(src='/components/bootstrap/dist/js/bootstrap.min.js')
-		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
-		script(src='/components/admin-lte/js/AdminLTE/app.js')
-
 		// angular
 		script(type="text/javascript", src="/components/angular/angular.js")
 		script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
 		script(type="text/javascript" src="/components/angular-resource/angular-resource.js")
 		script(type="text/javascript" src="/components/ng-table/ng-table.js")
+
+		// bootstrap
+		//- script(src='/components/bootstrap/dist/js/bootstrap.min.js')
+		script(src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js")
+		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
+		script(src='/components/admin-lte/js/AdminLTE/app.js')
+
 		// bootstrapping
 		script(type = "text/javascript" src="/js/mabel.js")
 
