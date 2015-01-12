@@ -23,17 +23,22 @@ function getFilteredSQL(table, opts, conn) {
 	var sql = "SELECT * from " + table;
 
 	var whereClause = "";
+	var wheres = [];
+	var hasWhere = false;
+	if (opts.where !== undefined) {
+		hasWhere = true;
+		wheres.push(opts.where);	
+	}
+	
 	if (opts.filter !== undefined) {
-		var wheres = [];
-		var hasWhere = false;
 		for (var i in opts.filter) {
 			if (opts.filter[i].length < 1) continue;
 			hasWhere = true;
 			wheres.push(conn.escapeId(i) + " LIKE " +  conn.escape('%' + opts.filter[i] + '%'));
 		}
-		if (hasWhere) {
-			whereClause = " WHERE " + wheres.join(" AND ");
-		}
+	}
+	if (hasWhere) {
+		whereClause = " WHERE " + wheres.join(" AND ");
 	}
 
 	if (opts.size !== undefined) {
