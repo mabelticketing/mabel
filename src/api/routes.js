@@ -69,6 +69,7 @@ function marshallPromise(res, promise) {
 		if (value === undefined) value = {};
 		res.json(value);
 	}, function(err) {
+		console.log(err);
 		res.status(500).send(err);
 	});
 }

@@ -99,6 +99,7 @@ create table group_access_right (
 	ticket_type_id int not null,
 	primary key (id),
 	FOREIGN KEY (group_id) REFERENCES user_group(id)
+	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
 );
 
 ### PAYMENT METHODS ###

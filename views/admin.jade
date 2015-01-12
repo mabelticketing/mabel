@@ -12,13 +12,20 @@ block prepend variables
 
 block content
 	.row
-		.col-md-6
+		.col-md-12
+			h1 Event Stuff
+		.col-md-3
 			include admin/boxes/event-settings.jade
-		.col-md-6
-			include admin/boxes/user-group.jade
+		.col-md-9
+			include admin/boxes/ticket-types.jade
 	.row
+		.col-md-12
+			h1 User Stuff
 		.col-md-8
-			include admin/boxes/user-list.jade
+			.col-md-12
+				include admin/boxes/user-list.jade
+			.col-md-12
+				include admin/boxes/user-group.jade
 		.col-md-4
 			include admin/boxes/user-detail.jade
 
@@ -30,6 +37,8 @@ block append scripts
 	script(type = "text/javascript" src="/js/admin/usergroups.controller.js")
 	script(type = "text/javascript" src="/js/admin/userlist.controller.js")
 	script(type = "text/javascript" src="/js/admin/userdetail.controller.js")
+	script(type = "text/javascript" src="/js/shared/tickettype.factory.js")
+	script(type = "text/javascript" src="/js/admin/tickettypes.controller.js")
 
 block append css
 	style.

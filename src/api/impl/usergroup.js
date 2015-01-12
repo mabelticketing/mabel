@@ -56,7 +56,7 @@ function del(group_id) {
 	var sql = "DELETE FROM user_group_membership WHERE group_id=?; ";
 	sql += "DELETE FROM group_access_right WHERE group_id = ?; ";
 	sql += "DELETE FROM user_group WHERE id = ?; ";
-	return runSql("DELETE FROM user_group WHERE id=?", [group_id]);
+	return runSql(sql, [group_id,group_id,group_id]);
 }
 
 function update(group_id, group) {
