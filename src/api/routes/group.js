@@ -20,8 +20,9 @@ router.route("/")
 		}
 	)
 	.post(
+		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.user.group.insert(req.body));
+			apiRouter.marshallPromise(res, api.user.group.insert(apiRouter.stripMeta(req.body)));
 		}
 	);
 
@@ -32,11 +33,13 @@ router.route("/:id")
 		}
 	)
 	.post(
+		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.user.group.update(req.params.id, req.body));
+			apiRouter.marshallPromise(res, api.user.group.update(req.params.id, apiRouter.stripMeta(req.body)));
 		}
 	)
 	.delete(
+		apiRouter.checkAdmin(),
 		function(req, res) {
 			apiRouter.marshallPromise(res, api.user.group.del(req.params.id));
 		}

@@ -106,7 +106,6 @@ function MabelTable(ngTableParams, $rootScope) {
 							params.total(0);
 							$defer.resolve([]);
 						}
-						$('[data-toggle="tooltip"]').tooltip();
 					});
 				}
 			});
