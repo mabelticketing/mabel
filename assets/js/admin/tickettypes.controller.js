@@ -7,6 +7,7 @@ function TicketTypesController(TicketType) {
 	vm.initialisor = function() {
 		return new TicketType();
 	};
+	vm.clickEvent = 'mabel.ticketType.typeSelected';
 	vm.columns = [
 		{
 			title: 'ID',

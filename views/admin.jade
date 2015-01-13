@@ -16,8 +16,13 @@ block content
 			h1 Event Stuff
 		.col-md-3
 			include admin/boxes/event-settings.jade
-		.col-md-9
+	.row
+		.col-md-12
+			h1 Ticket Stuff
+		.col-md-8
 			include admin/boxes/ticket-types.jade
+		.col-md-4
+			include admin/boxes/ticket-type-detail.jade
 	.row
 		.col-md-12
 			h1 User Stuff
@@ -38,6 +43,7 @@ block append scripts
 	script(type = "text/javascript" src="/js/admin/userlist.controller.js")
 	script(type = "text/javascript" src="/js/admin/userdetail.controller.js")
 	script(type = "text/javascript" src="/js/shared/tickettype.factory.js")
+	script(type = "text/javascript" src="/js/admin/tickettypedetail.controller.js")
 	script(type = "text/javascript" src="/js/admin/tickettypes.controller.js")
 
 block append css

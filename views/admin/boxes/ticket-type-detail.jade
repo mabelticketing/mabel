@@ -1,0 +1,33 @@
+.box.box-solid(ng-controller="TicketTypeDetailController as ticketDetail" 
+	class="box-primary"
+	ng-class="{'box-success':ticketDetail.type._status==='success','box-danger':ticketDetail.type._status==='error','box-warning':ticketDetail.type._status==='pending'}"
+	ng-click="ticketDetail.resetStatus()")
+	.box-header(data-toggle="tooltip" title="{{ticketDetail.type._error}}" data-placement="bottom")
+		h3.box-title Ticket Type Detail
+	.box-body(ng-if="ticketDetail.type === undefined")
+		div Please select a type.
+	.box-body(ng-if="ticketDetail.type !== undefined && ticketDetail.type.id === undefined")
+		div.italic Loading...
+	.box-body(ng-if="ticketDetail.type !== undefined && ticketDetail.type.id !== undefined")
+		.form-group
+			label(for="type-id-field") ID 
+			br
+			#type-id-field {{ticketDetail.type.id}}
+		.form-group
+			label(for="event-name-field") Name
+			input.form-control#type-name-field(type="text" ng-model="ticketDetail.type.name")
+		.form-group
+			label(for="event-price-field") Price
+			input.form-control#useg-sr-price-field(type="text" ng-model="ticketDetail.type.price")
+		.form-group
+			label(for="event-ticket_limit-field") Ticket Limit
+			input.form-control#type-ticket_limit-field(type="text" ng-model="ticketDetail.type.ticket_limit")
+		.form-group
+			label Groups
+			.form-group
+				.checkbox(ng-repeat="group in ticketDetail.allGroups")
+					label(title="{{group.description}}")
+						input(icheck, type="checkbox", class="simple", name="{{group.name}}", ng-model="ticketDetail.type.groups_obj[group.id]")
+						| {{group.description}}
+	.box-footer(ng-if="ticketDetail.type !== undefined && ticketDetail.type.id !== undefined")
+		button.btn.btn-default(ng-click="ticketDetail.type.save()") Save
