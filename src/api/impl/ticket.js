@@ -40,12 +40,6 @@ function del(ticket_id) {
 	return runSql("DELETE FROM ticket WHERE id = ?;", [ticket_id]);
 }
 
-//TODO: We want tickets of different event sites to be separate
-/*
-	- create a default group for each event
-	- add tickets to the appropriate group when they log into a new event site
-	- api.tickets.getAll should return just the tickets within that group
-*/
 function getAll(opts) {
 	var conn = connection.getConnection();
 	var sql = connection.getFilteredSQL("ticket", opts, conn);
