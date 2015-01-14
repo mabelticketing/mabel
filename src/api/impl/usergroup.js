@@ -28,9 +28,12 @@ function setGroups(user, groups) {
 	var insql = "INSERT INTO user_group_membership SET ?;";
 
 	// prepare a statement for each group membership
-	for (var i=0; i<groups.length; i++) {
+	for (var i = 0; i < groups.length; i++) {
 		sql += insql;
-		data.push({user_id:user.id, group_id: parseInt(groups[i])});
+		data.push({
+			user_id: user.id,
+			group_id: parseInt(groups[i])
+		});
 	}
 	// make sure to enable multi-statement
 	return runSql(sql, data, true);
@@ -56,7 +59,9 @@ function del(group_id) {
 	var sql = "DELETE FROM user_group_membership WHERE group_id=?; ";
 	sql += "DELETE FROM group_access_right WHERE group_id = ?; ";
 	sql += "DELETE FROM user_group WHERE id = ?; ";
-	return runSql(sql, [group_id,group_id,group_id]);
+	return runSql(sql, [group_id, group_id, group_id], true).then(function() {
+		return {};
+	});
 }
 
 function update(group_id, group) {
