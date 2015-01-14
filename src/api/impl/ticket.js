@@ -12,7 +12,12 @@ var api = {
 module.exports = api;
 
 function get(ticket_id) {
-	var sql = "SELECT * FROM (SELECT id, booking_user_id, ticket_type_id, status_id, book_time FROM ticket WHERE id=?) AS a JOIN user ON user.id=a.user_id LIMIT 1;";
+	var sql = "SELECT a.id, booking_user_id, user.name AS booking_user_name, ticket_type_id, \
+					ticket_type.name AS ticket_type_name, status_id, ticket_status.name AS status_name, book_time\
+				FROM (SELECT * FROM ticket WHERE id=1) AS a \
+				JOIN user ON a.booking_user_id=user.id \
+				JOIN ticket_type on ticket_type.id=ticket_type_id \
+				JOIN ticket_status ON ticket_status.id=status_id LIMIT 1;";
 	return runSql(sql, [ticket_id]).then(function(values) {
 		return values[0];
 	});
