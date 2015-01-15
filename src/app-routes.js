@@ -9,6 +9,12 @@ router.get("/", function(req, res) {
 	res.render("index.jade");
 });
 
+router.get(/^\/views\/(.*)$/,
+	function(req, res) {
+		res.render(req.params[0] + ".jade");
+	}
+);
+
 router.get("/apitest", function(req, res) {
 	res.render("apitest.jade");
 });

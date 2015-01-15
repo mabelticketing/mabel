@@ -5,7 +5,7 @@ var router = express.Router({
 	mergeParams: true
 });
 module.exports = router;
-
+	
 router.route("/:id")
 	.get(
 		function(req, res) {

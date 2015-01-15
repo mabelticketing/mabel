@@ -19,8 +19,8 @@ head
 				color: inherit;
 			}
 		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
-		link(href='/components/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
+		link(href='/components/admin-lte/css/iCheck/minimal/blue.css', rel='stylesheet', type='text/css')
 		link(href='/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
 		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
 body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
@@ -53,7 +53,6 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 							li(class="active") #{val.name}
 			section.content
 				block content
-					| Hello admin panel!
 	block scripts
 		// TODO?: Can/should bower do automatic incuding/dependency resolution for us?
 
@@ -62,23 +61,42 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 			
 		// misc
 		script(type="text/javascript", src="/components/moment/moment.js")
-		
-		// bootstrap
-		script(src='/components/bootstrap/dist/js/bootstrap.min.js')
-		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
-		script(src='/components/admin-lte/js/app.js')
+		script(type="text/javascript", src="/components/admin-lte/js/plugins/iCheck/icheck.min.js")
+		script#mabel-table-header(type='text/ng-template')
+			tr
+				th 
+				th.header(ng-repeat='column in columns',
+					ng-class="{ 'sortable': column.sortable, 'sort-asc': tableParams.isSortBy(column.sortable, 'asc'), 'sort-desc': tableParams.isSortBy(column.sortable, 'desc') }",
+					ng-click="tableParams.sorting(column.sortable, tableParams.isSortBy(column.sortable, 'asc') ? 'desc' : 'asc')")
+					| {{column.title}}
+				th Actions 
+			tr.ng-table-filters(ng-show='show_filter')
+				th
+				th.filter(ng-repeat='column in columns')
+					div(ng-repeat='(name, filter) in column.filter')
+						input.input-filter.form-control(type="text", name="{{name}}", ng-model="tableParams.filter()[name]" ng-if="filter==='text'")
+				th
 
+		
 		// angular
 		script(type="text/javascript", src="/components/angular/angular.js")
 		script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
 		script(type="text/javascript" src="/components/angular-resource/angular-resource.js")
-		script(type="text/javascript" src="/components/ng-table/ng-table.min.js")
+		script(type="text/javascript" src="/components/ng-table/ng-table.js")
+
+		// bootstrap
+		//- script(src='/components/bootstrap/dist/js/bootstrap.min.js')
+		script(src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js")
+		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
+		script(src='/components/admin-lte/js/AdminLTE/app.js')
+
 		// bootstrapping
 		script(type = "text/javascript" src="/js/mabel.js")
 
 		// shared
 		script(type = "text/javascript" src="/js/shared/mabel.shared.js")
 		script(type = "text/javascript" src="/js/shared/mabeltoken.factory.js")
+		script(type = "text/javascript" src="/js/shared/icheck.directive.js")
 		script(type = "text/javascript" src="/js/shared/datetimepicker.directive.js")
 		script(type = "text/javascript" src="/js/shared/mabelresource.factory.js")
 		script(type = "text/javascript" src="/js/shared/user.factory.js")

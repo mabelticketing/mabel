@@ -4,7 +4,6 @@ angular.module('mabel.admin')
 
 function EventSettingsController(EventSettings) {
 	var vm = this;
-	eve = vm;
 	vm.settings = EventSettings.get({
 		id: 1
 	});
