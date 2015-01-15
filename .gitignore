@@ -34,3 +34,6 @@ assets/config.js
 
 # anything installed by bower
 assets/components
+
+# for tom
+src/config-backup.js
