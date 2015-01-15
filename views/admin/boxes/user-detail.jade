@@ -1,0 +1,38 @@
+.box.box-solid(ng-controller="UserDetailController as userDetail" 
+	class="box-primary"
+	ng-class="{'box-success':userDetail.user._status==='success','box-danger':userDetail.user._status==='error','box-warning':userDetail.user._status==='pending'}"
+	ng-click="userDetail.resetStatus()")
+	.box-header(data-toggle="tooltip" title="{{userDetail.user._error}}" data-placement="bottom")
+		h3.box-title User Detail
+	//- form(editable-form)
+	.box-body(ng-show="userDetail.user === undefined")
+		div Please select a user.
+	.box-body(ng-show="userDetail.user.id === undefined")
+		div.italic Loading...
+	.box-body(ng-show="userDetail.user !== undefined && userDetail.user.id !== undefined")
+		.form-group
+			label(for="user-id-field") ID 
+			br
+			#user-id-field {{userDetail.user.id}}
+		.form-group
+			label(for="event-name-field") Name
+			input.form-control#user-name-field(type="text" ng-model="userDetail.user.name")
+		.form-group
+			label(for="event-email-field") Email
+			input.form-control#useg-sr-email-field(type="email" ng-model="userDetail.user.email")
+		.form-group
+			label(for="event-crsid-field") CRSID
+			input.form-control#user-crsid-field(type="text" ng-model="userDetail.user.crsid")
+		.form-group
+			label(for="event-registration-date-field") Registration Date
+			br
+			#user-registration-date {{ userDetail.user.registration_time.format('lll') }}
+		.form-group
+			label Groups
+			.form-group
+				.checkbox(ng-repeat="group in userDetail.allGroups")
+					label(title="{{group.description}}")
+						input(icheck, type="checkbox", class="simple", name="{{group.name}}", ng-model="userDetail.user.groups_obj[group.id]")
+						| {{group.description}}
+	.box-footer(ng-show="userDetail.user !== undefined && userDetail.user.id !== undefined")
+		button.btn.btn-default(ng-click="userDetail.user.save()") Save

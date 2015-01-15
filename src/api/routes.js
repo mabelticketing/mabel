@@ -6,12 +6,14 @@ var router = express.Router();
 
 /* RESPONSIBILITY OF THE ROUTES FILES IS AUTHENTICATION AND MARSHALLING FOR HTTP */
 
-module.exports                = router;
+module.exports                 = router;
 
 // TODO: I don't know if these functions should really be in here or in some helper module
-module.exports.checkGroup     = checkGroup;
-module.exports.checkAdmin     = checkAdmin;
-module.exports.marshallResult = marshallResult;
+module.exports.checkGroup      = checkGroup;
+module.exports.checkAdmin      = checkAdmin;
+module.exports.marshallResult  = marshallResult;
+module.exports.marshallPromise = marshallPromise;
+module.exports.stripMeta       = stripMeta;
 
 // all API routes should be authenticated with an access_token
 router
@@ -27,6 +29,9 @@ router
 router.use("/event",
 	require("./routes/event.js"));
 
+router.use("/user/group",
+	require("./routes/group.js"));
+
 router.use("/user",
 	require("./routes/user.js"));
 
@@ -38,6 +43,9 @@ router.use("/payment_method",
 
 router.use("/booking",
 	require("./routes/booking.js"));
+
+router.use("/ticket",
+	require("./routes/ticket.js"));
 
 function checkGroup(groupId) {
 	return function(req, res, next) {
@@ -57,4 +65,25 @@ function marshallResult(res) {
 		if (err) return res.status(500).send(err);
 		res.json(result);
 	};
+}
+
+function marshallPromise(res, promise) {
+	promise.then(function(value) {
+		if (value === undefined) value = {};
+		res.json(value);
+	}, function(err) {
+		console.log(err);
+		res.status(500).send(err);
+	});
+}
+
+
+function stripMeta(obj) {
+	// delete any properties which start with $ or _
+	for (var i in obj) {
+		if (i.indexOf("_") === 0 || i.indexOf("$") === 0) {
+			delete obj[i];
+		}
+	}
+	return obj;
 }

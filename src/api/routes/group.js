@@ -6,16 +6,8 @@ var router = express.Router({
 });
 module.exports = router;
 
-router.route("/available/:event_id")
+router.route("/")
 	.get(
-		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.getForUser(req.user, req.params.event_id));
-		}
-	);
-
-router.route("/:event_id/")
-	.get(
-		apiRouter.checkAdmin(),
 		function(req, res) {
 
 			var opts = {};
@@ -24,32 +16,31 @@ router.route("/:event_id/")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			apiRouter.marshallPromise(res, api.ticket_type.getAll(opts, req.params.event_id));
+			apiRouter.marshallPromise(res, api.user.group.getAll(opts));
 		}
 	)
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.insert(apiRouter.stripMeta(req.body), req.params.event_id));
+			apiRouter.marshallPromise(res, api.user.group.insert(apiRouter.stripMeta(req.body)));
 		}
 	);
 
-router.route("/:event_id/:ticket_type_id")
+router.route("/:id")
 	.get(
-		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.get(req.params.ticket_type_id));
+			apiRouter.marshallPromise(res, api.user.group.get(req.params.id));
 		}
 	)
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.update(req.params.ticket_type_id, apiRouter.stripMeta(req.body)));
+			apiRouter.marshallPromise(res, api.user.group.update(req.params.id, apiRouter.stripMeta(req.body)));
 		}
 	)
 	.delete(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.del(req.params.ticket_type_id));
+			apiRouter.marshallPromise(res, api.user.group.del(req.params.id));
 		}
 	);

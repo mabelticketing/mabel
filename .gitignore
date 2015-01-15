@@ -28,7 +28,7 @@ node_modules
 .lock-wscript
 
 # sublime configuration
-*.sublime-*
+*.sublime-workspace
 
 assets/config.js
 
