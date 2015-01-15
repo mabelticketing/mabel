@@ -1,1 +1,1 @@
-angular.module('mabel.shared', ['ngCookies','ui.bootstrap']); 
+angular.module('mabel.shared', ['ngCookies']); 
