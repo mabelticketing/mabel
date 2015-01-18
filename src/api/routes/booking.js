@@ -18,8 +18,19 @@ router.route("/:event_id")
 
 		},
 		function(req, res, next) {
-			// TODO: actually post the booking in req.body
-			console.log(req.body);
+			// post booking in req.body
+			api.booking.makeBooking(req.user.id, req.params.event_id, req.body, function(err, result) {
+				if (err) return next(err);
+
+				// make transaction!
+				api.booking.makeTransaction(req.user.id, req.params.event_id, req.body, result.ticketsAllocated, function(err, result) {
+					if (err) return next(err);
+
+					//TODO: do something with result (don't think it contains anything yet)
+				})
+
+				req.ticketsAllocated = result.ticketsAllocated;
+			});
 			next();
 		},
 		function(req, res) {

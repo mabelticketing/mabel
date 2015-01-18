@@ -10,7 +10,9 @@ module.exports = {
 	// joinQueue will update the queue while getStatus will not
 	joinQueue: joinQueue,
 	getStatus: getStatus,
-	leaveQueue: leaveQueue
+	leaveQueue: leaveQueue,
+	makeBooking: makeBooking,
+	makeTransaction: makeTransaction
 };
 
 // TODO: Increase number of people allowed through at a time from 1
@@ -67,5 +69,87 @@ function canBook(user_id, event_id, callback) {
 		// TODO: check if there are any ticket types available to this user's groups
 		
 		return callback(null, {open:true});
+	});
+}
+
+function makeBooking(user_id, event_id, booking, callback) {
+	// have ticketsAllocated object so user isn't over charged if all tickets not available
+	var ticketsAllocated = [];
+
+	var countSql = "SELECT * FROM (SELECT ticket_type_id,COUNT(*) AS ticket_num FROM ticket GROUP BY ticket_type_id) AS t1 \
+	RIGHT JOIN (SELECT id,ticket_limit FROM ticket_type) AS t2 ON t1.ticket_type_id=t2.id";
+	runSql(countSql, function(err, countResult) {
+		if (err) return callback(err);
+		// create array of count information
+		var counts = []; // again, undefineds in this array. there is probably a better way, but this is A WAY
+		for(var i=0; i<countResult.length; i++) {
+			counts[countResult[i].id] = {
+				"count" : (countResult[i].ticket_num == null) ? 0 : countResult[i].ticket_num, // if null, 0 tickets sold
+				"limit" : countResult[i].ticket_limit
+			};
+		}
+		// generate queries
+		insertSqlStatements = [];
+		var tickets = booking.tickets;
+		for(var j=0; j<tickets.length; j++) {
+			var ticketsLeft = counts[tickets[j].ticket_type_id].limit - counts[tickets[j].ticket_type_id].count;
+			if (tickets[j].quantity > 0 && ticketsLeft > 0) { // if we WANT tickets AND there are TICKETS LEFT
+				var toBuy = Math.min(tickets[j].quantity, ticketsLeft); // make sure we aren't over selling
+				ticketsAllocated.push({
+					"ticket_type_id": tickets[j].ticket_type_id,
+					"quantity": toBuy
+				});
+				var query = "INSERT INTO ticket (booking_user_id,ticket_type_id,status_id,book_time) VALUES ";
+				var spacer = "";
+				for (var k=0; k<toBuy; k++) {
+					query += spacer;
+					query += "("+user_id+","+tickets[j].ticket_type_id+",1,UNIX_TIMESTAMP())";
+					spacer = ",";
+				}
+				insertSqlStatements.push(query);
+			}
+		}
+		// join queries
+		insertSql = insertSqlStatements.join("; ");
+
+		// run insert query
+		runSql(insertSql, function (err) {
+			if (err) return callback(err); // will need to alert user to contact staffing email - tickets may not have been allocated but transaction might be inserted??
+			return callback(null, {
+				"ticketsAllocated": ticketsAllocated
+			});
+		}, true);
+	});
+
+
+}
+
+function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback) {
+	ticketTypeSql = "SELECT * FROM ticket_type WHERE event_id=?";
+	runSql(ticketTypeSql, [event_id], function(err, types) {
+		if (err) return callback(err);
+		var value = 0;
+		var totalQty = 0;
+
+		var sortedTypes = [];
+		for (var i=0; i<types.length; i++) sortedTypes[types[i].id] = type[i];
+
+		// generate value
+		for (var j=0; j<ticketsAllocated.length; j++) {
+			var price = sortedTypes[ticketsAllocated[j].ticket_type_id].price;
+			var qty = ticketsAllocated[j].quantity;
+			totalQty += qty;
+			value += price * qty;
+		}
+
+		// add charitable donation if nesc.
+		value += booking.donate ? (2*totalQty) : 0; // ASSUMES booking donation = £2.00 which it IS FOR EMB2015
+
+		transactionSql = "INSERT INTO transaction (user_id,value,payment_method_id,transaction_time) VALUES(?,?,?,UNIX_TIMESTAMP())";
+		runSql(transactionSql, [user_id,value,booking.payment_method], function(err) {
+			if (err) return callback(err);
+			else callback(null,{}); // TODO: something more interesting here?
+		})
+
 	});
 }
