@@ -40,7 +40,7 @@ function canBook(user_id, event_id, callback) {
 		if (err) return callback(err);
 		if (eventDetails.length < 1) return callback(__("No such event"));
 
-		var now = new Date();
+		var now = new Date().getTime()/1000;
 		
 		if (now < eventDetails[0].launch_time) {
 			return callback(null, {open:false, reason:__("Booking is not yet open")});
