@@ -18,7 +18,7 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
 block title
-	//- TODO: This is outside of scope for bookingCtrl
+	//- TODO: This is outside of scope for bookingCtrl - HOW DO WE DISPLAY THIS??????
 	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
 	title(ng-if="bookingCtrl.status == 'booking'") Book your tickets!
 
@@ -56,6 +56,8 @@ block content
 										ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
 										value="ticket.ticket_type_id")
 									select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
+										//- TODO: display appropriate ticket quantity options
+										//- TODO: clarify where all this stuff is authenticated
 										option(ng-value="0") 0
 										option(ng-value="1") 1
 										option(ng-value="2") 2
@@ -94,4 +96,7 @@ block content
 								ng-value="method.id")
 							span #[b {{ method.name }}] - {{ method.description }}
 					p(ng-if="bookingCtrl.booking.payment_method != -1") #[input(type="submit", value="Confirm")]
+
+			div(ng-switch-when="done")
+				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC
 

@@ -132,8 +132,10 @@ function BookingController($scope, APICaller, $interval) {
 		console.log("submit!");
 		APICaller.post("booking/1", vm.booking, function(err, result) {
 			if (err) return console.log(err); // error handling
-			// TODO: DO SOMETHING (better) WITH RESULT
-			if (result.success) alert("Probably done");
+			// if we have success, display confirmation with link to ticket management page
+
+			// need to do more with booking stuff
+			if (result.success) vm.status = "done";
 		});
 	}
 
