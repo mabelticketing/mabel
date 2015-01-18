@@ -1,13 +1,14 @@
+
 extends ./admin/main.jade
 
 block prepend variables
-	// these variable will normally be overridden by subpages
+	//- these variable will normally be overridden by subpages
 	- title = "Dashboard"
 	- subtitle = "Control Panel"
 	- breadcrumb = [{name:"Dashboard"}]
 	- sidebarItems = [{link:"#", name:title, icon:"dashboard", selected:true}, {link:"#", name:"Widgets", icon:"th"}]
 
-	// notifications and user will normally come from the app-routes context
+	//- notifications and user will normally come from the app-routes context
 	- notifications = notifications || []
 
 block content
