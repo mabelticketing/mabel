@@ -7,7 +7,7 @@ function BookingController($scope, APICaller, $interval) {
 	var vm = this;
 
 	/*** DECLARATION ***/
-
+	e = vm;
 	// initialise scope vars 
 	vm.user = {};
 	vm.available_tickets = [];
@@ -36,14 +36,14 @@ function BookingController($scope, APICaller, $interval) {
 
 	// get user data to help the user feel comfortable
 	APICaller.get("user/me", function(err, data) {
-		if (err) console.log("err");
+		if (err) return console.log(err);
 
 		vm.user = data;
 	});
 
 	// join the queue
 	APICaller.get("booking/open/1", function(err, data) {
-		if (err) console.log("err"); // error handling
+		if (err) return console.log(err); // error handling
 		
 		// set up polling at intervals
 		poller = $interval(pollApi, 30000);
@@ -76,7 +76,7 @@ function BookingController($scope, APICaller, $interval) {
 					// add each ticket, quantity 0 to vm.booking
 					// this is possibly a stupid idea, gives lots of undefineds in array
 					vm.booking.tickets.push({
-						ticket_type_id: available_tickets[i].ticket_type_id,
+						ticket_type_id: available_tickets[i].id,
 						quantity: 0,
 						price: available_tickets[i].price,
 						name: available_tickets[i].name
@@ -129,8 +129,9 @@ function BookingController($scope, APICaller, $interval) {
 
 	// booking submission method
 	function submitBooking() {
-		console.log("submit!");
+		console.log(vm.booking);
 		APICaller.post("booking/1", vm.booking, function(err, result) {
+			console.log(result);
 			if (err) return console.log(err); // error handling
 			// if we have success, display confirmation with link to ticket management page
 
