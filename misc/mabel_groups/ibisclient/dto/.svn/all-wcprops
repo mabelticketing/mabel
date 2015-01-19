@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto
+END
+IbisIdentifier.php
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/36/lookup/trunk/src/php/ibisclient/dto/IbisIdentifier.php
+END
+IbisAttribute.php
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisAttribute.php
+END
+IbisContactRow.php
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisContactRow.php
+END
+IbisContactWebPage.php
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/36/lookup/trunk/src/php/ibisclient/dto/IbisContactWebPage.php
+END
+IbisDto.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisDto.php
+END
+IbisPerson.php
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisPerson.php
+END
+IbisAttributeScheme.php
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisAttributeScheme.php
+END
+IbisError.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisError.php
+END
+IbisInstitution.php
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisInstitution.php
+END
+IbisGroup.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/45/lookup/trunk/src/php/ibisclient/dto/IbisGroup.php
+END
+IbisContactPhoneNumber.php
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/36/lookup/trunk/src/php/ibisclient/dto/IbisContactPhoneNumber.php
+END
+IbisResult.php
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/38/lookup/trunk/src/php/ibisclient/dto/IbisResult.php
+END
