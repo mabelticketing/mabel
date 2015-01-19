@@ -86,6 +86,10 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 
 		// bootstrap
 		//- script(src='/components/bootstrap/dist/js/bootstrap.min.js')
+		script.
+			// Add a dummy function to prevent errors
+			jQuery.fn.tooltip = function() {
+			};
 		script(src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js")
 		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
 		script(src='/components/admin-lte/js/AdminLTE/app.js')
