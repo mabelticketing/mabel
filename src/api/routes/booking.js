@@ -10,6 +10,7 @@ router.route("/:event_id")
 	.post(
 		function(req, res, next) {
 			// check we can book (that we're at the front of the queue an' all)
+			console.log(req.body);
 			api.booking.canBook(req.user.id, req.params.event_id, function(err, result) {
 				if (err) return next(err);
 				if (!result.open) return next("Booking not open for this user");
@@ -19,19 +20,23 @@ router.route("/:event_id")
 		},
 		function(req, res, next) {
 			// post booking in req.body
-			api.booking.makeBooking(req.user.id, req.params.event_id, req.body, function(err, result) {
-				if (err) return next(err);
-
+			console.log(req.body);
+			var bookingPromise = api.booking.makeBooking(req.user.id, req.params.event_id, req.body);
+			bookingPromise.then(function(result) {
+				console.log(req.ticketsAllocated);
 				// make transaction!
 				api.booking.makeTransaction(req.user.id, req.params.event_id, req.body, result.ticketsAllocated, function(err, result) {
 					if (err) return next(err);
 
 					//TODO: do something with result (don't think it contains anything yet)
-				})
+				});
 
 				req.ticketsAllocated = result.ticketsAllocated;
+				next();
+
+			}, function(err) {
+				if (err) return next(err);
 			});
-			next();
 		},
 		function(req, res) {
 			// leave the queue
