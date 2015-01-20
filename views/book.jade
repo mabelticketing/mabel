@@ -47,7 +47,8 @@ block content
 						.well
 							form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate)
 								fieldset
-									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
+									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets*.
+									p *Guest names can be assigned to tickets after you make your booking.
 									.form-group
 										label.col-lg-2.control-label Tickets
 										.col-lg-10
@@ -101,7 +102,7 @@ block content
 												label
 													input(type="radio", ng-model="bookingCtrl.booking.payment_method", ng-value="method.id")
 													span #[b {{ method.name }}] - {{ method.description }}
-										p(ng-if="bookingCtrl.booking.payment_method != -1", style="text-align:center;") #[input.btn.btn-info(style="margin-top:20px;", type="submit", value="Confirm")]
+									p(ng-if="bookingCtrl.booking.payment_method != -1", style="text-align:center;") #[input.btn.btn-info(type="submit", value="Confirm")]
 
 			div(ng-switch-when="done")
 				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC
