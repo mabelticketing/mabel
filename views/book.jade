@@ -17,6 +17,12 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/mabel.booking.js")
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
+	// bootstrap
+	script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
+	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
+	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	link(rel="stylesheet", type="text/css", href="/css/main.css")
+
 block title
 	//- TODO: This is outside of scope for bookingCtrl - HOW DO WE DISPLAY THIS??????
 	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
@@ -35,67 +41,68 @@ block content
 				p {{bookingCtrl.reason}}
 
 			div(ng-switch-when="booking")
-				form(ng-submit="bookingCtrl.submitBooking()" novalidate)
+				.slide
+					section.slide-content
+						h1 Booking
+						.well
+							form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate)
+								fieldset
+									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets*.
+									p *Guest names can be assigned to tickets after you make your booking.
+									.form-group
+										label.col-lg-2.control-label Tickets
+										.col-lg-10
+											table.table
+												thead
+													tr
+														th Ticket types
+														th Price
+														th Quantity
 
-					h1 Booking
-					h2 Welcome {{ bookingCtrl.user.name }}, please select your tickets.
-					
-					table
-						thead
-							tr
-								th(style="width:200px;text-align:left;") Ticket types
-								th(style="width:100px;text-align:left;") Price
-								th(style="width:100px;text-align:left;") Qty.
-
-						tbody(ng-repeat="ticket in bookingCtrl.available_tickets")
-							tr
-								td {{ ticket.name }}
-								td £{{ ticket.price }}
-								td
-									input(type="hidden" 
-										ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
-										value="ticket.ticket_type_id")
-									select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
-										//- TODO: display appropriate ticket quantity options
-										//- TODO: clarify where all this stuff is authenticated
-										option(ng-value="0") 0
-										option(ng-value="1") 1
-										option(ng-value="2") 2
-										option(ng-value="3") 3
-										option(ng-value="4") 4
-
-					h2 Charitable donation
-					label
-						p 
-							input(type="checkbox" name=""	
-								ng-model="bookingCtrl.booking.donate")
-							| I wish to make a charitable donation of #[b £1.00] per ticket to your Charitable Causes.
-					
-					h2 Summary
-					div(ng-if="bookingCtrl.meta.ticketQuantity > 0")
-						h3 Your tickets
-						ul
-							li(ng-repeat="ticket in bookingCtrl.booking.tickets"
-								ng-if="ticket.quantity > 0") 
-								| {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
-							
-							li(ng-if="bookingCtrl.booking.donate") Charitable donation @ £1.00 per ticket
-						
-						p Total cost: £{{ bookingCtrl.meta.bookingSum | number:2 }}
-					
-					div(ng-if="bookingCtrl.meta.ticketQuantity == 0")
-						p
-							em You haven't selected any tickets for us to summarise :(
-					
-					h2 Payment Method
-					p Please choose a payment method from the options below.
-					p(ng-repeat="method in bookingCtrl.payment_methods")
-						label
-							input(type="radio"
-								ng-model="bookingCtrl.booking.payment_method"
-								ng-value="method.id")
-							span #[b {{ method.name }}] - {{ method.description }}
-					p(ng-if="bookingCtrl.booking.payment_method != -1") #[input(type="submit", value="Confirm")]
+												tbody
+													tr(ng-repeat="ticket in bookingCtrl.available_tickets", style="background-color:#ffffff;")
+														td {{ ticket.name }}
+														td £{{ ticket.price }}
+														td
+															input(type="hidden" 
+																ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
+																value="ticket.ticket_type_id")
+															select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
+																//- TODO: display appropriate ticket quantity options
+																//- TODO: clarify where all this stuff is authenticated
+																option(ng-value="0") 0
+																option(ng-value="1") 1
+																option(ng-value="2") 2
+																option(ng-value="3") 3
+																option(ng-value="4") 4
+									.form-group
+										label.col-lg-2.control-label Donation
+										.col-lg-10
+											.checkbox
+												label
+													p
+														input(type="checkbox", ng-model="bookingCtrl.booking.donate") 
+														| I wish to make a charitable donation of #[b £2.00] per ticket to your charitable causes.
+												p You can find out more about our charitable causes on our #[a(href="http://emmamayball.com") homepage].
+									.form-group(ng-if="bookingCtrl.meta.ticketQuantity > 0")
+										label.col-lg-2.control-label Summary
+										.col-lg-10
+											table.table.table-striped
+												tbody
+													tr(ng-repeat="ticket in bookingCtrl.booking.tickets", ng-if="ticket.quantity > 0", style="background-color:#ffffff;")
+														td {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
+													tr(ng-if="bookingCtrl.booking.donate", style="background-color:#ffffff;")
+														td #[b Charitable donation @ £2.00 per ticket]
+													tr.info
+														td Total cost: #[b £{{ bookingCtrl.meta.bookingSum | number:2 }}]
+									.form-group
+										label.col-lg-2.control-label Payment Method
+										.col-lg-10
+											.radio(ng-repeat="method in bookingCtrl.payment_methods")
+												label
+													input(type="radio", ng-model="bookingCtrl.booking.payment_method", ng-value="method.id")
+													span #[b {{ method.name }}] - {{ method.description }}
+									p(ng-if="bookingCtrl.booking.payment_method != -1", style="text-align:center;") #[input.btn.btn-info(type="submit", value="Confirm")]
 
 			div(ng-switch-when="done")
 				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC

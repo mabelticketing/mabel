@@ -78,8 +78,9 @@ function makeBooking(user_id, event_id, booking, callback) {
 
 	var countSql = "SELECT * FROM (SELECT ticket_type_id,COUNT(*) AS ticket_num FROM ticket GROUP BY ticket_type_id) AS t1 \
 	RIGHT JOIN (SELECT id,ticket_limit FROM ticket_type) AS t2 ON t1.ticket_type_id=t2.id";
-	runSql(countSql, function(err, countResult) {
-		if (err) return callback(err);
+	var promise1 = runSql(countSql);
+
+	return promise1.then(function(countResult) {
 		// create array of count information
 		var counts = []; // again, undefineds in this array. there is probably a better way, but this is A WAY
 		for(var i=0; i<countResult.length; i++) {
@@ -113,11 +114,12 @@ function makeBooking(user_id, event_id, booking, callback) {
 		insertSql = insertSqlStatements.join("; ");
 
 		// run insert query
-		runSql(insertSql, function (err) {
-			if (err) return callback(err); // will need to alert user to contact staffing email - tickets may not have been allocated but transaction might be inserted??
-			return callback(null, {
+		var promise2 = runSql(insertSql);
+
+		return promise2.then(function () {
+			return {
 				"ticketsAllocated": ticketsAllocated
-			});
+			};
 		}, true);
 	});
 
@@ -132,7 +134,7 @@ function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback)
 		var totalQty = 0;
 
 		var sortedTypes = [];
-		for (var i=0; i<types.length; i++) sortedTypes[types[i].id] = type[i];
+		for (var i=0; i<types.length; i++) sortedTypes[types[i].id] = types[i];
 
 		// generate value
 		for (var j=0; j<ticketsAllocated.length; j++) {
