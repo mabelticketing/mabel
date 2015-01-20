@@ -1,8 +1,9 @@
-insert into mabel.event (id, name, launch_time, close_time) VALUES (
+insert into mabel.event (id, name, launch_time, close_time, group_assignment_url) VALUES (
 	1,
 	'Emmanuel May Ball 2015', 
 	UNIX_TIMESTAMP('2014-12-13 00:00:00'),
-	UNIX_TIMESTAMP('2014-12-25 00:00:00')
+	UNIX_TIMESTAMP('2014-12-25 00:00:00'),
+	'http://www.emmamayball.com/mabel_groups/index.php?key=8jKiATo6kN787QF604EUaIL93R4W1Qjg&c={!crsid!}&e={!email!}'
 );
 
 insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (
