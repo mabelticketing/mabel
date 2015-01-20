@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/50/lookup/trunk/src/php/ibisclient/methods
+END
+InstitutionMethods.php
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/50/lookup/trunk/src/php/ibisclient/methods/InstitutionMethods.php
+END
+GroupMethods.php
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/50/lookup/trunk/src/php/ibisclient/methods/GroupMethods.php
+END
+IbisMethods.php
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/36/lookup/trunk/src/php/ibisclient/methods/IbisMethods.php
+END
+PersonMethods.php
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/44/lookup/trunk/src/php/ibisclient/methods/PersonMethods.php
+END
