@@ -2,6 +2,8 @@
 # Schema for initialising the MySQL database
 # 
 # NB I have introduced foreign key dependencies, which means we have to create and delete in the right order
+drop table if exists email_destination;
+drop table if exists email;
 drop table if exists transaction;
 drop table if exists group_payment_method_access;
 drop table if exists payment_method;
@@ -21,6 +23,7 @@ create table event (
 	name varchar(100) not null,
 	launch_time int not null,
 	close_time int not null,
+	group_assignment_url varchar(300),
 	primary key (id)
 );
 
@@ -52,6 +55,9 @@ create table user (
 	email varchar(100) not null,
 	crsid varchar(8),
 	registration_time int not null,
+	password_md5 varchar(100), # will be null for raven logins
+	verification_code varchar(100), # emailed to new users if registered via mabel
+	is_verified boolean not null DEFAULT 0,
 	primary key (id),
 	unique(email),
 	unique(crsid)
@@ -136,4 +142,24 @@ create table transaction (
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
+);
+
+
+### MAIL LOGS ###
+
+create table email (
+	id int auto_increment not null,
+	from_email varchar(100) not null,
+	send_time int not null,
+	message_content text not null,
+	primary key (id)
+);
+
+create table email_destination (
+	id int auto_increment not null,
+	address varchar(100) not null,
+	user int,
+	email_id int not null,
+	primary key (id),
+	foreign key (email_id) references email(id)
 );
