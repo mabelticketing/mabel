@@ -22,16 +22,25 @@ router.get("/apitest", function(req, res) {
 router.get('/login/mabel',
 	passport.authenticate('local'),
 	function(req, res) {
-		res.render("loginConfirmation.jade", {token:req.user.token});
+		console.log(req.user.token); // helper for now, if needed TODO: remove
+		res.redirect("/dash");
 	}
 );
 
 router.get('/login/raven',
 	passport.authenticate('raven'),
 	function(req, res) {
-		res.render("loginConfirmation.jade", {token:req.user.token});
+		console.log(req.user.token); // helper for now, if needed TODO: remove
+		res.redirect("/dash");
 	}
 );
+
+router.get('/dash',
+	function(req, res) {
+		res.render("dash.jade");
+	}
+);
+
 router.get('/logout',
 	function(req, res) {
 		res.render("logout.jade");

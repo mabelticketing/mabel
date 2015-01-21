@@ -1,11 +1,12 @@
 var config = require('./config.js');
 var passport = require('passport');
-var getConnection = require("./api/impl/connection.js").getConnection;
+var connection = require("./api/impl/connection.js");
 var LocalStrategy = require('passport-local').Strategy;
 var RavenStrategy = require('passport-raven').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var jwt = require("jwt-simple");
 var __ = require("./strings.js");
+var crypto = require('crypto');
 
 var secret = config.jwt_secret;
 
@@ -18,46 +19,47 @@ passport.use(new LocalStrategy(
 				error: __("Invalid email address")
 			});
 		}
-		var username = email.split("@")[0];
-		// password has to be equal to the part of the email before
-		if (password === username) {
-			var conn = getConnection();
-
-			// try to find user in db with crsid
-			conn.query("SELECT * FROM user WHERE email=?", [email], function(err, rows) {
-				// pass errors through middleware
-				if (err) done(err);
-				if (rows.length < 1) {
-					var insertQuery = "INSERT INTO user (name, email, registration_time) " +
-						"VALUES (?,?,CURRENT_TIMESTAMP)";
-
-					conn.query(insertQuery, ["Mabel User", email],
-						function(err, result) {
-							// pass errors through middleware
-							if (err) return done(err);
-
-							// now finally return the page to the user
-
-							getToken(result.insertId, function(token) {
-								done(null, {
-									token: token,
-								});
-							});
-						}
-					);
-					conn.end();
+		// try to find user in db with crsid
+		connection.runSql("SELECT * FROM user WHERE email=?", [email])
+			.then(function(values) {
+				if (values.length < 1) {
+					// user not registered
+					throw {
+						// deliberately not saying whether it's email or password that was wrong (security mofo)
+						error: __("Invalid credentials")
+					};
+				} else if (values.length > 1) {
+					throw {
+						error: __("Unexpectedly found many users :(")
+					};
 				} else {
-					// the user is in the table, so just get his user id to encode as the token
-					
-					return getToken(rows[0].id, function(token) {
-						done(null, {
-							token: token,
-						});
-					});
+					var user = values[0];
+					if (user.is_verified === 0) {
+						// user is not verified
+						throw {
+							error: __("User is not verified")
+						};
+					} else {
+						var hash = crypto.createHash('md5');
+						hash.update(password);
+						var md5_pass = hash.digest();
+						if (md5_pass === user.password_md5) {
+							return getToken(user.id);
+						} else {
+							throw {
+								error: __("Invalid credentials")
+							};
+						}
+					}
 				}
+			})
+			.then(function(token) {
+				return done(null, {
+					token: token,
+				});
+			}, function(err) {
+				return done(err);
 			});
-
-		}
 	}
 ));
 
@@ -66,65 +68,41 @@ passport.use(new RavenStrategy({
 	// NB I don't know what audience is actually for. It seems to just work like a base url
 	audience: config.base_url,
 	desc: __('Mabel Ticketing System'),
-	msg: __('Mabel needs to check you are a current member of Emmanuel College'),
+	msg: __('Mabel needs to check you are a current member of the university'),
 	// use demonstration raven server in development
 	debug: false
 }, function(crsid, params, done) {
-	// connect to database
-	var conn = getConnection();
 
 	// try to find user in db with crsid
-	conn.query("SELECT * FROM user WHERE crsid=?", [crsid], function(err, rows) {
-		// pass errors through middleware
-		if (err) {
-			conn.end();
-			return done(err);
-		}
-		if (rows.length < 1) {
-			// if user not in table then put them in
+	connection.runSql("SELECT * FROM user WHERE crsid=?", [crsid])
+		.then(function(rows) {
+			var tokenPromise;
 
-			// Temporary patch while lookup is broken
-			// var lookupURL = config.lookup_url + "person/crsid/" + crsid + "?format=json";
-			// https.get(lookupURL, function(res) {
-			// var body = '';
-			// res.on('data', function(chunk) {
-			// 	body += chunk;
-			// });
-			// res.on('end', function() {
-			// var response = JSON.parse(body);
-			// var name = response.result.person.displayName;
-			var name = "Raven User";
-			var insertQuery = "INSERT INTO user (name, email, crsid, registration_time) " +
-				"VALUES (?,?,?,CURRENT_TIMESTAMP)";
+			if (rows.length < 1) {
+				// if user not in table then put them in
+				tokenPromise = register({
+					// TODO: Can we get a better name than this?
+					name: "Mabel User",
+					email: crsid + "@cam.ac.uk",
+					crsid: crsid,
+					is_verified: 1
+				}).then(function(user) {
+					return getToken(user.id);
+				});
 
-			// TODO: We have a bit more Ibis stuff to process to allocate user groups
+			} else {
+				// the user is in the table, so just get his user id to encode as the token
+				tokenPromise = getToken(rows[0].id);
+			}
 
-			conn.query(insertQuery, [name, crsid + "@cam.ac.uk", crsid],
-				function(err, result) {
-					// pass errors through middleware
-					if (err) return done(err);
-
-					// now finally return the page to the user
-
-					getToken(result.insertId, function(token) {
-						done(null, {
-							token: token,
-						});
-					});
-				}
-			);
-			conn.end();
-		} else {
-			// the user is in the table, so just get his user id to encode as the token
-			
-			getToken(rows[0].id, function(token) {
+			tokenPromise.then(function(token) {
 				done(null, {
 					token: token,
 				});
+			}, function(err) {
+				done(err);
 			});
-			conn.end();
-		}
-	});
+		});
 
 }));
 
@@ -161,30 +139,56 @@ passport.serializeUser(function(user, done) {
 });
 
 
+function register(user) {
+	var insertQuery = "INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()";
+	return connection.runSql(insertQuery, user)
+		.then(function(result) {
+			return result.insertId;
+		})
+		// TODO: lookup groups and assign
+		// register will return a promise which is resolved with the new user
+		.then(getUser)
+		.then(function(newUser) {
+			var groups = [];
+			// TODO: lookup groups
+			newUser.groups = groups;
+			return newUser;
+		});
+}
+
+function getUser(userId) {
+	return connection.runSql("SELECT * FROM user WHERE id = ?", [userId])
+		.then(function(results) {
+			if (results.length !== 1) {
+				throw {
+					error: __("Unexpected user length")
+				};
+			}
+			return results[0];
+		});
+}
+
 // the token contains the user ID and also the groups which the user is a member of
-function getToken(userId, callback) {
-	var conn = getConnection();
+function getToken(userId) {
 
 	// try to find user in db with crsid
 	var sql = "SELECT user_group.id AS group_id FROM user_group \
 		JOIN user_group_membership \
 		ON (user_group.id=user_group_membership.group_id) \
 		WHERE user_id=?";
-
-	conn.query(sql, [userId], function(err, rows) {
-		var groups = [];
-		for (var i = 0; i < rows.length; i++) {
-			groups.push(rows[i].group_id);
+	return connection.runSql(sql, [userId]).then(
+		function(rows) {
+			var groups = [];
+			for (var i = 0; i < rows.length; i++) {
+				groups.push(rows[i].group_id);
+			}
+			// TODO: compress this somewhat?
+			var tokenObj = {
+				authenticated: true,
+				id: userId,
+				groups: groups
+			};
+			return jwt.encode(tokenObj, secret);
 		}
-		// TODO: compress this somewhat?
-		var tokenObj = {
-			authenticated: true,
-			id: userId,
-			groups: groups
-		};
-		callback(jwt.encode(tokenObj, secret));
-	});
-
-	conn.end();
-
+	);
 }
