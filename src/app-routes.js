@@ -69,7 +69,7 @@ router.route("/register")
 						[newUser.name, newUser.email, newUser.password, code]);
 				})
 				.then(function() {
-					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "'Mabel Ticketing' <registration@mabelticketing.co.uk>", "Mabel Registration Confirmation", 
+					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "'Mabel Ticketing' <registration@mg.clittle.com>", "Mabel Registration Confirmation", 
 						"test.jade", {name: newUser.name, link: config.base_url + "/confirm?code=" + code});
 				})
 				.then(function() {
