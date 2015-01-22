@@ -25,6 +25,8 @@ block scripts
 
 block title
 	//- TODO: This is outside of scope for bookingCtrl - HOW DO WE DISPLAY THIS??????
+	//- Probably easiest to not use angular for this, and instead set document.title in javascript
+	//- alternatively move the controller further up the html, or create a new 'title' controller
 	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
 	title(ng-if="bookingCtrl.status == 'booking'") Book your tickets!
 
