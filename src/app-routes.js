@@ -1,23 +1,11 @@
 // imports
 var express  = module.parent.exports.express;
 var passport = require("passport");
+var bodyParser = require('body-parser');
 
 /*** APP ROUTER ***/
 var router   = express.Router();
 
-router.get("/", function(req, res) {
-	res.render("index.jade");
-});
-
-router.get(/^\/views\/(.*)$/,
-	function(req, res) {
-		res.render(req.params[0] + ".jade");
-	}
-);
-
-router.get("/apitest", function(req, res) {
-	res.render("apitest.jade");
-});
 
 router.get('/login/mabel',
 	passport.authenticate('local'),
@@ -37,15 +25,33 @@ router.get('/login/raven',
 	}
 );
 
-router.get('/dash',
-	function(req, res) {
-		res.render("dash.jade");
-	}
-);
-
 router.get('/logout',
 	function(req, res) {
 		res.render("logout.jade");
+	}
+);
+
+router.route("/register")
+	.post(
+		bodyParser.urlencoded({ extended: false }), 
+		function(req, res) {
+			var newUser = req.body;
+			var error = 'Not implemented yet';
+			if (error !== undefined)
+				res.render("register.jade", {email:newUser.email, name:newUser.name, error:'Not implemented yet'});
+			else {
+				// TODO: register + log in + redirect to dash
+			}
+		}
+	).get(function(req, res) {
+		res.render("register.jade");
+	});
+
+// TODO: everything below this point should be precompiled HTML
+
+router.get('/dash',
+	function(req, res) {
+		res.render("dash.jade");
 	}
 );
 
@@ -63,4 +69,13 @@ router.get('/confirmation',
 		res.render('confirmation.jade');
 	});
 
+router.get("/", function(req, res) {
+	res.render("index.jade");
+});
+
+router.get(/^\/views\/(.*)$/,
+	function(req, res) {
+		res.render(req.params[0] + ".jade");
+	}
+);
 module.exports = router;
