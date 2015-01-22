@@ -21,8 +21,16 @@ insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (
 	100,
 	1
 );
+
 insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (
 	3,
+	'Dining',
+	98.00,
+	100,
+	1
+);
+insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+	4,
 	'Performer Discounted Ticket',
 	68.00,
 	100,
@@ -104,10 +112,17 @@ insert into mabel.user_group_membership (user_id, group_id) VALUES (1, 3);
 insert into mabel.user_group_membership (user_id, group_id) VALUES (2, 3);
 insert into mabel.user_group_membership (user_id, group_id) VALUES (3, 6);
 
-insert into mabel.group_access_right (id, group_id, ticket_type_id) VALUES (1,1,1);
-insert into mabel.group_access_right (id, group_id, ticket_type_id) VALUES (2,2,2);
-insert into mabel.group_access_right (id, group_id, ticket_type_id) VALUES (3,4,1);
-insert into mabel.group_access_right (id, group_id, ticket_type_id) VALUES (4,6,3);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (1,1);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (1,2);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (1,3);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (1,4);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (2,1);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (2,2);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (2,3);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (4,1);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (4,2);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (4,3);
+insert into mabel.group_access_right (group_id, ticket_type_id) VALUES (6,4);
 
 insert into mabel.payment_method (id, name, description, event_id, ticket_limit) VALUES (
 	1,
