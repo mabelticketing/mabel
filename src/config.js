@@ -10,5 +10,6 @@ module.exports = {
 	db_host : "104.236.25.186",
 	db_user : "chris",
 	db_password : "mabel-dbCHRISTMAS",
-	db_db : "mabel"
+	db_db : "mabel",
+	mailgun_api_key : "key-63d264e42d05a5b1287708742fdccbc9"
 };
