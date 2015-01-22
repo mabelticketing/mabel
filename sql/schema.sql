@@ -107,7 +107,8 @@ create table group_access_right (
 	ticket_type_id int not null,
 	primary key (id),
 	FOREIGN KEY (group_id) REFERENCES user_group(id),
-	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
+	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
+	unique(group_id, ticket_type_id)
 );
 
 ### PAYMENT METHODS ###
@@ -128,7 +129,8 @@ create table group_payment_method_access (
 	payment_method_id int not null,
 	primary key (id),
 	FOREIGN KEY (group_id) REFERENCES user_group(id),
-	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id),
+	unique(group_id, payment_method_id)
 );
 
 ### TRANSACTIONS ###
