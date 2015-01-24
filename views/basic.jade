@@ -1,0 +1,17 @@
+extends ./main.jade
+
+block scripts
+	// bootstrap
+	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
+	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	link(rel="stylesheet", type="text/css", href="/css/main.css")
+
+block title
+	title Mabel Ticketing | #{title}
+
+block content
+	div.slide
+			section.slide-content
+				h1 #{title}
+				.well
+					p!= content

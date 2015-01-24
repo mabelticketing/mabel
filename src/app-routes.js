@@ -69,8 +69,8 @@ router.route("/register")
 						[newUser.name, newUser.email, newUser.password, code]);
 				})
 				.then(function() {
-					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "'Mabel Ticketing' <registration@mg.clittle.com>", "Mabel Registration Confirmation", 
-						"test.jade", {name: newUser.name, link: config.base_url + "/confirm?code=" + code});
+					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "'Mabel Ticketing' <registration@mabelticketing.co.uk>", "Mabel Registration Confirmation", 
+						"test.jade", {name: newUser.name, link: config.base_url + "/confirm/" + code});
 				})
 				.then(function() {
 					res.render("registered.jade",{name: newUser.name, email: newUser.email});
@@ -78,6 +78,17 @@ router.route("/register")
 		}
 	).get(function(req, res) {
 		res.render("register.jade");
+	});
+
+router.route("/confirm/:code")
+	.get(function(req, res) {
+		connection.runSql("UPDATE user SET is_verified=1 WHERE verification_code=?", [req.params.code])
+			.then(function(rows) {
+				if (rows.affectedRows < 1) throw "invalid verification code.";
+				res.render("basic.jade", {title:"Registration Confirmed", content:"Thank you for verifying your email address. You may now log in to book tickets <a href='/login/mabel/'>here</a>."});
+			}).fail(function(err) {
+				res.render("basic.jade", {title:"Confirmation Failed", content:"An error occurred: " + err});
+			});
 	});
 
 // TODO: everything below this point should be precompiled HTML
