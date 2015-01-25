@@ -48,3 +48,11 @@ router.route("/:id")
 			apiRouter.marshallPromise(res, api.ticket.del(req.params.id));
 		}
 	);
+
+router.route("/getByUser/:id")
+	.get(
+		function(req, res) {
+			console.log("here");
+			apiRouter.marshallPromise(res, api.ticket.getByUser(req.params.id));
+		}
+	);

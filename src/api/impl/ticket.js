@@ -5,6 +5,7 @@ var Q = require("q");
 var api = {
 	get: get,
 	getAll: getAll,
+	getByUser: getByUser,
 	insert: insert,
 	del: del,
 	update: update
@@ -51,4 +52,9 @@ function getAll(opts) {
 	conn.end();
 
 	return runSql(sql, true);
+}
+
+function getByUser(user_id) {
+	var sql = "SELECT * FROM ticket WHERE booking_user_id = ?";
+	return runSql(sql, [user_id]);
 }
