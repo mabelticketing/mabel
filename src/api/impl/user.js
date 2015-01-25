@@ -36,10 +36,10 @@ function getAllowance(user_id) {
 			FROM user_group \
 			JOIN user_group_membership \
 				ON user_group.id=user_group_membership.group_id \
-			WHERE user_id=17) A\
+			WHERE user_id=?) A\
 		JOIN (SELECT COUNT(*) b \
 			FROM ticket \
-			WHERE booking_user_id=17) B;", [user_id, user_id]);
+			WHERE booking_user_id=?) B;", [user_id, user_id]);
 }
 
 function update(user, callback) {
