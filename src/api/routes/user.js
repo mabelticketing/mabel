@@ -13,6 +13,14 @@ router.route("/me")
 		}
 	);
 
+router.route("/ticket_allowance")
+	.get(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.user.getAllowance(req.user.id));
+		}
+	);
+
+
 router.route("/:id")
 	.get(
 		function(req, res, next) {

@@ -8,6 +8,7 @@ var api = {
 	insert: insert,
 	del: del,
 	update: update,
+	getAllowance: getAllowance,
 	group: require("./usergroup.js")
 };
 module.exports = api;
@@ -27,6 +28,18 @@ function get(user_id, callback) {
 			callback(null, users[0]);
 		});
 	});
+}
+
+function getAllowance(user_id) {
+	return runSql("SELECT a-b AS allowance FROM \
+		(SELECT MAX(ticket_allowance) a \
+			FROM user_group \
+			JOIN user_group_membership \
+				ON user_group.id=user_group_membership.group_id \
+			WHERE user_id=17) A\
+		JOIN (SELECT COUNT(*) b \
+			FROM ticket \
+			WHERE booking_user_id=17) B;", [user_id, user_id]);
 }
 
 function update(user, callback) {

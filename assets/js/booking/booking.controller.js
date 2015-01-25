@@ -19,6 +19,7 @@ function BookingController($scope, APICaller, $interval) {
 	vm.meta = {
 		bookingSum: 0,
 		ticketQuantity: 0,
+		ticketAllowance: 0
 	};
 	vm.booking = {
 		tickets: [],
@@ -38,6 +39,14 @@ function BookingController($scope, APICaller, $interval) {
 		if (err) return console.log(err);
 
 		vm.user = data;
+	});
+
+	// get the user's ticket allowance
+	APICaller.get("user/ticket_allowance", function(err, data) {
+		if (err) return console.log(err);
+
+		// generate an empty array to get ng-repeat to work (it only works for arrays, not up to a range)
+		vm.meta.ticketAllowance = new Array(data[0].allowance);
 	});
 
 	// join the queue
@@ -68,7 +77,7 @@ function BookingController($scope, APICaller, $interval) {
 
 			// get available ticket types
 			// TODO: parameterise event id
-			APICaller.get("ticket_type/1", function(err, available_tickets) {
+			APICaller.get("ticket_type/available/1", function(err, available_tickets) {
 				if (err) return console.log(err);
 
 				vm.available_tickets = available_tickets;
@@ -96,6 +105,7 @@ function BookingController($scope, APICaller, $interval) {
 				$interval.cancel(poller);
 			}
 			vm.status = "booking";
+
 		} else if (status.queueing) {
 			// show the loading page
 			console.log("Show loading page");
@@ -118,7 +128,7 @@ function BookingController($scope, APICaller, $interval) {
 		if (tickets !== undefined) {
 			for (var i = 0; i < tickets.length; i++) {
 				bookingSum += parseInt(tickets[i].quantity) * tickets[i].price;
-				ticketQuantity += tickets[i].quantity;
+				ticketQuantity += parseInt(tickets[i].quantity);
 
 				if (vm.booking.donate === true) bookingSum += parseInt(tickets[i].quantity);
 			}

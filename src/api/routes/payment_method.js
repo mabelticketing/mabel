@@ -8,6 +8,7 @@ module.exports = router;
 
 router.route("/:id")
 	.get(
+		apiRouter.checkAdmin(),
 		function(req, res) {
 			api.payment_method.get(req.params.id, apiRouter.marshallResult(res));
 		}
@@ -16,6 +17,6 @@ router.route("/:id")
 router.route("/")
 	.get(
 		function(req, res) {
-			api.payment_method.getAll(apiRouter.marshallResult(res));
+			apiRouter.marshallPromise(res, api.payment_method.getAll(req.user.id));
 		}
 	);
