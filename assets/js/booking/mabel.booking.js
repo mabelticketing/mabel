@@ -1,1 +1,1 @@
-angular.module('mabel.booking', ['mabel.shared']); 
+angular.module('mabel.booking', ['mabel.shared', 'ui.bootstrap']); 
