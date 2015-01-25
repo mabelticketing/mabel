@@ -117,7 +117,7 @@ router.route("/register")
 					return connection.runSql("INSERT INTO user SET name=?, email=?, password_md5=md5(?), registration_time=UNIX_TIMESTAMP(), verification_code=?", [newUser.name, newUser.email, newUser.password, code]);
 				})
 				.then(function() {
-					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "'Mabel Ticketing' <registration@mabelticketing.co.uk>", "Mabel Registration Confirmation",
+					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "Registration Confirmation",
 						"regConf.jade", {
 							name: newUser.name,
 							link: config.base_url + "/confirm/" + code
@@ -162,7 +162,7 @@ router.route("/confirm/resend/:email")
 					throw 'Unexpected error - email matches multiple users';
 				}
 				var user = users[0];
-				return emailer.send("'" + user.name + "' <" + user.email + ">", "'Mabel Ticketing' <registration@mabelticketing.co.uk>", "Mabel Registration Confirmation",
+				return emailer.send("'" + user.name + "' <" + user.email + ">", "Registration Confirmation",
 					"regConf.jade", {
 						name: user.name,
 						link: config.base_url + "/confirm/" + user.verification_code

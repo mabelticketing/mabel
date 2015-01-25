@@ -26,8 +26,8 @@ passport.use(new LocalStrategy({
 passport.use(new RavenStrategy({
 	// NB I don't know what audience is actually for. It seems to just work like a base url
 	audience: config.base_url,
-	desc: __('Mabel Ticketing System'),
-	msg: __('Mabel needs to check you are a current member of the university'),
+	desc: __('Emmanuel May Ball Ticketing System'), // TODO: Parameterise this
+	msg: __('Emmanuel May Ball needs to check you are a current member of the university'),
 	// use demonstration raven server in development
 	debug: false
 }, RavenStrategyCallback));
