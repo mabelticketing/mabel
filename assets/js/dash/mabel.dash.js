@@ -1,0 +1,1 @@
+angular.module('mabel.dash', ['mabel.shared'/*, 'ui.bootstrap'*/]); 
