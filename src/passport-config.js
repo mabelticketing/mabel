@@ -69,7 +69,7 @@ function RavenStrategyCallback(crsid, params, done) {
 			if (rows.length < 1) {
 				// if user not in table then put them in
 				tokenPromise = register({
-					// TODO: Can we get a better name than this?
+					// TODO: et a better name than this?
 					name: "Mabel User",
 					email: crsid + "@cam.ac.uk",
 					crsid: crsid,
