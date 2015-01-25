@@ -5,6 +5,7 @@ block scripts
 	script(type="text/javascript", src="/components/angular/angular.js")
 	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
 	// bootstrapping
+	//- TODO: remove this?
 	script(type="text/javascript" src="/js/mabel.js")
 
 	// shared
@@ -18,13 +19,10 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
 	// bootstrap
-	script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
-	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
-	//- TODO: This is outside of scope for bookingCtrl - HOW DO WE DISPLAY THIS??????
 	//- Probably easiest to not use angular for this, and instead set document.title in javascript
 	//- alternatively move the controller further up the html, or create a new 'title' controller
 	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
@@ -96,14 +94,14 @@ block content
 													tr.info
 														td Total cost: #[b £{{ bookingCtrl.meta.bookingSum | number:2 }}]
 									.form-group
-										label.col-lg-2.control-label Payment Method
+										label.col-lg-2.control-label Payment
 										.col-lg-10
 											.radio(ng-repeat="method in bookingCtrl.payment_methods")
 												label
 													input(type="radio", ng-model="bookingCtrl.booking.payment_method", ng-value="method.id")
 													span #[b {{ method.name }}] - {{ method.description }}
 									p(ng-if="bookingCtrl.booking.payment_method != -1 && bookingCtrl.meta.ticketAllowance.length >= bookingCtrl.meta.ticketQuantity", style="text-align:center;") 
-										input.btn.btn-info(type="submit", value="Confirm")
+										input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
 
 			div(ng-switch-when="done")
 				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC

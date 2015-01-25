@@ -1,1 +1,43 @@
-p dash.jade
+extends ./main.jade
+
+block scripts
+	// angular
+	script(type="text/javascript", src="/components/angular/angular.js")
+	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+	
+	// shared
+	script(type="text/javascript" src="/js/shared/mabel.shared.js")
+	script(type="text/javascript" src="/js/shared/apicaller.factory.js")
+	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
+
+	// dash
+	script(type="text/javascript" src="/js/dash/mabel.dash.js")
+	script(type="text/javascript" src="/js/dash/dash.controller.js")
+
+	// bootstrap
+	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	link(rel="stylesheet", type="text/css", href="/css/main.css")
+
+
+block title
+	title Dashboard
+
+block content
+	div(ng-app="mabel.dash" ng-controller="DashController as dashCtrl" ng-view)
+		.slide
+			section.slide-content
+				h1 Dashboard
+				.panel.panel-warning
+					.panel-heading
+						h4.panel-heading(style="margin:0px;padding:0px;") The tickets that will be available to you are as follows:
+					.panel-body
+						ul
+							li(ng-repeat="ticket in dashCtrl.tickets") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
+						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
+				h2 Your tickets
+				p #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
+				//- TODO: display list of ticketsTODO: give option to open editing section  has name column, delete ticket column. There is also a transfer tickets button.
+				h2 Booking
+				p #[em You have not made any bookings yet.]
+				hr
+				p If you have any other queries regarding tickets, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
