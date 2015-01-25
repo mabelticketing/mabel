@@ -7,7 +7,6 @@ function BookingController($scope, APICaller, $interval) {
 	var vm = this;
 
 	/*** DECLARATION ***/
-	e = vm;
 	// initialise scope vars 
 	vm.user = {};
 	vm.available_tickets = [];
@@ -42,6 +41,7 @@ function BookingController($scope, APICaller, $interval) {
 	});
 
 	// join the queue
+	// TODO: Parameterise event id
 	APICaller.get("booking/open/1", function(err, data) {
 		if (err) return console.log(err); // error handling
 		
@@ -65,9 +65,9 @@ function BookingController($scope, APICaller, $interval) {
 		console.log(status);
 		if (status.open) {
 			// show the booking page and stuff
-			console.log("Show booking page");
 
 			// get available ticket types
+			// TODO: parameterise event id
 			APICaller.get("ticket_type/1", function(err, available_tickets) {
 				if (err) return console.log(err);
 

@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var connection = require('./api/impl/connection.js');
 var emailer = require("./emailer");
 var config = require("./config");
+var register = require("./passport-config.js").register;
 
 /*** APP ROUTER ***/
 var router = express.Router();
@@ -113,8 +114,13 @@ router.route("/register")
 						// user already exists
 						throw newUser.email + ' has already been registered.';
 					}
-
-					return connection.runSql("INSERT INTO user SET name=?, email=?, password_md5=md5(?), registration_time=UNIX_TIMESTAMP(), verification_code=?", [newUser.name, newUser.email, newUser.password, code]);
+					var user = {
+						name:  newUser.name,
+						email:  newUser.email, 
+						verification_code:  code, 
+						password: newUser.password
+					};
+					return register(user);
 				})
 				.then(function() {
 					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "Registration Confirmation",
