@@ -3,16 +3,20 @@ extends ./main.jade
 block scripts
 	// angular
 	script(type="text/javascript", src="/components/angular/angular.js")
-	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/components/angular-resource/angular-resource.js")
 	
 	// shared
-	script(type="text/javascript" src="/js/shared/mabel.shared.js")
-	script(type="text/javascript" src="/js/shared/apicaller.factory.js")
-	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
+	script(type="text/javascript", src="/js/shared/mabel.shared.js")
+	script(type="text/javascript", src="/js/shared/apicaller.factory.js")
+	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
+	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
+	script(type="text/javascript", src="/js/shared/user.factory.js")
 
 	// dash
-	script(type="text/javascript" src="/js/dash/mabel.dash.js")
-	script(type="text/javascript" src="/js/dash/dash.controller.js")
+	script(type="text/javascript", src="/components/moment/moment.js")
+	script(type="text/javascript", src="/js/dash/mabel.dash.js")
+	script(type="text/javascript", src="/js/dash/dash.controller.js")
 
 	// bootstrap
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
@@ -31,12 +35,21 @@ block content
 					.panel-heading
 						h4.panel-heading(style="margin:0px;padding:0px;") The tickets that will be available to you are as follows:
 					.panel-body
-						ul
-							li(ng-repeat="ticket in dashCtrl.tickets") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
+						ul(ng-if="dashCtrl.ticketsAvailable.length != 0")
+							li(ng-repeat="ticket in dashCtrl.ticketsAvailable") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
+						p(ng-if="dashCtrl.ticketsAvailable.length == 0", style="font-style:italic;") We couldn't find any tickets available to you.
 						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
 				h2 Your tickets
-				p #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
-				//- TODO: display list of ticketsTODO: give option to open editing section  has name column, delete ticket column. There is also a transfer tickets button.
+				table(ng-if="dashCtrl.ticketsBooked != 0")
+					tr
+						th Ticket
+						th 
+					tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
+						td {{ ticket }}
+						td 
+				p(ng-if="dashCtrl.ticketsBooked == 0") #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
+
+				
 				h2 Booking
 				p #[em You have not made any bookings yet.]
 				hr
