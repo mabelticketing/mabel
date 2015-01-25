@@ -18,15 +18,13 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
 	// bootstrap
-	script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
-	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
 	//- TODO: This is outside of scope for bookingCtrl - HOW DO WE DISPLAY THIS??????
-	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
-	title(ng-if="bookingCtrl.status == 'booking'") Book your tickets!
+	title(ng-if="bookingCtrl.status == 'queueing'") Mabel | Queueing...
+	title(ng-if="bookingCtrl.status == 'booking'") Mabel | Book your tickets!
 
 block content
 	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)
@@ -96,13 +94,13 @@ block content
 													tr.info
 														td Total cost: #[b £{{ bookingCtrl.meta.bookingSum | number:2 }}]
 									.form-group
-										label.col-lg-2.control-label Payment Method
+										label.col-lg-2.control-label Payment
 										.col-lg-10
 											.radio(ng-repeat="method in bookingCtrl.payment_methods")
 												label
 													input(type="radio", ng-model="bookingCtrl.booking.payment_method", ng-value="method.id")
 													span #[b {{ method.name }}] - {{ method.description }}
-									p(ng-if="bookingCtrl.booking.payment_method != -1", style="text-align:center;") #[input.btn.btn-info(type="submit", value="Confirm")]
+									p #[input.btn.btn-info(id="submitButton", type="submit", value="Confirm")]
 
 			div(ng-switch-when="done")
 				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC
