@@ -14,6 +14,10 @@ function send(to, subject, template, data) {
 	if (typeof to === 'string') to = [to];
 	template = __dirname + "/../views/email/" + template;
 
+	// TODO: parameterise event details
+	// TODO: Set up emmamayball.com domain on mailgun
+	var from = "'Emmanuel May Ball Ticketing' <ticketing@emmamayball.com>";
+
 	var render = jade.compileFile(template, {
 		filename:template,
 		pretty:"\t"
@@ -23,7 +27,7 @@ function send(to, subject, template, data) {
 
 	var mailcomposer = new MailComposer();
 	mailcomposer.setMessageOption({
-		from    : "'Emmanuel May Ball Ticketing' <ticketing@emmamayball.com>", // TODO: Parameterise this
+		from    : from, // TODO: Parameterise this
 		to      : to,
 		subject : subject,
 		text    : text,

@@ -12,6 +12,11 @@ var crypto = require('crypto');
 
 var secret = config.jwt_secret;
 
+module.exports = {
+	// TODO: this isn't a very tidy place for this
+	register: register
+};
+
 // TODO: Maybe one day - a load of the stuff here should probably go via API for consistency
 
 // configure passport auth strategies
@@ -179,6 +184,12 @@ function register(user) {
 			return deferred.promise;
 		});
 
+	if (user.password !== undefined) {
+		var hash = crypto.createHash('md5');
+		hash.update(user.password);
+		user.password_md5 = hash.digest('hex');
+		delete user.password;
+	}
 	var userPromise = connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [user])
 		.then(function(result) {
 			return result.insertId;
