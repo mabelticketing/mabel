@@ -17,7 +17,10 @@ var secret = config.jwt_secret;
 // configure passport auth strategies
 
 // mabel email + password login
-passport.use(new LocalStrategy(LocalStrategyCallback));
+passport.use(new LocalStrategy({
+	usernameField: 'email',
+	passwordField: 'password'
+}, LocalStrategyCallback));
 
 // raven login
 passport.use(new RavenStrategy({
@@ -94,8 +97,8 @@ function RavenStrategyCallback(crsid, params, done) {
 function LocalStrategyCallback(email, password, done) {
 	var count = (email.match(/@/g) || []).length;
 	if (count !== 1) {
-		done({
-			error: __("Invalid email address")
+		return done(null, false, {
+			message: __("Invalid email address")
 		});
 	}
 	// try to find user in db with crsid
@@ -104,29 +107,29 @@ function LocalStrategyCallback(email, password, done) {
 			if (values.length < 1) {
 				// user not registered
 				throw {
-					// deliberately not saying whether it's email or password that was wrong (security mofo)
-					error: __("Invalid credentials")
+					// deliberately not saying whether it's email or password that was wrong
+					message: __("Invalid credentials")
 				};
 			} else if (values.length > 1) {
 				throw {
-					error: __("Unexpectedly found many users :(")
+					message: __("Unexpectedly found many users :(")
 				};
 			} else {
 				var user = values[0];
 				if (user.is_verified === 0) {
 					// user is not verified
 					throw {
-						error: __("User is not verified")
+						message: __("This email address has not been verified. <a href='/confirm/resend/" + user.email + "'>Click here</a> to resend the verification code.")
 					};
 				} else {
 					var hash = crypto.createHash('md5');
 					hash.update(password);
-					var md5_pass = hash.digest();
+					var md5_pass = hash.digest('hex');
 					if (md5_pass === user.password_md5) {
 						return getToken(user.id);
 					} else {
 						throw {
-							error: __("Invalid credentials")
+							message: __("Invalid credentials")
 						};
 					}
 				}
@@ -137,7 +140,7 @@ function LocalStrategyCallback(email, password, done) {
 				token: token,
 			});
 		}, function(err) {
-			return done(err);
+			return done(null, false, err);
 		});
 }
 
@@ -148,7 +151,9 @@ function register(user) {
 	// TODO: parameterise event id
 	var groupsPromise = connection.runSql("SELECT * FROM event WHERE id=1")
 		.then(function(eventDetails) {
-			if (eventDetails.length !== 1) throw {error: "unexpected number of events"};
+			if (eventDetails.length !== 1) throw {
+				error: "unexpected number of events"
+			};
 			var crsid, email, url = eventDetails[0].group_assignment_url;
 			if (user.crsid !== undefined) {
 				crsid = user.crsid;
@@ -156,8 +161,8 @@ function register(user) {
 			if (user.email !== undefined) {
 				email = user.email;
 			}
-			url = url.replace(/\{!crsid!\}/,crsid);
-			url = url.replace(/\{!email!\}/,email);
+			url = url.replace(/\{!crsid!\}/, crsid);
+			url = url.replace(/\{!email!\}/, email);
 
 			// http.request doesn't do promises, so we make one ourselves
 			var deferred = Q.defer();
@@ -178,7 +183,7 @@ function register(user) {
 		.then(function(result) {
 			return result.insertId;
 		});
-		// .then(getUser);
+	// .then(getUser);
 
 	// return groupsPromise;
 	return Q.all([groupsPromise, userPromise])
@@ -187,11 +192,10 @@ function register(user) {
 			var userId = results[1];
 			var promises = [];
 			promises.push(getUser(userId));
-			for (var i=0; i<groups.length; i++) {
+			for (var i = 0; i < groups.length; i++) {
 				promises.push(
-					connection.runSql("insert into mabel.user_group_membership (user_id, group_id) VALUES (?, ?)",
-						[userId, groups[i]])
-				);	
+					connection.runSql("insert into mabel.user_group_membership (user_id, group_id) VALUES (?, ?)", [userId, groups[i]])
+				);
 			}
 			return Q.all(promises).then(function(insertResult) {
 				// the first promise result is the result of getUser
