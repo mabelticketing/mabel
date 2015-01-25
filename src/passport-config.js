@@ -6,64 +6,20 @@ var RavenStrategy = require('passport-raven').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var jwt = require("jwt-simple");
 var __ = require("./strings.js");
+var Q = require('q');
+var http = require('http');
 var crypto = require('crypto');
 
 var secret = config.jwt_secret;
 
-// configure trivial passport authentication strategy
-passport.use(new LocalStrategy(
-	function(email, password, done) {
-		var count = (email.match(/@/g) || []).length;
-		if (count !== 1) {
-			done({
-				error: __("Invalid email address")
-			});
-		}
-		// try to find user in db with crsid
-		connection.runSql("SELECT * FROM user WHERE email=?", [email])
-			.then(function(values) {
-				if (values.length < 1) {
-					// user not registered
-					throw {
-						// deliberately not saying whether it's email or password that was wrong (security mofo)
-						error: __("Invalid credentials")
-					};
-				} else if (values.length > 1) {
-					throw {
-						error: __("Unexpectedly found many users :(")
-					};
-				} else {
-					var user = values[0];
-					if (user.is_verified === 0) {
-						// user is not verified
-						throw {
-							error: __("User is not verified")
-						};
-					} else {
-						var hash = crypto.createHash('md5');
-						hash.update(password);
-						var md5_pass = hash.digest();
-						if (md5_pass === user.password_md5) {
-							return getToken(user.id);
-						} else {
-							throw {
-								error: __("Invalid credentials")
-							};
-						}
-					}
-				}
-			})
-			.then(function(token) {
-				return done(null, {
-					token: token,
-				});
-			}, function(err) {
-				return done(err);
-			});
-	}
-));
+// TODO: Maybe one day - a load of the stuff here should probably go via API for consistency
 
-// configure raven passport authentication strategy
+// configure passport auth strategies
+
+// mabel email + password login
+passport.use(new LocalStrategy(LocalStrategyCallback));
+
+// raven login
 passport.use(new RavenStrategy({
 	// NB I don't know what audience is actually for. It seems to just work like a base url
 	audience: config.base_url,
@@ -71,7 +27,36 @@ passport.use(new RavenStrategy({
 	msg: __('Mabel needs to check you are a current member of the university'),
 	// use demonstration raven server in development
 	debug: false
-}, function(crsid, params, done) {
+}, RavenStrategyCallback));
+
+// token auth (for access to the api)
+passport.use(new BearerStrategy(BearerStrategyCallback));
+
+// I don't know why we need (de)serialization functions but things get unhappy
+// if they don't exist
+
+passport.deserializeUser(function(user, done) {
+	done(null, user);
+});
+
+passport.serializeUser(function(user, done) {
+	done(null, user);
+});
+
+function BearerStrategyCallback(token, done) {
+	var decoded = jwt.decode(token, secret);
+	if (decoded.authenticated === true) {
+		return done(null, {
+			id: decoded.id,
+			groups: decoded.groups,
+			token: token
+		}, null);
+	} else {
+		return done(null, false);
+	}
+}
+
+function RavenStrategyCallback(crsid, params, done) {
 
 	// try to find user in db with crsid
 	connection.runSql("SELECT * FROM user WHERE crsid=?", [crsid])
@@ -104,60 +89,121 @@ passport.use(new RavenStrategy({
 			});
 		});
 
-}));
+}
 
-// passport bearer strategy
-passport.use(new BearerStrategy(
-	function(token, done) {
-		var decoded = jwt.decode(token, secret);
-		if (decoded.authenticated === true) {
-			return done(null, {
-				id: decoded.id,
-				groups: decoded.groups,
-				token: token
-			}, null);
-		} else {
-			return done(null, false);
-		}
+function LocalStrategyCallback(email, password, done) {
+	var count = (email.match(/@/g) || []).length;
+	if (count !== 1) {
+		done({
+			error: __("Invalid email address")
+		});
 	}
-));
+	// try to find user in db with crsid
+	connection.runSql("SELECT * FROM user WHERE email=?", [email])
+		.then(function(values) {
+			if (values.length < 1) {
+				// user not registered
+				throw {
+					// deliberately not saying whether it's email or password that was wrong (security mofo)
+					error: __("Invalid credentials")
+				};
+			} else if (values.length > 1) {
+				throw {
+					error: __("Unexpectedly found many users :(")
+				};
+			} else {
+				var user = values[0];
+				if (user.is_verified === 0) {
+					// user is not verified
+					throw {
+						error: __("User is not verified")
+					};
+				} else {
+					var hash = crypto.createHash('md5');
+					hash.update(password);
+					var md5_pass = hash.digest();
+					if (md5_pass === user.password_md5) {
+						return getToken(user.id);
+					} else {
+						throw {
+							error: __("Invalid credentials")
+						};
+					}
+				}
+			}
+		})
+		.then(function(token) {
+			return done(null, {
+				token: token,
+			});
+		}, function(err) {
+			return done(err);
+		});
+}
 
-
-
-// below is currently not used meaningfully because we don't actually use sessions
-// but things get unhappy if the functions don't exist
-
-passport.deserializeUser(function(userid, done) {
-	// convert a user id into the user object itself
-	done(null, userid);
-});
-
-passport.serializeUser(function(user, done) {
-	// convert a user object into the ID.
-	// we do this to keep the session size small
-	done(null, user);
-});
-
-
+// returns a promise which is resolved with the new user
 function register(user) {
-	var insertQuery = "INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()";
-	return connection.runSql(insertQuery, user)
+
+	// while the user insert is going on, retrieve the group stuff
+	// TODO: parameterise event id
+	var groupsPromise = connection.runSql("SELECT * FROM event WHERE id=1")
+		.then(function(eventDetails) {
+			if (eventDetails.length !== 1) throw {error: "unexpected number of events"};
+			var crsid, email, url = eventDetails[0].group_assignment_url;
+			if (user.crsid !== undefined) {
+				crsid = user.crsid;
+			}
+			if (user.email !== undefined) {
+				email = user.email;
+			}
+			url = url.replace(/\{!crsid!\}/,crsid);
+			url = url.replace(/\{!email!\}/,email);
+
+			// http.request doesn't do promises, so we make one ourselves
+			var deferred = Q.defer();
+
+			http.get(url, function(res) {
+				console.log("Got response: " + res.statusCode);
+
+				res.on("data", function(chunk) {
+					deferred.resolve(JSON.parse(chunk));
+				});
+			}).on('error', function(e) {
+				deferred.reject(new Error(e));
+			});
+			return deferred.promise;
+		});
+
+	var userPromise = connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [user])
 		.then(function(result) {
 			return result.insertId;
-		})
-		// TODO: lookup groups and assign
-		// register will return a promise which is resolved with the new user
-		.then(getUser)
-		.then(function(newUser) {
-			var groups = [];
-			// TODO: lookup groups
-			newUser.groups = groups;
-			return newUser;
+		});
+		// .then(getUser);
+
+	// return groupsPromise;
+	return Q.all([groupsPromise, userPromise])
+		.then(function(results) {
+			var groups = results[0];
+			var userId = results[1];
+			var promises = [];
+			promises.push(getUser(userId));
+			for (var i=0; i<groups.length; i++) {
+				promises.push(
+					connection.runSql("insert into mabel.user_group_membership (user_id, group_id) VALUES (?, ?)",
+						[userId, groups[i]])
+				);	
+			}
+			return Q.all(promises).then(function(insertResult) {
+				// the first promise result is the result of getUser
+				var newUser = insertResult[0];
+				newUser.groups = groups;
+				return newUser;
+			});
 		});
 }
 
 function getUser(userId) {
-	return connection.runSql("SELECT * FROM user WHERE id = ?", [userId])
+	return connection.runSql("SELECT * FROM user WHERE id = ?", [userId], true)
 		.then(function(results) {
 			if (results.length !== 1) {
 				throw {
