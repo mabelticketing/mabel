@@ -52,7 +52,9 @@ block content
 									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
 									p Guest names can be assigned to tickets after you make your booking.
 									.form-group
-										label.col-lg-2.control-label Tickets
+										div.alert.alert-danger(ng-if="bookingCtrl.meta.ticketQuantity > bookingCtrl.meta.ticketAllowance.length")
+											strong Error: 
+											| You may only book {{bookingCtrl.meta.ticketAllowance.length}} tickets (you have selected {{bookingCtrl.meta.ticketQuantity}}).
 										.col-lg-10
 											table.table
 												thead
@@ -72,11 +74,7 @@ block content
 															select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
 																//- TODO: display appropriate ticket quantity options
 																//- TODO: clarify where all this stuff is authenticated
-																option(ng-value="0") 0
-																option(ng-value="1") 1
-																option(ng-value="2") 2
-																option(ng-value="3") 3
-																option(ng-value="4") 4
+																option(ng-value="$index" ng-repeat="i in [0].concat(bookingCtrl.meta.ticketAllowance) track by $index") {{$index}}
 									.form-group
 										label.col-lg-2.control-label Donation
 										.col-lg-10
@@ -104,7 +102,8 @@ block content
 												label
 													input(type="radio", ng-model="bookingCtrl.booking.payment_method", ng-value="method.id")
 													span #[b {{ method.name }}] - {{ method.description }}
-									p(ng-if="bookingCtrl.booking.payment_method != -1", style="text-align:center;") #[input.btn.btn-info(type="submit", value="Confirm")]
+									p(ng-if="bookingCtrl.booking.payment_method != -1 && bookingCtrl.meta.ticketAllowance.length >= bookingCtrl.meta.ticketQuantity", style="text-align:center;") 
+										input.btn.btn-info(type="submit", value="Confirm")
 
 			div(ng-switch-when="done")
 				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC
