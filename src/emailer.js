@@ -10,7 +10,7 @@ module.exports = {
 	send: send
 };
 
-function send(to, from, subject, template, data) {
+function send(to, subject, template, data) {
 	if (typeof to === 'string') to = [to];
 	template = __dirname + "/../views/email/" + template;
 
@@ -23,7 +23,7 @@ function send(to, from, subject, template, data) {
 
 	var mailcomposer = new MailComposer();
 	mailcomposer.setMessageOption({
-		from    : from,
+		from    : "'Emmanuel May Ball Ticketing' <ticketing@emmamayball.com>", // TODO: Parameterise this
 		to      : to,
 		subject : subject,
 		text    : text,
