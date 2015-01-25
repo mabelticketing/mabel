@@ -11,26 +11,15 @@ module.exports = {
 	update: update
 };
 
-function getForUser(user, event_id, callback) {
-	if (user.groups.length < 1)
-		return callback({error:"The user is not a member of any groups!"});
-	var sql = "SELECT DISTINCT(ticket_type.id) AS ticket_type_id,\
-			ticket_type.name AS name, \
-			ticket_type.price AS price \
-		FROM group_access_right \
-		JOIN user_group \
-			ON user_group.id = group_access_right.group_id \
-		JOIN ticket_type \
-			ON ticket_type.id = group_access_right.ticket_type_id \
-		WHERE ticket_type.event_id=? AND (";
-
-	var sep = "";
-	for (var i = 0; i < user.groups.length; i++) {
-		sql += sep + "user_group.id = ?";
-		sep = " OR ";
-	}
-	sql += ");";
-	return runSql(sql, [event_id].concat(user.groups));
+// TODO: use event_id
+function getForUser(user, event_id) {
+	var sql = "SELECT * FROM ticket_type \
+		JOIN (SELECT DISTINCT(ticket_type_id) \
+				FROM (SELECT * FROM user_group_membership WHERE user_id=?) A \
+				JOIN group_access_right \
+				ON A.group_id=group_access_right.group_id) B \
+			ON B.ticket_type_id=id;";
+	return runSql(sql, [user.id]);
 }
 
 function getAll(opts, event_id) {
