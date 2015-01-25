@@ -3,16 +3,16 @@ extends ./main.jade
 block scripts
 	// angular
 	script(type="text/javascript", src="/components/angular/angular.js")
-	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
+	
 	// bootstrapping
-	//- TODO: remove this?
-	script(type="text/javascript" src="/js/mabel.js")
+	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
 
 	// shared
-	script(type="text/javascript" src="/js/shared/mabel.shared.js")
-	script(type="text/javascript" src="/js/shared/datetimepicker.directive.js")
-	script(type="text/javascript" src="/js/shared/apicaller.factory.js")
-	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
+	script(type="text/javascript", src="/js/shared/mabel.shared.js")
+	script(type="text/javascript", src="/js/shared/datetimepicker.directive.js")
+	script(type="text/javascript", src="/js/shared/apicaller.factory.js")
+	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
 	
 	// booking
 	script(type = "text/javascript" src="/js/booking/mabel.booking.js")
