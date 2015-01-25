@@ -3,6 +3,7 @@ html
 	head
 		title Login Successful
 		script(type="text/javascript").
+			// TODO: Inline this function
 			function createCookie(name,value,days) {
 				if (days) {
 					var date = new Date();
@@ -13,9 +14,5 @@ html
 				document.cookie = name+"="+value+expires+"; path=/";
 			}
 			createCookie("mabelAuthToken", "#{token}",1);
+			window.location = "/dash";
 	body
-		h1 Login Successful.
-		p token is #{token}
-		a(href="/admin") Admin Panel
-		br
-		a(href="/") Home Page

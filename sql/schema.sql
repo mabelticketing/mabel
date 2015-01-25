@@ -5,6 +5,7 @@
 drop table if exists email_destination;
 drop table if exists email;
 drop table if exists transaction;
+drop table if exists group_payment_method_access;
 drop table if exists payment_method;
 drop table if exists group_access_right;
 drop table if exists user_group_membership;
@@ -82,6 +83,7 @@ create table user_group (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	description varchar(1000),
+	ticket_allowance int not null,
 	primary key (id)
 );
 
@@ -105,7 +107,8 @@ create table group_access_right (
 	ticket_type_id int not null,
 	primary key (id),
 	FOREIGN KEY (group_id) REFERENCES user_group(id),
-	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
+	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
+	unique(group_id, ticket_type_id)
 );
 
 ### PAYMENT METHODS ###
@@ -115,9 +118,19 @@ create table payment_method (
 	name varchar(100) not null,
 	description varchar(128),
 	event_id int not null,
-	# perhaps an issue here - do we want e.g. performers to be given the option of paying for their ticket with college bill? so perhaps link with groups table
+	ticket_limit int not null,
 	primary key (id),
 	FOREIGN KEY (event_id) REFERENCES event(id)
+);
+
+create table group_payment_method_access (
+	id int auto_increment not null,
+	group_id int not null,
+	payment_method_id int not null,
+	primary key (id),
+	FOREIGN KEY (group_id) REFERENCES user_group(id),
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id),
+	unique(group_id, payment_method_id)
 );
 
 ### TRANSACTIONS ###

@@ -22,9 +22,10 @@ block scripts
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
-	//- TODO: This is outside of scope for bookingCtrl - HOW DO WE DISPLAY THIS??????
-	title(ng-if="bookingCtrl.status == 'queueing'") Mabel | Queueing...
-	title(ng-if="bookingCtrl.status == 'booking'") Mabel | Book your tickets!
+	//- Probably easiest to not use angular for this, and instead set document.title in javascript
+	//- alternatively move the controller further up the html, or create a new 'title' controller
+	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
+	title(ng-if="bookingCtrl.status == 'booking'") Book your tickets!
 
 block content
 	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)

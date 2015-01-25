@@ -37,14 +37,12 @@ if (! empty($crsid) ) {
 			break;
 		}
 	}
-}
 
-// next check the authorised members' list
-if (! empty($email) ) {
-	$lines = file('auth_members.txt');
+	// next check the authorised members' list
+	$lines = file('auth_members_crsid.txt');
 
 	foreach ($lines as $line) {
-		if (strcasecmp(trim($email), trim($line) ) == 0) {
+		if (strcasecmp(trim($crsid), trim($line) ) == 0) {
 			array_push($groups, $EMMA_GRP);
 			break;
 		}

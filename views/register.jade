@@ -1,0 +1,52 @@
+extends ./main.jade
+
+block scripts
+	// angular
+	script(type="text/javascript", src="/components/angular/angular.js")
+	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+	// bootstrapping
+	script(type="text/javascript" src="/js/mabel.js")
+
+	// shared
+	script(type="text/javascript" src="/js/shared/mabel.shared.js")
+	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
+	
+	// bootstrap
+	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
+	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	link(rel="stylesheet", type="text/css", href="/css/main.css")
+
+block title
+	title Mabel Ticketing | Register to Buy Tickets
+
+block content
+	div(ng-app="mabel.register").slide
+			section.slide-content
+				h1 Register to Buy Tickets
+				.well
+					form.form-horizontal(method="POST")
+						fieldset
+							if error
+								div.alert.alert-dismissable.alert-danger
+									strong Error: 
+									| #{error}
+							legend You need to register before you will be able to purchase tickets.
+								br
+								| If you are a current student, you should 
+								a(href="/login/raven") log in with Raven
+								|	instead.
+							.form-group
+								label.col-lg-2.control-label(for='inputName') Name
+								.col-lg-10
+									input#inputName.form-control(type='text', name="name", value=name, placeholder='Name')
+							.form-group
+								label.col-lg-2.control-label(for='inputEmail') Email
+								.col-lg-10
+									input#inputEmail.form-control(type='email', name="email", value=email, placeholder='Email')
+							.form-group
+								label.col-lg-2.control-label(for='inputPassword') Password
+								.col-lg-10
+									input#inputPassword.form-control(type='password', name="password", placeholder='Password')
+							.form-group
+								.col-lg-10.col-lg-offset-2
+									button.btn.btn-primary(type='submit') Submit
