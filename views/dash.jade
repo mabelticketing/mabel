@@ -32,8 +32,8 @@ block content
 						h4.panel-heading(style="margin:0px;padding:0px;") The tickets that will be available to you are as follows:
 					.panel-body
 						ul
-							li(ng-repeat="group in dashCtrl.groups") #[b {{ group.description }}] - you are able to purchase up to #[b {{ group.ticket_allowance }} ticket#[span(ng-if="group.ticket_allowance != 1") s]] as a member of this group.
-						p If there is a problem with the ticket groups you have been allocated above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
+							li(ng-repeat="ticket in dashCtrl.tickets") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
+						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
 				h2 Your tickets
 				p #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
 				//- TODO: display list of ticketsTODO: give option to open editing section  has name column, delete ticket column. There is also a transfer tickets button.

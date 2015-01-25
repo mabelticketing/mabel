@@ -9,14 +9,15 @@ function DashController($scope, APICaller) {
 	//e = vm;
 
 	// initialise scope vars 
-	vm.groups = [];
+	vm.tickets = [];
 
 	/*** INITIAL ACTION ***/
 
-	APICaller.get('user/group', function(err, data) {
+	APICaller.get('ticket_type/available/1', function(err, data) {
 		if (err) return console.log(err);
-		// assign response to groups array
-		vm.groups = data;
+		// assign response to tickets array
+		vm.tickets = data;
+		console.log(data);
 	});
 	
 	// NOT SURE THIS IS NESC.
