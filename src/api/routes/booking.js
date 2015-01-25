@@ -23,17 +23,15 @@ router.route("/:event_id")
 			console.log(req.body);
 			var bookingPromise = api.booking.makeBooking(req.user.id, req.params.event_id, req.body);
 			bookingPromise.then(function(result) {
+				req.ticketsAllocated = result.ticketsAllocated;
 				console.log(req.ticketsAllocated);
 				// make transaction!
-				api.booking.makeTransaction(req.user.id, req.params.event_id, req.body, result.ticketsAllocated, function(err, result) {
-					if (err) return next(err);
+				return api.booking.makeTransaction(req.user.id, req.params.event_id, req.body, result.ticketsAllocated);
 
-					//TODO: do something with result (don't think it contains anything yet)
-				});
-
-				req.ticketsAllocated = result.ticketsAllocated;
+			})
+			.then(function(transactionInsertResults) {
+				//TODO: do something with result (don't think it contains anything yet)
 				next();
-
 			}, function(err) {
 				if (err) return next(err);
 			});

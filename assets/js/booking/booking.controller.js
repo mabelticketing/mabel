@@ -3,12 +3,14 @@ angular.module('mabel.booking')
 
 // TODO Maybe: I feel like BookingController is trying to do too much, but maybe that doesn't matter
 // e.g. the call to user/me should perhaps be the responsibility of some other controller
-function BookingController($scope, APICaller, $interval) {
+function BookingController($scope, APICaller, User, $interval) {
 	var vm = this;
+
+	e = vm;
 
 	/*** DECLARATION ***/
 	// initialise scope vars 
-	vm.user = {};
+	vm.user = User.current();
 	vm.available_tickets = [];
 	vm.payment_methods = [];
 	vm.status = 'queueing';
@@ -19,7 +21,7 @@ function BookingController($scope, APICaller, $interval) {
 	vm.meta = {
 		bookingSum: 0,
 		ticketQuantity: 0,
-		ticketAllowance: 0
+		ticketAllowance: []
 	};
 	vm.booking = {
 		tickets: [],
@@ -34,16 +36,10 @@ function BookingController($scope, APICaller, $interval) {
 
 	/*** INITIAL ACTION ***/
 
-	// get user data to help the user feel comfortable
-	APICaller.get("user/me", function(err, data) {
-		if (err) return console.log(err);
-
-		vm.user = data;
-	});
-
 	// get the user's ticket allowance
 	APICaller.get("user/ticket_allowance", function(err, data) {
 		if (err) return console.log(err);
+		if (data[0].allowance < 1) return;
 
 		// generate an empty array to get ng-repeat to work (it only works for arrays, not up to a range)
 		vm.meta.ticketAllowance = new Array(data[0].allowance);
@@ -59,6 +55,13 @@ function BookingController($scope, APICaller, $interval) {
 		processStatus(data);
 	});	
 
+	// get available payment methods
+	APICaller.get("payment_method", function(err, payment_method) {
+		if (err) return console.log(err);
+
+		vm.payment_methods = payment_method;
+	});
+
 	// we will watch for changes to the tickets array or donations boolean and update summaries when the array changes
 	$scope.$watch(function() {
 		return vm.booking.tickets;
@@ -69,6 +72,21 @@ function BookingController($scope, APICaller, $interval) {
 	}, updateMeta);
 
 	/*** FUNCTION DEFINITIONS ***/
+
+	function resizeArray(array, size, default_obj) {
+		if (array.length > size) {
+			return array.slice(0, size);
+		} 
+		if (array.length < size) {
+			var arr = array.slice(0);
+			var obj = arr[0] || default_obj;
+			for (var i=array.length; i<size; i++) {
+				arr[i] = angular.copy(obj);
+			}
+			return arr;
+		}
+		return array;
+	}
 
 	function processStatus(status) {
 		console.log(status);
@@ -88,16 +106,10 @@ function BookingController($scope, APICaller, $interval) {
 						ticket_type_id: available_tickets[i].id,
 						quantity: 0,
 						price: available_tickets[i].price,
-						name: available_tickets[i].name
+						name: available_tickets[i].name,
+						payment_methods: []
 					});
 				}
-			});
-
-			// get available payment methods
-			APICaller.get("payment_method", function(err, payment_method) {
-				if (err) return console.log(err);
-
-				vm.payment_methods = payment_method;
 			});
 
 			// don't need to keep polling now we're ready to book
@@ -105,6 +117,7 @@ function BookingController($scope, APICaller, $interval) {
 				$interval.cancel(poller);
 			}
 			vm.status = "booking";
+			document.title = "Mabel Ticketing | Book Your Tickets";
 
 		} else if (status.queueing) {
 			// show the loading page
@@ -112,11 +125,13 @@ function BookingController($scope, APICaller, $interval) {
 			vm.queue.position = status.position;
 			vm.queue.of = status.of;
 			vm.status = "queueing";
+			document.title = "Mabel Ticketing | Queueing...";
 
 		} else {
 			// show some kind of error message or rejoin the queue
 			console.log("Not in the queue!");
 			vm.status = "unavailable";
+			document.title = "Mabel Ticketing | Booking Unavailable";
 			vm.reason = status.reason;
 		}
 	}
@@ -125,13 +140,13 @@ function BookingController($scope, APICaller, $interval) {
 		var bookingSum = 0;
 		var ticketQuantity = 0;
 		var tickets = vm.booking.tickets;
-		if (tickets !== undefined) {
-			for (var i = 0; i < tickets.length; i++) {
-				bookingSum += parseInt(tickets[i].quantity) * tickets[i].price;
-				ticketQuantity += parseInt(tickets[i].quantity);
+		for (var i = 0; i < tickets.length; i++) {
+			bookingSum += parseInt(tickets[i].quantity) * tickets[i].price;
+			ticketQuantity += parseInt(tickets[i].quantity);
+			tickets[i].payment_methods = resizeArray(tickets[i].payment_methods, parseInt(tickets[i].quantity), vm.payment_methods[0].id);
 
-				if (vm.booking.donate === true) bookingSum += parseInt(tickets[i].quantity);
-			}
+			// TODO: £2 should be parameterised
+			if (vm.booking.donate === true) bookingSum += 2*parseInt(tickets[i].quantity);
 		}
 		vm.meta.bookingSum = bookingSum;
 		vm.meta.ticketQuantity = ticketQuantity;
