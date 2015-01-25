@@ -1,1 +1,1 @@
-angular.module('mabel.dash', ['mabel.shared', 'ngResource'/*, 'ui.bootstrap'*/]); 
+angular.module('mabel.dash', ['mabel.shared', 'ngResource', 'ui.bootstrap']); 
