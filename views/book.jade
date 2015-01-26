@@ -4,12 +4,15 @@ block scripts
 	// angular
 	script(type="text/javascript", src="/components/angular/angular.js")
 	script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/components/angular-resource/angular-resource.js")
 	
-	// bootstrapping
-	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
+	// misc
+	script(type="text/javascript", src="/components/moment/moment.js")
 
 	// shared
 	script(type="text/javascript", src="/js/shared/mabel.shared.js")
+	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
+	script(type="text/javascript", src="/js/shared/user.factory.js")
 	script(type="text/javascript", src="/js/shared/datetimepicker.directive.js")
 	script(type="text/javascript", src="/js/shared/apicaller.factory.js")
 	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
@@ -19,14 +22,14 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
 	// bootstrap
+	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
 	//- Probably easiest to not use angular for this, and instead set document.title in javascript
 	//- alternatively move the controller further up the html, or create a new 'title' controller
-	title(ng-if="bookingCtrl.status == 'queueing'") Queueing...
-	title(ng-if="bookingCtrl.status == 'booking'") Book your tickets!
+	title Mabel Ticketing | Booking
 
 block content
 	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)
@@ -45,10 +48,12 @@ block content
 					section.slide-content
 						h1 Booking
 						.well
-							form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate)
+							p(ng-if="bookingCtrl.meta.ticketAllowance.length <= 0") No tickets are currently available for you to book.
+							form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.meta.ticketAllowance.length > 0")
 								fieldset
 									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
 									p Guest names can be assigned to tickets after you make your booking.
+									p You may book {{ bookingCtrl.meta.ticketAllowance.length }} ticket{{ bookingCtrl.meta.ticketAllowance.length==1?"":"s"}}.
 									.form-group
 										div.alert.alert-danger(ng-if="bookingCtrl.meta.ticketQuantity > bookingCtrl.meta.ticketAllowance.length")
 											strong Error: 
@@ -70,7 +75,6 @@ block content
 																ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
 																value="ticket.ticket_type_id")
 															select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
-																//- TODO: display appropriate ticket quantity options
 																//- TODO: clarify where all this stuff is authenticated
 																option(ng-value="$index" ng-repeat="i in [0].concat(bookingCtrl.meta.ticketAllowance) track by $index") {{$index}}
 									.form-group
@@ -86,21 +90,22 @@ block content
 										label.col-lg-2.control-label Summary
 										.col-lg-10
 											table.table.table-striped
+												tbody(ng-repeat="ticketType in bookingCtrl.booking.tickets", ng-if="ticketType.quantity > 0")
+													tr(style="background-color:#ffffff;")
+														th {{ ticketType.name }} (£{{ ticketType.price | number:2 }}) 
+													tr(ng-repeat="method in ticketType.payment_methods track by $index" style="background-color:#ffffff;")
+														td Payment method for {{ticketType.name}} Ticket {{$index + 1}}: 
+															select(ng-model="ticketType.payment_methods[$index]")
+																//- TODO: display appropriate ticket quantity options
+																//- TODO: clarify where all this stuff is authenticated
+																option(ng-value="m.id" ng-repeat="m in bookingCtrl.payment_methods") {{m.name}}
 												tbody
-													tr(ng-repeat="ticket in bookingCtrl.booking.tickets", ng-if="ticket.quantity > 0", style="background-color:#ffffff;")
-														td {{ ticket.quantity }}x {{ ticket.name }} @ £{{ ticket.price | number:2 }} each
 													tr(ng-if="bookingCtrl.booking.donate", style="background-color:#ffffff;")
 														td #[b Charitable donation @ £2.00 per ticket]
+												tfoot
 													tr.info
 														td Total cost: #[b £{{ bookingCtrl.meta.bookingSum | number:2 }}]
-									.form-group
-										label.col-lg-2.control-label Payment
-										.col-lg-10
-											.radio(ng-repeat="method in bookingCtrl.payment_methods")
-												label
-													input(type="radio", ng-model="bookingCtrl.booking.payment_method", ng-value="method.id")
-													span #[b {{ method.name }}] - {{ method.description }}
-									p(ng-if="bookingCtrl.booking.payment_method != -1 && bookingCtrl.meta.ticketAllowance.length >= bookingCtrl.meta.ticketQuantity", style="text-align:center;") 
+									p(ng-if="bookingCtrl.meta.ticketAllowance.length >= bookingCtrl.meta.ticketQuantity", style="text-align:center;") 
 										input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
 
 			div(ng-switch-when="done")
