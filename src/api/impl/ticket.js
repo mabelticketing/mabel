@@ -1,6 +1,6 @@
 var connection = require("./connection.js");
 var runSql = connection.runSql;
-var Q = require("q");
+var Q = require("q"); // TODO: is this used here?
 
 var api = {
 	get: get,
@@ -56,5 +56,6 @@ function getAll(opts) {
 
 function getByUser(user_id) {
 	var sql = "SELECT * FROM ticket WHERE booking_user_id = ?";
+	// TODO: join with ticket_type
 	return runSql(sql, [user_id]);
 }
