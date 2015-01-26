@@ -52,7 +52,6 @@ router.route("/:id")
 router.route("/getByUser/:id")
 	.get(
 		function(req, res) {
-			console.log("here");
 			apiRouter.marshallPromise(res, api.ticket.getByUser(req.params.id));
 		}
 	);
