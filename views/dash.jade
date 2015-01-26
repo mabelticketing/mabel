@@ -43,13 +43,15 @@ block content
 						p(ng-if="dashCtrl.ticketsAvailable.length == 0", style="font-style:italic;") We couldn't find any tickets available to you.
 						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
 				h2 Your tickets
-				table(ng-if="dashCtrl.ticketsBooked != 0")
-					tr
-						th Ticket
-						th 
-					tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
-						td {{ ticket }}
-						td 
+				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked != 0")
+					thead
+						tr
+							th Ticket
+							th Manage
+					tbody
+						tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
+							td {{ ticket }}
+							td ticket management buttons
 				p(ng-if="dashCtrl.ticketsBooked == 0") #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
 
 				
