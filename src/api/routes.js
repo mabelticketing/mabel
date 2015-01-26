@@ -47,6 +47,9 @@ router.use("/booking",
 router.use("/ticket",
 	require("./routes/ticket.js"));
 
+router.use("/transaction",
+	require("./routes/transaction.js"));
+
 function checkGroup(groupId) {
 	return function(req, res, next) {
 		if (req.user.groups.indexOf(groupId) < 0) {
