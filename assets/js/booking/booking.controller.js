@@ -42,7 +42,7 @@ function BookingController($scope, APICaller, User, $interval) {
 		if (data[0].allowance < 1) return;
 
 		// generate an empty array to get ng-repeat to work (it only works for arrays, not up to a range)
-		vm.meta.ticketAllowance = new Array(data[0].allowance);
+		vm.meta.ticketAllowance = new Array(Math.min(data[0].allowance,10))
 	});
 
 	// join the queue
