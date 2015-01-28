@@ -1,7 +1,7 @@
 var express   =      require("express");
 var apiRouter = require("../routes.js");
 var api       =    require("../api.js");
-var router    = express.router({
+var router    = express.Router({
 	mergeParams: true
 });
 
