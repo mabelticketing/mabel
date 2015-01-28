@@ -103,11 +103,14 @@ function makeBooking(user_id, event_id, booking, callback) {
 		}
 		// generate queries
 		var insertSqlStatements = [];
+		var insertSqlValues     = [];
+		var ticketCount = 0;
 		var tickets = booking.tickets;
 		for (var j = 0; j < tickets.length; j++) {
 			var ticketsLeft = counts[tickets[j].ticket_type_id].limit - counts[tickets[j].ticket_type_id].count;
 			if (tickets[j].quantity > 0 && ticketsLeft > 0) { // if we WANT tickets AND there are TICKETS LEFT
 				var toBuy = Math.min(tickets[j].quantity, ticketsLeft); // make sure we aren't over selling
+				ticketCount += toBuy;
 				ticketsAllocated.push({
 					"ticket_type_id": tickets[j].ticket_type_id,
 					"quantity": toBuy,
@@ -117,8 +120,15 @@ function makeBooking(user_id, event_id, booking, callback) {
 				var spacer = "";
 				for (var k = 0; k < toBuy; k++) {
 					query += spacer;
-					query += "(" + user_id + "," + tickets[j].ticket_type_id + ",1,UNIX_TIMESTAMP())";
+					query += "(?,?,1,UNIX_TIMESTAMP())";
+					insertSqlValues.push(user_id);
+					insertSqlValues.push(tickets[j].ticket_type_id);
 					spacer = ",";
+					// add donation ticket if we need to
+					if (booking.donate) {
+						query += ",(?,5,1,UNIX_TIMESTAMP())";
+						insertSqlValues.push(user_id);
+					}
 				}
 				insertSqlStatements.push(query);
 			}
@@ -127,7 +137,7 @@ function makeBooking(user_id, event_id, booking, callback) {
 		var insertSql = insertSqlStatements.join("; ");
 
 		// run insert query
-		var promise2 = runSql(insertSql, true);
+		var promise2 = runSql(insertSql, insertSqlValues, true);
 
 		return promise2.then(function() {
 			return {
@@ -142,6 +152,7 @@ function makeBooking(user_id, event_id, booking, callback) {
 function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback) {
 	// firstly group payment methods so we have one transaction per payment method
 	// shouldn't trust data from the client - so retrieve ticket prices from DB
+	console.log(booking);
 	return runSql("SELECT price, id from ticket_type")
 		.then(function(priceRow) {
 			// key the prices by ticket_type_id for clarity
