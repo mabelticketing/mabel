@@ -55,7 +55,8 @@ function getAll(opts) {
 }
 
 function getByUser(user_id) {
-	var sql = "SELECT * FROM ticket WHERE booking_user_id = ?";
-	// TODO: join with ticket_type
+	var sql = "SELECT * FROM ticket \
+			JOIN ticket_type ON ticket_type.id=ticket.ticket_type_id \
+			WHERE ticket.booking_user_id=?";
 	return runSql(sql, [user_id]);
 }

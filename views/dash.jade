@@ -34,7 +34,7 @@ block content
 		.slide
 			section.slide-content
 				h1 Dashboard
-				.panel.panel-warning
+				.panel.panel-info
 					.panel-heading
 						h4.panel-heading(style="margin:0px;padding:0px;") The tickets that will be available to you are as follows:
 					.panel-body
@@ -47,15 +47,28 @@ block content
 					thead
 						tr
 							th Ticket
-							th Manage
+							th Name
+							th Delete
 					tbody
 						tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
-							td {{ ticket }}
-							td ticket management buttons
+							td {{ ticket.name }}
+							td
+								input(type="text")
+							td
+								input(type="checkbox")
 				p(ng-if="dashCtrl.ticketsBooked == 0") #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
 
-				
-				h2 Billing
-				p #[em You have not made any bookings yet. #[a(href="/book") Click here to make one].]
+				div(ng-if="dashCtrl.transactions.length == 0")
+					h2 Billing
+					p #[em You have not made any bookings yet. #[a(href="/book") Click here to make one].]
+				table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length != 0")
+					thead
+						tr
+							th Date of booking
+							th Payment method
+					tbody
+						tr(ng-repeat="transaction in dashCtrl.transactions")
+							td {{ transaction.transaction_time }}
+							td {{ transaction.payment_method_id }}
 				hr
-				p If you have any other queries regarding tickets, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
+				p If you have any other queries regarding tickets, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com]. Please allow a few days before seeing cheques confirmed on this page.
