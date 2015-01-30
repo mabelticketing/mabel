@@ -77,6 +77,7 @@ function canBook(user_id, event_id, callback) {
 		}
 
 		// TODO: check if there are any ticket types available to this user's groups
+		// -> just getting boolean. YES / NO? Act accordingly - perhaps move to its own function.
 
 		return callback(null, {
 			open: true

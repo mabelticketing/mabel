@@ -21,10 +21,16 @@ router.route("/:event_id")
 		function(req, res, next) {
 			// posted booking is in req.body
 			var ticketsRequested = [];
+			var ticketTypeIDs    = [];
 
 			for (var i=0; i<req.body.tickets.length; i++) {
 				var num = parseInt(req.body.tickets[i].payment_methods.length);
 				for (var j=0; j<num; j++) {
+					var ticket_type_id = req.body.tickets[i].ticket_type_id;
+					if (ticketTypeIDs.indexOf(ticket_type_id) == -1) {
+						// only add ticket_type_id if not in the array already
+						ticketTypeIDs.push(ticket_type_id);
+					}
 					ticketsRequested.push({
 						ticket_type_id: req.body.tickets[i].ticket_type_id,
 						payment_method: parseInt(req.body.tickets[i].payment_methods[j])
@@ -32,10 +38,29 @@ router.route("/:event_id")
 				}
 			}
 
-			// TODO: ticket validation:
+			/*** VALIDATION ***/
+
 			// Check that the user has access to each of these ticket types
+			// TODO: implement this
+			api.booking_validate.hasAccess(req.user.id, req.params.event_id, ticketTypeIDs, function(err, result) {
+				if (err) return next(err);
+				if (!result.success) {
+					// TODO: return more useful information
+					return next("You haven't got access to all of the tickets you requested.");
+					// TODO: Where is next() going?!?!
+				}
+				// does have access
+				// -> allow to continue
+			}
+
+
 			// Check that the user is allowed to buy this many tickets
+			// - put into array: {ticket_type_id: quantity} both integers! allowed.
+			// - api.booking_validate.canBuyX() for each ticket_type requested
+
 			// Check that the user is allowed to use the selected payment methods
+			// go through payment methods. College Bill only for emmanuel college users
+
 			// Check that "College Bill" hasn't been used more than once
 
 			api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate)
