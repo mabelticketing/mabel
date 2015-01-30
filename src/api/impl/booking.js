@@ -77,8 +77,6 @@ function canBook(user_id, event_id, callback) {
 			}
 		}
 
-		// TODO: check if there are any ticket types available to this user's groups
-
 		return callback(null, {
 			open: true
 		});
