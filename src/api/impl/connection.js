@@ -135,7 +135,7 @@ function runSql() {
 		default:
 			throw new Error("Invalid usage for runSql", arguments);
 	}
-	sql = mysql.format(arguments[0], data);
+	sql = mysql.format(arguments[0].replace(/(\t|\n)/g," ").replace(/\s+/g," "), data);
 	
 	// create a promise which will be resolved when the query returns
 	// for backwards-compatibility, add the given callback to the promise 
@@ -151,6 +151,8 @@ function runSql() {
 	});
 	conn.query(sql, function(err, rows) {
 		if (err) return d.reject(err);
+		rows.queryData = data;
+		rows.querySql = sql;
 		d.resolve(rows);
 	});
 	conn.end();
