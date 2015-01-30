@@ -157,14 +157,22 @@ function BookingController($scope, APICaller, User, $interval) {
 
 	// booking submission method
 	function submitBooking() {
-		console.log(vm.booking);
+		vm.meta.errorMsg = "";
 		APICaller.post("booking/1", vm.booking, function(err, result) {
 			console.log(result);
-			if (err) return console.log(err); // error handling
+			if (err) {
+				vm.meta.errorMsg = err.error;
+				return console.log(err); // error handling
+			}
 			// if we have success, display confirmation with link to ticket management page
 
 			// need to do more with booking stuff
-			if (result.success) vm.status = "done";
+			if (result.success) {
+				vm.status = "done";
+				return;
+			}
+			// weird, no error but success is false;
+			console.log(err, result);
 		});
 	}
 

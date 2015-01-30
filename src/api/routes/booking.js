@@ -31,22 +31,24 @@ router.route("/:event_id")
 			// subset helper function
 			function subset(requested, available) {
 				for (var i=0; i<requested.length; i++) {
-					if (available.indexOf(requested[i]) == -1) return false;
+					if (available.indexOf(requested[i]) === -1) return false;
 				}
 				return true;
 			}
 
 			for (var i=0; i<req.body.tickets.length; i++) {
+
 				var num = parseInt(req.body.tickets[i].payment_methods.length);
+				
 				for (var j=0; j<num; j++) {
 					var ticket_type_id = req.body.tickets[i].ticket_type_id;
 					// todo: change to object keys rather than using indexOf
-					if (ticketTypeIDs.indexOf(ticket_type_id) == -1) {
+					if (ticketTypeIDs.indexOf(ticket_type_id) === -1) {
 						// only add ticket_type_id if not in the array already
 						ticketTypeIDs.push(ticket_type_id);
 					}
 					var payment_method_id = parseInt(req.body.tickets[i].payment_methods[j]);
-					if (paymentMethodIDs.indexOf(payment_method_id) == -1) {
+					if (paymentMethodIDs.indexOf(payment_method_id) === -1) {
 						// only add payment_method_id if not in the array already
 						paymentMethodIDs.push(payment_method_id);
 					}
@@ -60,8 +62,10 @@ router.route("/:event_id")
 				}
 			}
 
+			// TODO: maybe check that every ticket has been allocated a payment method?
+
 			// check user has requested >0 tickets
-			if (count == 0) {
+			if (count === 0) {
 				res.json({
 					error: "You have not selected any tickets!",
 					success: false
@@ -73,7 +77,7 @@ router.route("/:event_id")
 				.then(function(result) {
 					for (var i=0; i<result.length; i++) {
 						var ticket_type_id = result[i].id;
-						if (availableTicketTypes.indexOf(ticket_type_id) == -1)
+						if (availableTicketTypes.indexOf(ticket_type_id) === -1)
 							availableTicketTypes.push(ticket_type_id);
 					}
 					// check ticket types are all available to user
@@ -89,7 +93,7 @@ router.route("/:event_id")
 				.then(function(result) {
 					for (i=0; i<result.length; i++) {
 						var method_id = result[i].id;
-						if (availablePaymentMethods.indexOf(method_id) == -1)
+						if (availablePaymentMethods.indexOf(method_id) === -1)
 							availablePaymentMethods.push(method_id);
 					}
 					// check payment methods are available to user
@@ -120,7 +124,7 @@ router.route("/:event_id")
 					var c = 0;
 					var COLLEGE_BILL_METHOD_ID = 1;
 					for (var i=0; i<ticketsRequested.length; i++) {
-						if (ticketsRequested[i].payment_method == COLLEGE_BILL_METHOD_ID) {
+						if (ticketsRequested[i].payment_method === COLLEGE_BILL_METHOD_ID) {
 							c += 1;
 						}
 					}
