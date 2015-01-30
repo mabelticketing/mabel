@@ -67,12 +67,13 @@ create table user (
 
 create table ticket (
 	id int auto_increment not null,
-	booking_user_id int not null,
+	user_id int not null,
 	ticket_type_id int not null,
+	guest_name varchar(100),
 	status_id int not null,
 	book_time int,
 	primary key (id),
-	FOREIGN KEY (booking_user_id) REFERENCES user(id),
+	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
 	FOREIGN KEY (status_id) REFERENCES ticket_status(id)
 );
