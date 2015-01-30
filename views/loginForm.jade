@@ -1,8 +1,9 @@
 extends ./main.jade
 
 block scripts	
+	script(type="text/javascript", src="/components/angular/angular.js")
 	// bootstrap
-	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
+	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
@@ -27,7 +28,7 @@ block content
 								|  instead.
 								br
 								| If you do not have a ticketing account, 
-								a click here to register
+								a(href="/register") click here to register
 								| .
 							.form-group
 								label.col-lg-2.control-label(for='inputEmail') Email
