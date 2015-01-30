@@ -9,7 +9,18 @@ module.exports = router;
 router.route("/available/:event_id")
 	.get(
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.getForUser(req.user, req.params.event_id));
+			var promise = api.ticket_type.getForUser(req.user, req.params.event_id)
+				// TODO: I don't think this is necessarily the tidiest way to tie in allowance
+				.then(function(results) {
+					return api.user.getAllowance(req.user.id).then(function(r) {
+						if (r.length !== 1) throw "Unexpected allowances length";
+						for (var i=0; i<results.length; i++) {
+							results[i].allowance = r[0].allowance;
+						}
+						return results;
+					});
+				});
+			apiRouter.marshallPromise(res, promise);
 		}
 	);
 
