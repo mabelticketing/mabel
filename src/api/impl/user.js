@@ -31,6 +31,8 @@ function get(user_id, callback) {
 }
 
 function getAllowance(user_id) {
+	// TODO: Parameterise this
+	var donation_ticket_type_id = 5;
 	return runSql("SELECT a-b AS allowance FROM \
 		(SELECT MAX(ticket_allowance) a \
 			FROM user_group \
@@ -39,7 +41,7 @@ function getAllowance(user_id) {
 			WHERE user_id=?) A\
 		JOIN (SELECT COUNT(*) b \
 			FROM ticket \
-			WHERE booking_user_id=?) B;", [user_id, user_id]);
+			WHERE booking_user_id=? AND ticket_type_id<>?) B;", [user_id, user_id, donation_ticket_type_id]);
 }
 
 function update(user, callback) {

@@ -84,7 +84,96 @@ function canBook(user_id, event_id, callback) {
 	});
 }
 
-function makeBooking(user_id, event_id, booking, callback) {
+function makeBooking(user_id, tickets, addDonations) {
+	// we are going to insert tickets one at a time to make sure we don't go over. 
+	// This is a magic SQL query which will only insert if there is space. 
+	/*
+		It works by selecting the constant values ?, ?, ?,
+		UNIX_TIMESTAMP() once for each row in the inner SELECT'd table.
+		This table will either have one row, if COUNT(*) <= ticket_limit,
+		(and so we insert the new ticket once), or no rows, in which case
+		we insert no tickets.
+		It is possible we could be even cleverer here and ensure the inner 
+		SELECT has the same number of rows as tickets we want to book of this 
+		type, then we would just need one query per ticket type.
+	*/
+	var sql = "INSERT INTO ticket \
+					(booking_user_id, ticket_type_id, status_id, book_time) \
+				SELECT ?, ?, 1, UNIX_TIMESTAMP() \
+				FROM \
+					(SELECT COUNT(*) sold FROM ticket WHERE ticket_type_id=?) A \
+					JOIN \
+					(SELECT ticket_limit cap FROM ticket_type WHERE id=?) B \
+					WHERE B.cap>A.sold;";
+	var promises = [];
+
+	// prepare a function here because we shouldn't create functions inside loops
+	function callback(ticket) {
+		return function(result) {
+			return {
+				result: result,
+				request: ticket
+			};
+		};
+	}
+	for (var i = 0; i < tickets.length; i++) {
+		promises.push(
+			runSql(sql, [user_id, tickets[i].ticket_type_id, tickets[i].ticket_type_id, tickets[i].ticket_type_id])
+			.then(callback(tickets[i]))
+		);
+	}
+
+	// TODO: parameterise this
+	var donation_ticket_type_id = 5;
+
+	// wait until all queries have been made
+	return Q.all(promises).then(function(results) {
+		var donationPromises = [];
+		var ticketsAllocated = [];
+		var ticketsRejected = [];
+		for (var i = 0; i < results.length; i++) {
+			if (results[i].result.affectedRows > 0) {
+				ticketsAllocated.push({
+					rowId: results[i].result.insertId,
+					request: results[i].request
+				});
+				if (addDonations) {
+					// add a donation, now we know that the ticket is booked
+					donationPromises.push(
+						runSql("INSERT INTO ticket SET ?, book_time=UNIX_TIMESTAMP()", [{
+							booking_user_id: user_id,
+							ticket_type_id: donation_ticket_type_id,
+							status_id: 1
+						}])
+						.then(callback(results[i].request))
+					);
+				}
+			} else {
+				ticketsRejected.push(results[i].request);
+			}
+		}
+
+		return Q.all(donationPromises)
+			.then(function(dResults) {
+				for (var j = 0; j < dResults.length; j++) {
+					if (dResults[j].result.affectedRows > 0) {
+						ticketsAllocated.push({
+							rowId: dResults[j].result.insertId,
+							request: dResults[j].request
+						});
+					}
+				}
+				return {
+					ticketsAllocated: ticketsAllocated,
+					ticketsRejected: ticketsRejected
+				};
+				
+			});
+
+	});
+}
+
+function makeBooking1(user_id, event_id, booking, callback) {
 	// have ticketsAllocated object so user isn't over charged if all tickets not available
 	var ticketsAllocated = [];
 
@@ -103,7 +192,7 @@ function makeBooking(user_id, event_id, booking, callback) {
 		}
 		// generate queries
 		var insertSqlStatements = [];
-		var insertSqlValues     = [];
+		var insertSqlValues = [];
 		var ticketCount = 0;
 		var tickets = booking.tickets;
 		for (var j = 0; j < tickets.length; j++) {
@@ -149,10 +238,11 @@ function makeBooking(user_id, event_id, booking, callback) {
 
 }
 
+
 function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback) {
 	// firstly group payment methods so we have one transaction per payment method
 	// shouldn't trust data from the client - so retrieve ticket prices from DB
-	console.log(booking);
+
 	return runSql("SELECT price, id from ticket_type")
 		.then(function(priceRow) {
 			// key the prices by ticket_type_id for clarity
@@ -179,7 +269,7 @@ function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback)
 					paymentsToMake[method_id] += prices[ticketsAllocated[i].ticket_type_id];
 					// TODO: fix assumption
 					// add charitable donation if nesc.
-					paymentsToMake[method_id]  += booking.donate ? 2 : 0; // ASSUMES booking donation = £2.00 which it IS FOR EMB2015
+					paymentsToMake[method_id] += booking.donate ? 2 : 0; // ASSUMES booking donation = £2.00 which it IS FOR EMB2015
 				}
 
 			}
@@ -191,39 +281,12 @@ function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback)
 			for (var method_id in payments) {
 				promises.push(
 					runSql("INSERT INTO transaction SET ?, transaction_time=UNIX_TIMESTAMP()", {
-						user_id:user_id,
-						value:payments[method_id],
-						payment_method_id:method_id
+						user_id: user_id,
+						value: payments[method_id],
+						payment_method_id: method_id
 					})
 				);
 			}
 			return Q.all(promises);
 		});
-
-
-	// var ticketTypeSql = "SELECT * FROM ticket_type WHERE event_id=?";
-	// runSql(ticketTypeSql, [event_id], function(err, types) {
-	// 	if (err) return callback(err);
-	// 	var value = 0;
-	// 	var totalQty = 0;
-
-	// 	var sortedTypes = [];
-	// 	for (var i = 0; i < types.length; i++) sortedTypes[types[i].id] = types[i];
-
-	// 	// generate value
-	// 	for (var j = 0; j < ticketsAllocated.length; j++) {
-	// 		var price = sortedTypes[ticketsAllocated[j].ticket_type_id].price;
-	// 		var qty = ticketsAllocated[j].quantity;
-	// 		totalQty += qty;
-	// 		value += price * qty;
-	// 	}
-
-
-	// 	transactionSql = "INSERT INTO transaction (user_id,value,payment_method_id,transaction_time) VALUES(?,?,?,UNIX_TIMESTAMP())";
-	// 	runSql(transactionSql, [user_id, value, booking.payment_method], function(err) {
-	// 		if (err) return callback(err);
-	// 		else callback(null, {}); // TODO: something more interesting here?
-	// 	})
-
-	// });
 }
