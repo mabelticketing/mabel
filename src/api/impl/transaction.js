@@ -46,7 +46,7 @@ function getByBookings(ticketsAllocated) {
 function insertTransactions(txs) {
 	var promises = [];
 	for (var i=0; i<txs.length; i++) {
-		promises.push(runSql("INSERT INTO transaction SET ?",[txs[0]]));
+		promises.push(runSql("INSERT INTO transaction SET ?, transaction_time=UNIX_TIMESTAMP()",[txs[0]]));
 	} 
 	return Q.all(promises);
 }
