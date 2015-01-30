@@ -48,16 +48,16 @@ block content
 					section.slide-content
 						h1 Booking
 						.well
-							p(ng-if="bookingCtrl.meta.ticketAllowance.length <= 0") No tickets are currently available for you to book.
-							form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.meta.ticketAllowance.length > 0")
+							p(ng-if="bookingCtrl.meta.ticketAllowance <= 0") No tickets are currently available for you to book.
+							form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.meta.ticketAllowance > 0")
 								fieldset
 									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
 									p Guest names can be assigned to tickets after you make your booking.
-									p You may book {{ bookingCtrl.meta.ticketAllowance.length }} ticket{{ bookingCtrl.meta.ticketAllowance.length==1?"":"s"}}.
+									p You may book {{ bookingCtrl.meta.ticketAllowance }} ticket{{ bookingCtrl.meta.ticketAllowance===1?"":"s"}}.
 									.form-group
-										div.alert.alert-danger(ng-if="bookingCtrl.meta.ticketQuantity > bookingCtrl.meta.ticketAllowance.length")
+										div.alert.alert-danger(ng-if="bookingCtrl.meta.ticketQuantity > bookingCtrl.meta.ticketAllowance")
 											strong Error: 
-											| You may only book {{bookingCtrl.meta.ticketAllowance.length}} tickets (you have selected {{bookingCtrl.meta.ticketQuantity}}).
+											| You may only book {{bookingCtrl.meta.ticketAllowance}} tickets (you have selected {{bookingCtrl.meta.ticketQuantity}}).
 										.col-lg-10
 											table.table
 												thead
@@ -71,12 +71,14 @@ block content
 														td {{ ticket.name }}
 														td £{{ ticket.price }}
 														td
-															input(type="hidden" 
-																ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
-																value="ticket.ticket_type_id")
-															select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
-																//- TODO: clarify where all this stuff is authenticated
-																option(ng-value="$index" ng-repeat="i in [0].concat(bookingCtrl.meta.ticketAllowance) track by $index") {{$index}}
+															div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length<1")
+																em Sold Out
+															div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length>0")
+																input(type="hidden" 
+																	ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
+																	value="ticket.ticket_type_id")
+																select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
+																	option(ng-value="$index" ng-repeat="i in [0].concat(bookingCtrl.booking.tickets[$index].max_tickets) track by $index") {{$index}}
 									.form-group
 										label.col-lg-2.control-label Donation
 										.col-lg-10
@@ -105,7 +107,7 @@ block content
 												tfoot
 													tr.info
 														td Total cost: #[b £{{ bookingCtrl.meta.bookingSum | number:2 }}]
-									p(ng-if="bookingCtrl.meta.ticketAllowance.length >= bookingCtrl.meta.ticketQuantity", style="text-align:center;") 
+									p(ng-if="bookingCtrl.meta.ticketAllowance >= bookingCtrl.meta.ticketQuantity", style="text-align:center;") 
 										input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
 
 			div(ng-switch-when="done")

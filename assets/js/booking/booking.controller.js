@@ -21,12 +21,11 @@ function BookingController($scope, APICaller, User, $interval) {
 	vm.meta = {
 		bookingSum: 0,
 		ticketQuantity: 0,
-		ticketAllowance: []
+		ticketAllowance: 0
 	};
 	vm.booking = {
 		tickets: [],
-		donate: true,
-		payment_method: -1
+		donate: true
 	};
 	// function on submission
 	vm.submitBooking = submitBooking;
@@ -36,14 +35,6 @@ function BookingController($scope, APICaller, User, $interval) {
 
 	/*** INITIAL ACTION ***/
 
-	// get the user's ticket allowance
-	APICaller.get("user/ticket_allowance", function(err, data) {
-		if (err) return console.log(err);
-		if (data[0].allowance < 1) return;
-
-		// generate an empty array to get ng-repeat to work (it only works for arrays, not up to a range)
-		vm.meta.ticketAllowance = data[0].allowance;
-	});
 
 	// join the queue
 	// TODO: Parameterise event id
@@ -53,23 +44,10 @@ function BookingController($scope, APICaller, User, $interval) {
 		// set up polling at intervals
 		poller = $interval(pollApi, 30000);
 		processStatus(data);
+
 	});	
 
-	// get available payment methods
-	APICaller.get("payment_method", function(err, payment_method) {
-		if (err) return console.log(err);
 
-		vm.payment_methods = payment_method;
-	});
-
-	// we will watch for changes to the tickets array or donations boolean and update summaries when the array changes
-	$scope.$watch(function() {
-		return vm.booking.tickets;
-	}, updateMeta, true); // the true argument causes 'deep' watching the array
-
-	$scope.$watch(function() {
-		return vm.booking.donate;
-	}, updateMeta);
 
 	/*** FUNCTION DEFINITIONS ***/
 
@@ -98,18 +76,43 @@ function BookingController($scope, APICaller, User, $interval) {
 			APICaller.get("ticket_type/available/1", function(err, available_tickets) {
 				if (err) return console.log(err);
 
-				vm.available_tickets = available_tickets;
-				for (var i=0; i<available_tickets.length; i++) {
-					// add each ticket, quantity 0 to vm.booking
-					// this is possibly a stupid idea, gives lots of undefineds in array
-					vm.booking.tickets.push({
-						ticket_type_id: available_tickets[i].id,
-						quantity: 0,
-						price: available_tickets[i].price,
-						name: available_tickets[i].name,
-						payment_methods: []
+				// get the user's ticket allowance
+				APICaller.get("user/ticket_allowance", function(err, data) {
+					if (err) return console.log(err);
+					if (data[0].allowance < 1) return;
+
+					vm.meta.ticketAllowance = data[0].allowance;
+					// generate an empty array to get ng-repeat to work (it only works for arrays, not up to a range)
+					// get available payment methods
+					APICaller.get("payment_method", function(err, payment_method) {
+						if (err) return console.log(err);
+
+						vm.payment_methods = payment_method;
+								
+						vm.available_tickets = available_tickets;
+						for (var i=0; i<available_tickets.length; i++) {
+							// add each ticket, quantity 0 to vm.booking
+							// this is possibly a stupid idea, gives lots of undefineds in array
+							vm.booking.tickets.push({
+								ticket_type_id: available_tickets[i].id,
+								max_tickets: new Array(Math.min(vm.meta.ticketAllowance, available_tickets[i].ticket_limit, 20)),
+								quantity: 0,
+								price: available_tickets[i].price,
+								name: available_tickets[i].name,
+								payment_methods: []
+							});
+						}
+
+						// we will watch for changes to the tickets array or donations boolean and update summaries when the array changes
+						$scope.$watch(function() {
+							return vm.booking.tickets;
+						}, updateMeta, true); // the true argument causes 'deep' watching the array
+
+						$scope.$watch(function() {
+							return vm.booking.donate;
+						}, updateMeta);
 					});
-				}
+				});
 			});
 
 			// don't need to keep polling now we're ready to book
