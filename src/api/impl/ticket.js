@@ -5,7 +5,7 @@ var config = require("../../config.js");
 var api = {
 	get: get,
 	getAll: getAll,
-	getByUser: getByUser,
+getByUser: getByUser,
 	insert: insert,
 	del: del,
 	update: update
@@ -15,7 +15,7 @@ module.exports = api;
 function get(ticket_id) {
 	var sql = "SELECT a.id, user_id, user.name AS booking_user_name, ticket_type_id, \
 					ticket_type.name AS ticket_type_name, status_id, ticket_status.name AS status_name, book_time\
-				FROM (SELECT * FROM ticket WHERE id=1) AS a \
+				FROM (SELECT * FROM ticket WHERE id=?) AS a \
 				JOIN user ON a.user_id=user.id \
 				JOIN ticket_type on ticket_type.id=ticket_type_id \
 				JOIN ticket_status ON ticket_status.id=status_id LIMIT 1;";

@@ -16,6 +16,7 @@ function APICaller($http, MabelToken) {
 		get: get,
 		put: put,
 		post: post,
+		del: del,
 		hasToken: !(token === undefined || token === null || token.length < 1) 
 	};
 	
@@ -80,5 +81,13 @@ function APICaller($http, MabelToken) {
 			}
 		}
 		call('post', resource, params, data, callback);
+	}
+
+	function del(resource, data, callback) {
+		if (callback === undefined) {
+			callback = data;
+			data = {};
+		}
+		call('delete', resource, data, {}, callback);
 	}
 }
