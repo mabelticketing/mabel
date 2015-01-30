@@ -3,6 +3,7 @@ var __ = require("../../strings.js");
 var Queue = require("../../queue.js");
 var runSql = connection.runSql;
 var Q = require("q");
+var config = require("../../config.js");
 
 module.exports = {
 	canBook: canBook,
@@ -125,7 +126,7 @@ function makeBooking(user_id, tickets, addDonations) {
 	}
 
 	// TODO: parameterise this
-	var donation_ticket_type_id = 5;
+	var donation_ticket_type_id = config.donation_ticket_type_id;
 
 	// wait until all queries have been made
 	return Q.all(promises).then(function(results) {
@@ -140,13 +141,17 @@ function makeBooking(user_id, tickets, addDonations) {
 				});
 				if (addDonations) {
 					// add a donation, now we know that the ticket is booked
+					var req = {
+						ticket_type_id: donation_ticket_type_id,
+						payment_method: results[i].request.payment_method
+					};
 					donationPromises.push(
 						runSql("INSERT INTO ticket SET ?, book_time=UNIX_TIMESTAMP()", [{
 							booking_user_id: user_id,
 							ticket_type_id: donation_ticket_type_id,
 							status_id: 1
 						}])
-						.then(callback(results[i].request))
+						.then(callback(req))
 					);
 				}
 			} else {
@@ -173,72 +178,6 @@ function makeBooking(user_id, tickets, addDonations) {
 
 	});
 }
-
-function makeBooking1(user_id, event_id, booking, callback) {
-	// have ticketsAllocated object so user isn't over charged if all tickets not available
-	var ticketsAllocated = [];
-
-	var countSql = "SELECT * FROM (SELECT ticket_type_id,COUNT(*) AS ticket_num FROM ticket GROUP BY ticket_type_id) AS t1 \
-	RIGHT JOIN (SELECT id,ticket_limit FROM ticket_type) AS t2 ON t1.ticket_type_id=t2.id";
-	var promise1 = runSql(countSql);
-
-	return promise1.then(function(countResult) {
-		// create array of count information
-		var counts = []; // again, undefineds in this array. there is probably a better way, but this is A WAY
-		for (var i = 0; i < countResult.length; i++) {
-			counts[countResult[i].id] = {
-				"count": (countResult[i].ticket_num == null) ? 0 : countResult[i].ticket_num, // if null, 0 tickets sold
-				"limit": countResult[i].ticket_limit
-			};
-		}
-		// generate queries
-		var insertSqlStatements = [];
-		var insertSqlValues = [];
-		var ticketCount = 0;
-		var tickets = booking.tickets;
-		for (var j = 0; j < tickets.length; j++) {
-			var ticketsLeft = counts[tickets[j].ticket_type_id].limit - counts[tickets[j].ticket_type_id].count;
-			if (tickets[j].quantity > 0 && ticketsLeft > 0) { // if we WANT tickets AND there are TICKETS LEFT
-				var toBuy = Math.min(tickets[j].quantity, ticketsLeft); // make sure we aren't over selling
-				ticketCount += toBuy;
-				ticketsAllocated.push({
-					"ticket_type_id": tickets[j].ticket_type_id,
-					"quantity": toBuy,
-					payment_methods: tickets[j].payment_methods
-				});
-				var query = "INSERT INTO ticket (booking_user_id,ticket_type_id,status_id,book_time) VALUES ";
-				var spacer = "";
-				for (var k = 0; k < toBuy; k++) {
-					query += spacer;
-					query += "(?,?,1,UNIX_TIMESTAMP())";
-					insertSqlValues.push(user_id);
-					insertSqlValues.push(tickets[j].ticket_type_id);
-					spacer = ",";
-					// add donation ticket if we need to
-					if (booking.donate) {
-						query += ",(?,5,1,UNIX_TIMESTAMP())";
-						insertSqlValues.push(user_id);
-					}
-				}
-				insertSqlStatements.push(query);
-			}
-		}
-		// join queries
-		var insertSql = insertSqlStatements.join("; ");
-
-		// run insert query
-		var promise2 = runSql(insertSql, insertSqlValues, true);
-
-		return promise2.then(function() {
-			return {
-				"ticketsAllocated": ticketsAllocated
-			};
-		});
-	});
-
-
-}
-
 
 function makeTransaction(user_id, event_id, booking, ticketsAllocated, callback) {
 	// firstly group payment methods so we have one transaction per payment method

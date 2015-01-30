@@ -150,7 +150,15 @@ function runSql() {
 		multipleStatements: (multiStatements !== undefined && multiStatements)
 	});
 	conn.query(sql, function(err, rows) {
-		if (err) return d.reject(err);
+		if (err) {
+			// if we get a deadlock, just try again
+			// http://stackoverflow.com/questions/643122/how-to-detect-deadlocks-in-mysql-innodb
+			if (err.errno === 1213) {
+				return d.resolve(runSql(sql));
+			} else {
+				return d.reject(err);
+			}
+		}
 		rows.queryData = data;
 		rows.querySql = sql;
 		d.resolve(rows);

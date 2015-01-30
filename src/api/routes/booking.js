@@ -18,7 +18,7 @@ router.route("/:event_id")
 			});
 
 		},
-		function(req, res, next) {
+		function(req, res) {
 			// posted booking is in req.body
 			var ticketsRequested = [];
 			var ticketTypeIDs    = [];
@@ -41,6 +41,7 @@ router.route("/:event_id")
 			/*** VALIDATION ***/
 
 			// Check that the user has access to each of these ticket types
+			// TODO: (and that these ticket types exist)
 			// TODO: implement this
 			api.booking_validate.hasAccess(req.user.id, req.params.event_id, ticketTypeIDs, function(err, result) {
 				if (err) return next(err);
@@ -52,8 +53,6 @@ router.route("/:event_id")
 				// does have access
 				// -> allow to continue
 			}
-
-
 			// Check that the user is allowed to buy this many tickets
 			// - put into array: {ticket_type_id: quantity} both integers! allowed.
 			// - api.booking_validate.canBuyX() for each ticket_type requested
@@ -68,40 +67,20 @@ router.route("/:event_id")
 					console.log(result);
 					res.mabel = {};
 					res.mabel.tickets = result;
-					return api.transaction.getByBookings(result.ticketsAllocated);
-				})
-				.then(function(result) {
-					res.mabel.transactions = result;
-					return api.transaction.insert(result);
 				})
 				.then(function() {
-					next();
+					// ticket insert worked
+					// leave the queue
+					var result = api.booking.leaveQueue(req.user.id, req.params.event_id);
+					result.success = true;
+					result.tickets = res.mabel.tickets;
+					res.json(result);
 				})
 				.fail(function(err) {
-					console.log("Something went sad", err);
+					console.log("Something went wrong", err);
+					// TODO: the client should do something with this error
 					res.json({error:err, success:false});
 				});
-			
-			// bookingPromise.then(function(result) {
-			// 	req.ticketsAllocated = result.ticketsAllocated;
-			// 	console.log(req.ticketsAllocated);
-			// 	// make transaction!
-			// 	return api.booking.makeTransaction(req.user.id, req.params.event_id, req.body, result.ticketsAllocated);
-			// })
-			// .then(function(transactionInsertResults) {
-			// 	// inserting transaction went well - we're done here
-			// 	next();
-			// }, function(err) {
-			// 	if (err) return next(err);
-			// });
-		},
-		function(req, res) {
-			// leave the queue
-			var result = api.booking.leaveQueue(req.user.id, req.params.event_id);
-			result.success = true;
-			result.tickets = res.mabel.tickets;
-			result.transactions = res.mabel.transactions;
-			res.json(result);
 		}
 	);
 
