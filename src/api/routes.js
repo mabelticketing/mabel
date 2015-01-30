@@ -14,6 +14,8 @@ module.exports.checkAdmin      = checkAdmin;
 module.exports.marshallResult  = marshallResult;
 module.exports.marshallPromise = marshallPromise;
 module.exports.stripMeta       = stripMeta;
+module.exports.isAdmin         = isAdmin;
+module.exports.isInGroup       = isInGroup;
 
 // all API routes should be authenticated with an access_token
 router
@@ -50,13 +52,21 @@ router.use("/ticket",
 router.use("/transaction",
 	require("./routes/transaction.js"));
 
+function isInGroup(user, groupId) {
+	return user.groups.indexOf(groupId) < 0;
+}
+
 function checkGroup(groupId) {
 	return function(req, res, next) {
-		if (req.user.groups.indexOf(groupId) < 0) {
-			next("You do not have permission to access this resource");
+		if (isInGroup(req.user, groupId)) {
+			return next("You do not have permission to access this resource");
 		}
 		next();
 	};
+}
+
+function isAdmin(user) {
+	isInGroup(user, 1);
 }
 
 function checkAdmin() {

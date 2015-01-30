@@ -24,7 +24,17 @@ block scripts
 	// bootstrap
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
-
+	style.
+		.label-notifier {
+			color: transparent!important;
+			width: 1.5em;
+			height: 1.5em;
+			display: inline-block;
+			border-radius: 2em;
+			padding: 0;
+			vertical-align: middle;
+			margin-left: 5px;
+		}
 
 block title
 	title Dashboard
@@ -46,9 +56,7 @@ block content
 						p(ng-if="dashCtrl.ticketsAvailable.length == 0", style="font-style:italic;") We couldn't find any tickets available to you.
 						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
 				h2 Your tickets
-				div(ng-if="dashCtrl.ticketsBooked === 0")
-					p #[em You do not currently have any tickets booked. #[a(href="/book") Click here to make a booking].]
-				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked !== 0")
+				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked.length !== 0")
 					thead
 						tr
 							th Ticket
@@ -56,14 +64,16 @@ block content
 							th Guest Name
 							th 
 					tbody
-						tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
+						tr(ng-repeat="ticket in dashCtrl.ticketsBooked" ng-click="ticket._status=''")
 							td {{ ticket.name }}
 							td &pound;{{ ticket.price | number:2 }}
 							td
 								input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}")
 							td(style="text-align:right")
-								button.btn.btn-xs(tabindex="-1") Save 
-								button.btn.btn-xs.btn-danger(tabindex="-1")  Cancel Ticket
+								button.btn.btn-xs(ng-click="dashCtrl.saveTicket(ticket)") Save 
+								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)")  Cancel Ticket
+								span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
+			
 						tr(ng-if="dashCtrl.donationValue > 0")
 							td Donations
 							th
@@ -75,11 +85,12 @@ block content
 							td
 							td &pound;{{ dashCtrl.totalValue | number:2 }}
 							td
-				p(ng-if="dashCtrl.ticketsBooked == 0") #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
+				p(ng-if="dashCtrl.ticketsBooked.length === 0") 
+					em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here. #[a(href="/book") Click here] to make a booking.
 
 				div(ng-if="dashCtrl.transactions.length == 0")
 					h2 Billing
-					p #[em We have not yet processed any transactions from you. #[a(href="/book") Click here to make one].]
+					p #[em We have not yet processed any transactions from you.]
 				table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length != 0")
 					thead
 						tr

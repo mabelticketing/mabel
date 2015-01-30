@@ -8,10 +8,15 @@ module.exports = router;
 
 router.route("/")
 	.get(
-		// TODO: allow users to get their own tickets
-		apiRouter.checkAdmin(),
+		function(req, res, next) {
+			if (apiRouter.isAdmin(req.user)) {
+				next();
+			} else {
+				apiRouter.marshallPromise(res, api.ticket.getByUser(req.user.id));
+			}
+		},
 		function(req, res) {
-
+			// this only gets called for admins
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
@@ -28,27 +33,53 @@ router.route("/")
 		}
 	);
 
+function checkTicketAccess(req, res, next) {
+	api.ticket.get(req.params.id)
+		.then(function(ticket) {		
+			if (ticket.user_id === req.user.id) {
+				// authorised because I can see my own tickets
+				next();
+			} else {
+				// Requesting someone else's details, so only allowed if I am admin
+				return (apiRouter.checkAdmin())(req, res, next);
+			} 
+		});
+}
+
 router.route("/:id")
 	.get(
-		// TODO: allow users to get their own tickets
-		apiRouter.checkAdmin(),
+		checkTicketAccess,
 		function(req, res) {
 			apiRouter.marshallPromise(res, api.ticket.get(req.params.id));
 		}
 	)
 	.post(
-		apiRouter.checkAdmin(),
+		checkTicketAccess,
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket.update(req.params.id, apiRouter.stripMeta(req.body)));
+			// An admin can change anything - but a user can only change guest name
+			var ticket = apiRouter.stripMeta(req.body);
+			if (!apiRouter.isAdmin(req.user)) {
+				ticket = {guest_name:ticket.guest_name, id:req.params.id};
+			}
+			apiRouter.marshallPromise(res, api.ticket.update(ticket));
 		}
 	)
 	.delete(
-		apiRouter.checkAdmin(),
+		checkTicketAccess,
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket.del(req.params.id));
+			apiRouter.marshallPromise(res, api.ticket.del(req.params.id)
+				.then(function(result) {
+					if (result.affectedRows > 0) {
+						return {success:true};
+					} else {
+						return {success:false};
+					}
+				})
+			);
 		}
 	);
 
+// TODO: this should just go through the / route, since we have the user id in req.user.id
 router.route("/getByUser/:id")
 	.get(
 		function(req, res) {
