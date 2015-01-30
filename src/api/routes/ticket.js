@@ -57,6 +57,7 @@ router.route("/:id")
 		checkTicketAccess,
 		function(req, res) {
 			// An admin can change anything - but a user can only change guest name
+			// TODO: confirmation email?
 			var ticket = apiRouter.stripMeta(req.body);
 			if (!apiRouter.isAdmin(req.user)) {
 				ticket = {guest_name:ticket.guest_name, id:req.params.id};
@@ -70,6 +71,7 @@ router.route("/:id")
 			apiRouter.marshallPromise(res, api.ticket.del(req.params.id)
 				.then(function(result) {
 					if (result.affectedRows > 0) {
+						// TODO: confirmation email + notification to admins
 						return {success:true};
 					} else {
 						return {success:false};
