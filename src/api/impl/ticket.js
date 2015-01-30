@@ -1,6 +1,6 @@
 var connection = require("./connection.js");
 var runSql = connection.runSql;
-var Q = require("q"); // TODO: is this used here?
+var config = require("../../config.js");
 
 var api = {
 	get: get,
@@ -13,10 +13,10 @@ var api = {
 module.exports = api;
 
 function get(ticket_id) {
-	var sql = "SELECT a.id, booking_user_id, user.name AS booking_user_name, ticket_type_id, \
+	var sql = "SELECT a.id, user_id, user.name AS booking_user_name, ticket_type_id, \
 					ticket_type.name AS ticket_type_name, status_id, ticket_status.name AS status_name, book_time\
 				FROM (SELECT * FROM ticket WHERE id=1) AS a \
-				JOIN user ON a.booking_user_id=user.id \
+				JOIN user ON a.user_id=user.id \
 				JOIN ticket_type on ticket_type.id=ticket_type_id \
 				JOIN ticket_status ON ticket_status.id=status_id LIMIT 1;";
 	return runSql(sql, [ticket_id]).then(function(values) {
@@ -55,8 +55,28 @@ function getAll(opts) {
 }
 
 function getByUser(user_id) {
-	var sql = "SELECT * FROM ticket \
+	var sql = "SELECT ticket_type.name name, ticket.book_time book_time, ticket.id id, ticket_type.id type_id, ticket_type.price price, ticket.guest_name guest_name, ticket_status.name status FROM ticket \
 			JOIN ticket_type ON ticket_type.id=ticket.ticket_type_id \
-			WHERE ticket.booking_user_id=?";
-	return runSql(sql, [user_id]);
+			JOIN ticket_status ON ticket.status_id=ticket_status.id \
+			WHERE ticket.user_id=?";
+	return runSql(sql, [user_id])
+		.then(function(results) {
+			// TODO: Is this the tidiest way of doing things?
+			// Move donation tickets into a separate list
+			var realTickets = [];
+			var extraTickets = [];
+
+			for (var i=0; i<results.length; i++) {
+				if (results[i].type_id === config.donation_ticket_type_id) {
+					extraTickets.push(results[i]);
+				} else {
+					realTickets.push(results[i]);
+				}
+			}
+
+			return {
+				real: realTickets,
+				extra: extraTickets
+			};
+		});
 }

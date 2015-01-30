@@ -36,6 +36,13 @@ insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (
 	100,
 	1
 );
+insert into mabel.ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+	5,
+	'Donation',
+	2.00,
+	3000,
+	1
+);
 
 insert into mabel.ticket_status (name) VALUES ('Pending');
 insert into mabel.ticket_status (name) VALUES ('Confirmed');

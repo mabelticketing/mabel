@@ -36,31 +36,50 @@ block content
 				h1 Dashboard
 				.panel.panel-info
 					.panel-heading
-						h4.panel-heading(style="margin:0px;padding:0px;") The tickets that will be available to you are as follows:
+						h4.panel-heading(style="margin:0px;padding:0px;") The following tickets are available for booking:
 					.panel-body
-						ul(ng-if="dashCtrl.ticketsAvailable.length != 0")
+						//- TODO:replace N
+						p(ng-if="dashCtrl.ticketsAvailable.length != 0")
+							| You will be able to purchase {{dashCtrl.ticketsAvailable[0].allowance}} more ticket{{dashCtrl.ticketsAvailable[0].allowance===1?"":"s"}}.
+						ul
 							li(ng-repeat="ticket in dashCtrl.ticketsAvailable") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
 						p(ng-if="dashCtrl.ticketsAvailable.length == 0", style="font-style:italic;") We couldn't find any tickets available to you.
 						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
 				h2 Your tickets
-				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked != 0")
+				div(ng-if="dashCtrl.ticketsBooked === 0")
+					p #[em You do not currently have any tickets booked. #[a(href="/book") Click here to make a booking].]
+				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked !== 0")
 					thead
 						tr
 							th Ticket
-							th Name
-							th Delete
+							th Price
+							th Guest Name
+							th 
 					tbody
 						tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
 							td {{ ticket.name }}
+							td &pound;{{ ticket.price | number:2 }}
 							td
-								input(type="text")
+								input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}")
+							td(style="text-align:right")
+								button.btn.btn-xs(tabindex="-1") Save 
+								button.btn.btn-xs.btn-danger(tabindex="-1")  Cancel Ticket
+						tr(ng-if="dashCtrl.donationValue > 0")
+							td Donations
+							th
+							td &pound;{{ dashCtrl.donationValue | number:2 }}
 							td
-								input(type="checkbox")
+					tfoot
+						tr
+							th Total
+							td
+							td &pound;{{ dashCtrl.totalValue | number:2 }}
+							td
 				p(ng-if="dashCtrl.ticketsBooked == 0") #[em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.]
 
 				div(ng-if="dashCtrl.transactions.length == 0")
 					h2 Billing
-					p #[em You have not made any bookings yet. #[a(href="/book") Click here to make one].]
+					p #[em We have not yet processed any transactions from you. #[a(href="/book") Click here to make one].]
 				table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length != 0")
 					thead
 						tr

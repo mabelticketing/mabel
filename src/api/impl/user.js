@@ -42,7 +42,7 @@ function getAllowance(user_id) {
 			WHERE user_id=?) A\
 		JOIN (SELECT COUNT(*) b \
 			FROM ticket \
-			WHERE booking_user_id=? AND ticket_type_id<>?) B;", [user_id, user_id, donation_ticket_type_id]);
+			WHERE user_id=? AND ticket_type_id<>?) B;", [user_id, user_id, donation_ticket_type_id]);
 }
 
 function update(user, callback) {
@@ -83,7 +83,7 @@ function insert(user, callback) {
 function del(user_id, callback) {
 	var sql = "DELETE FROM user_group_membership WHERE user_id=?; ";
 	sql += "DELETE FROM transaction WHERE user_id = ?; ";
-	sql += "DELETE FROM ticket WHERE booking_user_id = ?; ";
+	sql += "DELETE FROM ticket WHERE user_id = ?; ";
 	sql += "DELETE FROM user WHERE id = ?; ";
 	runSql(sql, [user_id, user_id, user_id, user_id], function(err, result){
 		if (err) return callback(err);
