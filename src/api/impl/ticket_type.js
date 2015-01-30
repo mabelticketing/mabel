@@ -13,12 +13,21 @@ module.exports = {
 
 // TODO: use event_id
 function getForUser(user, event_id) {
-	var sql = "SELECT * FROM ticket_type \
-		JOIN (SELECT DISTINCT(ticket_type_id) \
-				FROM (SELECT * FROM user_group_membership WHERE user_id=?) A \
-				JOIN group_access_right \
-				ON A.group_id=group_access_right.group_id) B \
-			ON B.ticket_type_id=id;";
+	var sql = 
+	"SELECT id, name, price, ticket_limit - IFNULL(C.sold,0) ticket_limit \
+	FROM ticket_type \
+	JOIN \
+		(SELECT DISTINCT(ticket_type_id) \
+		 FROM \
+			 (SELECT * \
+				FROM user_group_membership \
+				WHERE user_id=17) A \
+		 JOIN group_access_right ON A.group_id=group_access_right.group_id) B ON B.ticket_type_id=id \
+	LEFT JOIN \
+		(SELECT ticket_type_id, \
+						COUNT(ticket_type_id) sold \
+		 FROM ticket \
+		 GROUP BY ticket_type_id) C ON C.ticket_type_id=id;"; 
 	return runSql(sql, [user.id]);
 }
 
