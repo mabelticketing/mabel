@@ -6,6 +6,8 @@ var connection = require('./api/impl/connection.js');
 var emailer = require("./emailer");
 var config = require("./config");
 var register = require("./passport-config.js").register;
+var unidecode = require('unidecode');
+
 
 /*** APP ROUTER ***/
 var router = express.Router();
@@ -123,7 +125,8 @@ router.route("/register")
 					return register(user);
 				})
 				.then(function() {
-					return emailer.send("'" + newUser.name + "' <" + newUser.email + ">", "Registration Confirmation",
+					// mailgun doesn't seem to like certain characters in the address
+					return emailer.send("'" + unidecode(newUser.name) + "' <" + newUser.email + ">", "Registration Confirmation",
 						"regConf.jade", {
 							name: newUser.name,
 							link: config.base_url + "/confirm/" + code
