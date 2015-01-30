@@ -12,7 +12,7 @@ block scripts
 	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
 	
 	// bootstrap
-	script(type="text/javascript", src="/components/bootstrap/dist/js/bootstrap.min.js")
+	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
@@ -20,7 +20,7 @@ block title
 	title Mabel Ticketing | Register to Buy Tickets
 
 block content
-	div(ng-app="mabel.register").slide
+	div.slide
 			section.slide-content
 				h1 Register to Buy Tickets
 				.well

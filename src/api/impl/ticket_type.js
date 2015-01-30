@@ -21,7 +21,7 @@ function getForUser(user, event_id) {
 		 FROM \
 			 (SELECT * \
 				FROM user_group_membership \
-				WHERE user_id=17) A \
+				WHERE user_id=?) A \
 		 JOIN group_access_right ON A.group_id=group_access_right.group_id) B ON B.ticket_type_id=id \
 	LEFT JOIN \
 		(SELECT ticket_type_id, \
