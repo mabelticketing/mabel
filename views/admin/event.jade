@@ -1,0 +1,20 @@
+extends includes/main.jade
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Event"
+	- subtitle = "Event Settings"
+	- breadcrumb = [{name:"Dashboard"}, {name:"Event"}]
+	- sidebarItems = [{link:"/admin", name:"Dashboard"}, {link:"#", name:"Event", selected:true}, {link:"/admin/users", name:"Users"}, {link:"/admin/tickets", name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	.row
+		.col-md-3
+			include boxes/event-settings.jade
+
+block append scripts
+	script(type = "text/javascript" src="/js/admin/eventsettings.factory.js")
+	script(type = "text/javascript" src="/js/admin/eventsettings.controller.js")

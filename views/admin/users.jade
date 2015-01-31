@@ -1,0 +1,28 @@
+extends ./includes/main.jade
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Users"
+	- subtitle = "User Settings"
+	- breadcrumb = [{name:"Dashboard"}, {name:"Users"}]
+	- sidebarItems = [{link:"/admin", name:"Dashboard"}, {link:"/admin/event/", name:"Event"}, {link:"#", selected:true, name:"Users"}, {link:"/admin/tickets", name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	.row
+		.col-md-8
+			.col-md-12
+				include boxes/user-list.jade
+			.col-md-12
+				include boxes/user-group.jade
+		.col-md-4
+			include boxes/user-detail.jade
+
+block append scripts
+	script(type = "text/javascript" src="/js/shared/mabeltable.directive.js")
+	script(type = "text/javascript" src="/js/shared/usergroup.factory.js")
+	script(type = "text/javascript" src="/js/admin/usergroups.controller.js")
+	script(type = "text/javascript" src="/js/admin/userlist.controller.js")
+	script(type = "text/javascript" src="/js/admin/userdetail.controller.js")

@@ -12,7 +12,7 @@ function User(MabelToken, MabelResource) {
 			// add a custom action to retrieve the current user
 			'current': {
 				method: 'GET',
-				url: 'api/user/me',
+				url: '/api/user/me',
 				mabelSerialize: true
 			}
 		},

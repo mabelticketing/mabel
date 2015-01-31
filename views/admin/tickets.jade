@@ -1,0 +1,28 @@
+extends ./includes/main.jade
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Tickets"
+	- subtitle = "Ticket Settings"
+	- breadcrumb = [{name:"Dashboard"}, {name:"Tickets"}]
+	- sidebarItems = [{link:"/admin", name:"Dashboard"}, {link:"/admin/event/", name:"Event"}, {link:"/admin/users", name:"Users"}, {link:"#", selected:true, name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	.row
+		.col-md-12
+			p Booked tickets here
+	.row
+		.col-md-8
+			include boxes/ticket-types.jade
+		.col-md-4
+			include boxes/ticket-type-detail.jade
+
+block append scripts
+	script(type = "text/javascript" src="/js/shared/mabeltable.directive.js")
+	script(type = "text/javascript" src="/js/shared/tickettype.factory.js")
+	script(type = "text/javascript" src="/js/admin/tickettypedetail.controller.js")
+	script(type = "text/javascript" src="/js/admin/tickettypes.controller.js")
+	script(type = "text/javascript" src="/js/shared/usergroup.factory.js")
