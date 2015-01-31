@@ -199,7 +199,19 @@ router.get('/dash',
 );
 
 router.get('/admin', function(req, res) {
-	res.render("admin.jade");
+	res.render("admin/dash.jade");
+});
+router.get('/admin/event', function(req, res) {
+	res.render("admin/event.jade");
+});
+router.get('/admin/users', function(req, res) {
+	res.render("admin/users.jade");
+});
+router.get('/admin/tickets', function(req, res) {
+	res.render("admin/tickets.jade");
+});
+router.get('/admin/transactions', function(req, res) {
+	res.render("admin/transactions.jade");
 });
 
 router.get('/book', function(req, res) {

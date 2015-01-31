@@ -1,0 +1,17 @@
+
+extends ./includes/main.jade
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Dashboard"
+	- subtitle = "Control Panel"
+	- breadcrumb = [{name:"Dashboard"}]
+	- sidebarItems = [{link:"#", name:title,selected:true}, {link:"/admin/event", name:"Event"}, {link:"/admin/users", name:"Users"}, {link:"/admin/tickets", name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	.row
+		.col-md-12
+			h1 Cool event stats could go here
