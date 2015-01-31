@@ -62,14 +62,22 @@ router.route("/:event_id")
 				}
 			}
 
-			// TODO: maybe check that every ticket has been allocated a payment method?
-
 			// check user has requested >0 tickets
 			if (count === 0) {
 				res.json({
 					error: "You have not selected any tickets!",
 					success: false
 				});
+			}
+
+			// check that every ticket has been allocated a payment method
+			for (var i=0; i<ticketsRequested.length; i++) {
+				var method = ticketsRequested[i].payment_method;
+				if (method == undefined || method <= 0) // (undefined == null)
+					res.json({
+						error: "You have a missing payment method for one of your tickets",
+						success: false
+					});
 			}
 
 			// get ticket types available to user
