@@ -90,10 +90,7 @@ router.route("/:event_id")
 					}
 					// check ticket types are all available to user
 					if (!subset(ticketTypeIDs, availableTicketTypes)) {
-						throw {
-							error: "You have requested ticket types not available to your account.",
-							success: false
-						};
+						throw "You have requested ticket types not available to your account.";
 					}
 					// get available payment methods to the user
 					return api.payment_method.getAll(req.user.id);
@@ -108,10 +105,7 @@ router.route("/:event_id")
 					if (!subset(paymentMethodIDs, availablePaymentMethods)) {
 						console.log(paymentMethodIDs);
 						console.log(availablePaymentMethods);
-						throw {
-							error: "You have requested payment methods not available to your account.",
-							success: false
-						};
+						throw "You have requested payment methods not available to your account.";
 					}
 					// find ticket allowance
 					return api.user.getAllowance(req.user.id);
@@ -120,10 +114,7 @@ router.route("/:event_id")
 					var allowance = result[0].allowance;
 					// check ticket allowance
 					if (allowance < count) {
-						throw {
-							error: "You are not allowed to buy that many tickets.",
-							success:false
-						};
+						throw "You are not allowed to buy that many tickets.";
 					}
 				})
 				.then(function() {
@@ -138,10 +129,7 @@ router.route("/:event_id")
 					}
 					if (c > 1) {
 						// "College Bill" was used more than once
-						throw {
-							error: "You are not allowed to put more than one ticket on your college bill.",
-							success:false
-						};
+						throw "You are not allowed to put more than one ticket on your college bill.";
 					}
 					return api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate);
 				})
@@ -159,9 +147,10 @@ router.route("/:event_id")
 					res.json(result);
 				})
 				.fail(function(err) {
-					//console.log("Something went wrong", err);
-					// TODO: the client should do something with this error
-					res.json({error:err, success:false});
+					res.json({
+						error: err,
+						success: false
+					});
 				});
 		}
 	);
