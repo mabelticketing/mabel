@@ -55,9 +55,13 @@ function getAll(opts) {
 }
 
 function getByUser(user_id) {
-	var sql = "SELECT ticket_type.name name, ticket.book_time book_time, ticket.id id, ticket_type.id type_id, ticket_type.price price, ticket.guest_name guest_name, ticket_status.name status FROM ticket \
-			JOIN ticket_type ON ticket_type.id=ticket.ticket_type_id \
+	var sql = "SELECT ticket_type.name name, ticket.book_time book_time, ticket.id id, \
+				ticket_type.id type_id, ticket_type.price price, ticket.guest_name guest_name, \
+				ticket_status.name status, payment_method.name payment_method \
+			FROM ticket \
+			JOIN ticket_type ON ticket.ticket_type_id=ticket_type.id \
 			JOIN ticket_status ON ticket.status_id=ticket_status.id \
+			JOIN payment_method ON ticket.payment_method_id=payment_method.id \
 			WHERE ticket.user_id=?";
 	return runSql(sql, [user_id])
 		.then(function(results) {

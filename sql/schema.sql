@@ -5,12 +5,12 @@
 drop table if exists email_destination;
 drop table if exists email;
 drop table if exists transaction;
+drop table if exists ticket;
 drop table if exists group_payment_method_access;
 drop table if exists payment_method;
 drop table if exists group_access_right;
 drop table if exists user_group_membership;
 drop table if exists user_group;
-drop table if exists ticket;
 drop table if exists user;
 drop table if exists ticket_status;
 drop table if exists ticket_type;
@@ -61,21 +61,6 @@ create table user (
 	primary key (id),
 	unique(email),
 	unique(crsid)
-);
-
-### TICKET ###
-
-create table ticket (
-	id int auto_increment not null,
-	user_id int not null,
-	ticket_type_id int not null,
-	guest_name varchar(100),
-	status_id int not null,
-	book_time int,
-	primary key (id),
-	FOREIGN KEY (user_id) REFERENCES user(id),
-	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
-	FOREIGN KEY (status_id) REFERENCES ticket_status(id)
 );
 
 ### GROUPS ###
@@ -132,6 +117,23 @@ create table group_payment_method_access (
 	FOREIGN KEY (group_id) REFERENCES user_group(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id),
 	unique(group_id, payment_method_id)
+);
+
+### TICKET ###
+
+create table ticket (
+	id int auto_increment not null,
+	user_id int not null,
+	ticket_type_id int not null,
+	guest_name varchar(100),
+	status_id int not null,
+	payment_method_id int not null,
+	book_time int,
+	primary key (id),
+	FOREIGN KEY (user_id) REFERENCES user(id),
+	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id),
+	FOREIGN KEY (status_id) REFERENCES ticket_status(id)
 );
 
 ### TRANSACTIONS ###

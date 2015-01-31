@@ -97,8 +97,8 @@ function makeBooking(user_id, tickets, addDonations) {
 		type, then we would just need one query per ticket type.
 	*/
 	var sql = "INSERT INTO ticket \
-					(user_id, ticket_type_id, status_id, book_time) \
-				SELECT ?, ?, 1, UNIX_TIMESTAMP() \
+					(user_id, ticket_type_id, status_id, payment_method_id, book_time) \
+				SELECT ?, ?, 1, ?, UNIX_TIMESTAMP() \
 				FROM \
 					(SELECT COUNT(*) sold FROM ticket WHERE ticket_type_id=?) A \
 					JOIN \
@@ -117,7 +117,8 @@ function makeBooking(user_id, tickets, addDonations) {
 	}
 	for (var i = 0; i < tickets.length; i++) {
 		promises.push(
-			runSql(sql, [user_id, tickets[i].ticket_type_id, tickets[i].ticket_type_id, tickets[i].ticket_type_id])
+			runSql(sql, [user_id, tickets[i].ticket_type_id, tickets[i].payment_method, 
+						tickets[i].ticket_type_id, tickets[i].ticket_type_id])
 			.then(callback(tickets[i]))
 		);
 	}
@@ -146,7 +147,8 @@ function makeBooking(user_id, tickets, addDonations) {
 						runSql("INSERT INTO ticket SET ?, book_time=UNIX_TIMESTAMP()", [{
 							user_id: user_id,
 							ticket_type_id: donation_ticket_type_id,
-							status_id: 1
+							status_id: 1,
+							payment_method_id: req.payment_method
 						}])
 						.then(callback(req))
 					);
