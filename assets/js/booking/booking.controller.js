@@ -161,7 +161,7 @@ function BookingController($scope, APICaller, User, $interval) {
 		APICaller.post("booking/1", vm.booking, function(err, result) {
 			console.log(result);
 			if (err) {
-				vm.meta.errorMsg = err.error;
+				vm.meta.errorMsg = err;
 				return console.log(err); // error handling
 			}
 			// if we have success, display confirmation with link to ticket management page
