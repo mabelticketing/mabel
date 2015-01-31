@@ -16,6 +16,7 @@ function DashController($scope, APICaller, User) {
 
 	vm.saveTicket       = saveTicket;
 	vm.cancelTicket     = cancelTicket;
+	vm.clearStatus      = clearStatus;
 
 	/*** INITIAL ACTION ***/
 
@@ -29,7 +30,7 @@ function DashController($scope, APICaller, User) {
 	userPromise.$promise.then(function(user) {
 		
 		APICaller.get('ticket', function(err, data) {
-			if (err) return console.log(err);
+			if (err!==undefined && err!==null) return console.log(err);
 
 			vm.ticketsBooked = data.real;
 
@@ -42,7 +43,7 @@ function DashController($scope, APICaller, User) {
 
 
 		APICaller.get('transaction/getByUser/'+user.id, function(err, data) {
-			if (err) return console.log(err);
+			if (err!==undefined && err!==null) return console.log(err);
 			vm.transactions = data;
 		});
 	});
@@ -51,11 +52,12 @@ function DashController($scope, APICaller, User) {
 	/*** FUNCTION DEFINITIONS ***/
 
 	function saveTicket(ticket) {
-		ticket._status = "pending"
+		ticket._status = "warning";
 		// TODO: This kind of get/save/delete thing is literally what $resources are for
 		APICaller.post('/ticket/' + ticket.id, ticket, function(err) {
-				if (err) {
-					ticket._status = "error"
+				if (err!==undefined && err!==null) {
+					ticket._status = "danger";
+					alert(err);
 					return console.log(err);
 				}
 				ticket._status = "success";
@@ -63,10 +65,14 @@ function DashController($scope, APICaller, User) {
 
 	}
 
+	function clearStatus(ticket) {
+		ticket._status = "";
+	}
+
 	function cancelTicket(ticket) {
 		if (window.confirm("Do you really want to cancel this ticket?")) { 
 			APICaller.del('/ticket/' + ticket.id, function(err) {
-				if (err) return console.log(err);
+				if (err!==undefined && err!==null) return console.log(err);
 				
 				for (var i=0; i<vm.ticketsBooked.length; i++) {
 					if (vm.ticketsBooked[i] === ticket) {
@@ -82,7 +88,7 @@ function DashController($scope, APICaller, User) {
 				// delete one of the donation tickets 
 				var toDelete = vm.donationTickets.pop();
 				APICaller.del('/ticket/' + toDelete.id, function(err) {
-					if (err) return console.log(err);
+					if (err && err!==null) return console.log(err);
 
 					updateTotal();
 				});
