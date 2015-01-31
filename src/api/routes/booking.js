@@ -71,9 +71,9 @@ router.route("/:event_id")
 			}
 
 			// check that every ticket has been allocated a payment method
-			for (var i=0; i<ticketsRequested.length; i++) {
+			for (i=0; i<ticketsRequested.length; i++) {
 				var method = ticketsRequested[i].payment_method;
-				if (method == undefined || method <= 0) // (undefined == null)
+				if (method === undefined || method <= 0) // (undefined == null)
 					res.json({
 						error: "You have a missing payment method for one of your tickets",
 						success: false
