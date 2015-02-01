@@ -9,6 +9,20 @@ var api = {
 
 module.exports = api;
 
+var handySQLToImplementLaterOnAdminPanel = 
+"SELECT transaction.id id, value, payment_method.name payment_method, user.name name, notes, tickets, transaction_time \
+FROM transaction \
+JOIN payment_method \
+	ON payment_method.id = payment_method_id \
+JOIN user \
+	ON user.id = user_id \
+JOIN ( \
+	SELECT user_id, GROUP_CONCAT(id ORDER BY id ASC SEPARATOR ', ') tickets \
+	FROM ticket \
+	GROUP BY user_id \
+	) A \
+	ON A.user_id = transaction.user_id;";
+
 function getByUser(user_id) {
 	var sql = "SELECT * FROM transaction WHERE user_id = ?";
 	return runSql(sql, [user_id]);
