@@ -3,7 +3,7 @@ insert into event (id, name, launch_time, close_time, group_assignment_url) VALU
 	'Emmanuel May Ball 2015', 
 	UNIX_TIMESTAMP('2014-12-13 00:00:00'),
 	UNIX_TIMESTAMP('2015-02-25 00:00:00'),
-	'http://www.emmamayball.com/groups/index.php?key=8jKiATo6kN787QF604EUaIL93R4W1Qjg&c={!crsid!}&e={!email!}'
+	'http://www.emmamayball.com/mabel_groups/index.php?key=8jKiATo6kN787QF604EUaIL93R4W1Qjg&c={!crsid!}&e={!email!}'
 );
 
 insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
