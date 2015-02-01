@@ -95,6 +95,27 @@ block content
 				p(ng-if="dashCtrl.ticketsBooked.length === 0") 
 					em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here. #[a(href="/book") Click here] to make a booking.
 
+				h2 Waiting List
+				table.table.table-striped.table-hover(ng-if="dashCtrl.waitingListTickets.length > 0")
+					thead
+						tr
+							th Ticket Type
+							th Payment Method
+							th Price
+							th 
+					tbody
+						tr(ng-repeat="ticket in dashCtrl.waitingListTickets")
+							td {{ ticket.name }}
+							//- TODO: allow users to change payment method
+							td {{ ticket.payment_method }}
+							td &pound;{{ ticket.price | number:2 }}
+							td(style="text-align:right")
+								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  Leave Waiting List
+								span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
+
+				p(ng-if="! (dashCtrl.waitingListTickets.length > 0)") 
+					em You are not currently in the waiting list for any tickets.
+
 				div(ng-if="dashCtrl.transactions.length == 0")
 					h2 Billing
 					p #[em We have not yet processed any transactions from you.]

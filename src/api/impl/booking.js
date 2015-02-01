@@ -117,8 +117,9 @@ function makeBooking(user_id, tickets, addDonations) {
 	}
 	for (var i = 0; i < tickets.length; i++) {
 		promises.push(
-			runSql(sql, [user_id, tickets[i].ticket_type_id, tickets[i].payment_method, 
-						tickets[i].ticket_type_id, tickets[i].ticket_type_id])
+			runSql(sql, [user_id, tickets[i].ticket_type_id, tickets[i].payment_method,
+				tickets[i].ticket_type_id, tickets[i].ticket_type_id
+			])
 			.then(callback(tickets[i]))
 		);
 	}
@@ -129,6 +130,7 @@ function makeBooking(user_id, tickets, addDonations) {
 	// wait until all queries have been made
 	return Q.all(promises).then(function(results) {
 		var donationPromises = [];
+		var waitingPromises = [];
 		var ticketsAllocated = [];
 		var ticketsRejected = [];
 		for (var i = 0; i < results.length; i++) {
@@ -154,11 +156,21 @@ function makeBooking(user_id, tickets, addDonations) {
 					);
 				}
 			} else {
-				ticketsRejected.push(results[i].request);
+				// not able to process ticket - add to the waiting list instead
+				waitingPromises.push(
+					runSql("INSERT INTO waiting_list SET ?, book_time=UNIX_TIMESTAMP()", [{
+						user_id: user_id,
+						ticket_type_id: results[i].request.ticket_type_id,
+						payment_method_id: results[i].request.payment_method,
+						has_donation: addDonations
+					}])
+					.then(callback(results[i].request))
+				);
 			}
 		}
 
-		return Q.all(donationPromises)
+		Q.all([
+			Q.all(donationPromises)
 			.then(function(dResults) {
 				for (var j = 0; j < dResults.length; j++) {
 					if (dResults[j].result.affectedRows > 0) {
@@ -168,13 +180,26 @@ function makeBooking(user_id, tickets, addDonations) {
 						});
 					}
 				}
-				return {
-					ticketsAllocated: ticketsAllocated,
-					ticketsRejected: ticketsRejected
-				};
-				
-			});
-
+				return ticketsAllocated;
+			}),
+			Q.all(waitingPromises)
+			.then(function(wResults) {
+				for (var j = 0; j < wResults.length; j++) {
+					if (wResults[j].result.affectedRows > 0) {
+						ticketsRejected.push({
+							rowId: wResults[j].result.insertId,
+							request: wResults[j].request
+						});
+					}
+				}
+			})
+		])
+		.then(function(dwResults) {
+			return {
+				ticketsAllocated: dwResults[0],
+				ticketsRejected: dwResults[1]
+			};
+		});
 	});
 }
 
