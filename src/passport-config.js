@@ -205,7 +205,7 @@ function register(user) {
 			promises.push(getUser(userId));
 			for (var i = 0; i < groups.length; i++) {
 				promises.push(
-					connection.runSql("insert into mabel.user_group_membership (user_id, group_id) VALUES (?, ?)", [userId, groups[i]])
+					connection.runSql("insert into user_group_membership (user_id, group_id) VALUES (?, ?)", [userId, groups[i]])
 				);
 			}
 			return Q.all(promises).then(function(insertResult) {

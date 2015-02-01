@@ -144,6 +144,7 @@ create table transaction (
 	value DECIMAL(6,2) not null,
 	payment_method_id int not null,
 	transaction_time int not null,
+	notes text,
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
