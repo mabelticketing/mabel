@@ -52,6 +52,9 @@ router.use("/ticket",
 router.use("/transaction",
 	require("./routes/transaction.js"));
 
+router.use("/waiting_list",
+	require("./routes/waiting_list.js"));
+
 function isInGroup(user, groupId) {
 	return user.groups.indexOf(groupId) < 0;
 }

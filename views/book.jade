@@ -54,7 +54,7 @@ block content
 									legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
 									p Guest names can be assigned to tickets after you make your booking.
 									p You may book {{ bookingCtrl.meta.ticketAllowance }} ticket{{ bookingCtrl.meta.ticketAllowance===1?"":"s"}}.
-									p Please note that although the tickets below are currently available for you to book, we cannot guarantee that they will still be available by the time your booking is confirmed.
+									p If we are unable to book all the tickets you request, the remainder will be added to the waiting list instead.
 									.form-group
 										div.alert.alert-danger(ng-if="bookingCtrl.meta.errorMsg.length > 0")
 											button.close(type="button", aria-label="Close", ng-click="bookingCtrl.meta.errorMsg = '';") 
@@ -74,14 +74,18 @@ block content
 														td {{ ticket.name }}
 														td £{{ ticket.price }}
 														td
-															div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length<1")
-																em Sold Out
-															div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length>0")
+															div
 																input(type="hidden" 
 																	ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
 																	value="ticket.ticket_type_id")
 																select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
 																	option(ng-value="$index" ng-repeat="i in [0].concat(bookingCtrl.booking.tickets[$index].max_tickets) track by $index") {{$index}}
+																div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length>bookingCtrl.booking.tickets[$index].max_available && bookingCtrl.booking.tickets[$index].max_available === 1")
+																	em Only {{bookingCtrl.booking.tickets[$index].max_available}} ticket available
+																div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length>bookingCtrl.booking.tickets[$index].max_available && bookingCtrl.booking.tickets[$index].max_available > 1")
+																	em Only {{bookingCtrl.booking.tickets[$index].max_available}} tickets available
+																div(ng-if="bookingCtrl.booking.tickets[$index].max_available === 0")
+																	em Sold out
 									.form-group
 										label.col-lg-2.control-label Donation
 										.col-lg-10

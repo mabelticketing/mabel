@@ -95,7 +95,8 @@ function BookingController($scope, APICaller, User, $interval) {
 							// this is possibly a stupid idea, gives lots of undefineds in array
 							vm.booking.tickets.push({
 								ticket_type_id: available_tickets[i].id,
-								max_tickets: new Array(Math.min(vm.meta.ticketAllowance, available_tickets[i].ticket_limit, 20)),
+								max_tickets: new Array(Math.min(vm.meta.ticketAllowance, 20)), // limit to 20 for rendering speed
+								max_available: available_tickets[i].ticket_limit,
 								quantity: 0,
 								price: available_tickets[i].price,
 								name: available_tickets[i].name,
