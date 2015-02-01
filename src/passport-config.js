@@ -152,9 +152,9 @@ function LocalStrategyCallback(email, password, done) {
 // returns a promise which is resolved with the new user
 function register(user) {
 
-	// while the user insert is going on, retrieve the group stuff
+	// before the user insert stuff happens, retrieve the group stuff
 	// TODO: parameterise event id
-	var groupsPromise = connection.runSql("SELECT * FROM event WHERE id=1")
+	return connection.runSql("SELECT * FROM event WHERE id=1")
 		.then(function(eventDetails) {
 			if (eventDetails.length !== 1) throw {
 				error: "unexpected number of events"
@@ -184,22 +184,19 @@ function register(user) {
 				deferred.reject(new Error(e));
 			});
 			return deferred.promise;
-		});
-
-	if (user.password !== undefined) {
-		var hash = crypto.createHash('md5');
-		hash.update(user.password);
-		user.password_md5 = hash.digest('hex');
-		delete user.password;
-	}
-	var userPromise = connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [user])
-		.then(function(result) {
-			return result.insertId;
-		});
-	// .then(getUser);
-
-	// return groupsPromise;
-	return Q.all([groupsPromise, userPromise])
+		})
+		.then(function(groups) {
+			if (user.password !== undefined) {
+				var hash = crypto.createHash('md5');
+				hash.update(user.password);
+				user.password_md5 = hash.digest('hex');
+				delete user.password;
+			}
+			return connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [user])
+				.then(function(result) {
+					return [groups, result.insertId];
+				});
+		})
 		.then(function(results) {
 			var groups = results[0];
 			var userId = results[1];
