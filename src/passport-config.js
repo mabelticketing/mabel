@@ -173,10 +173,12 @@ function register(user) {
 			var deferred = Q.defer();
 
 			http.get(url, function(res) {
-				console.log("Got response: " + res.statusCode);
-
 				res.on("data", function(chunk) {
-					deferred.resolve(JSON.parse(chunk));
+					try {
+						deferred.resolve(JSON.parse(chunk));
+					} catch (err) {
+						deferred.reject(err);
+					}
 				});
 			}).on('error', function(e) {
 				deferred.reject(new Error(e));
