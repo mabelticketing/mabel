@@ -1,5 +1,4 @@
 var res = {
-	"You have joined the queue.": "You have now joined the queue. dfgskjdfgkjdsfgkj"
 };
 var counts = {};
 

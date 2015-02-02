@@ -35,13 +35,13 @@ block content
 	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)
 		div(ng-switch="bookingCtrl.status")
 			
-			div(ng-switch-when="queueing")
-				h2 Queuing...
-				p You are currently in position {{ bookingCtrl.queue.position }} of {{ bookingCtrl.queue.of }}.
-
 			div(ng-switch-when="unavailable")
-				h2 Booking is currently unavailable
-				p {{bookingCtrl.reason}}
+				.slide
+					section.slide-content
+						h2 Booking is currently unavailable
+						.well
+							p {{bookingCtrl.reason}}
+							p Please do not refresh this page - the booking form will load automatically as soon as it is available.
 
 			div(ng-switch-when="booking")
 				.slide

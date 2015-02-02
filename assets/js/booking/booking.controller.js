@@ -13,11 +13,6 @@ function BookingController($scope, APICaller, User, $interval) {
 	vm.user = User.current();
 	vm.available_tickets = [];
 	vm.payment_methods = [];
-	vm.status = 'queueing';
-	vm.queue = {
-		position:-1,
-		of:-1
-	};
 	vm.meta = {
 		bookingSum: 0,
 		ticketQuantity: 0,
@@ -36,7 +31,6 @@ function BookingController($scope, APICaller, User, $interval) {
 	/*** INITIAL ACTION ***/
 
 
-	// join the queue
 	// TODO: Parameterise event id
 	APICaller.get("booking/open/1", function(err, data) {
 		if (err) return console.log(err); // error handling
@@ -44,7 +38,6 @@ function BookingController($scope, APICaller, User, $interval) {
 		// set up polling at intervals
 		poller = $interval(pollApi, 30000);
 		processStatus(data);
-
 	});	
 
 
@@ -67,7 +60,6 @@ function BookingController($scope, APICaller, User, $interval) {
 	}
 
 	function processStatus(status) {
-		console.log(status);
 		if (status.open) {
 			// show the booking page and stuff
 
@@ -123,17 +115,7 @@ function BookingController($scope, APICaller, User, $interval) {
 			vm.status = "booking";
 			document.title = "Mabel Ticketing | Book Your Tickets";
 
-		} else if (status.queueing) {
-			// show the loading page
-			console.log("Show loading page");
-			vm.queue.position = status.position;
-			vm.queue.of = status.of;
-			vm.status = "queueing";
-			document.title = "Mabel Ticketing | Queueing...";
-
 		} else {
-			// show some kind of error message or rejoin the queue
-			console.log("Not in the queue!");
 			vm.status = "unavailable";
 			document.title = "Mabel Ticketing | Booking Unavailable";
 			vm.reason = status.reason;
@@ -178,13 +160,9 @@ function BookingController($scope, APICaller, User, $interval) {
 	}
 
 	function pollApi() {
-
-		console.log("Polling @ " + (new Date()));
 		
-		// POST to /booking/open/:event_id joins the queue if possible and not already queueing, gives status either way
-		// TODO: parameterise event_id
 		APICaller.get("booking/open/1", function(err, data) {
-			if (err) console.log("err"); // error handling
+			if (err) console.log("err", err); // error handling
 
 			// stop polling if booking info returned
 			processStatus(data);
