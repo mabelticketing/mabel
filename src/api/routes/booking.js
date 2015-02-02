@@ -173,12 +173,15 @@ router.route("/:event_id")
 					}
 					
 					// assemble result
+					// TODO: put lots of useful information in here, externalise it
 					var result = {
 						success: true,
+						// total: ,
 						tickets: ticketsExclDonations
 					};
 
 					// send result back
+					// TODO: obtain client email address and spam them
 					res.json(result);
 				})
 				.fail(function(err) {
