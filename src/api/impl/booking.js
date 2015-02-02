@@ -1,40 +1,17 @@
 var connection = require("./connection.js");
 var __ = require("../../strings.js");
-var Queue = require("../../queue.js");
 var runSql = connection.runSql;
 var Q = require("q");
 var config = require("../../config.js");
+var moment = require("moment");
 
 module.exports = {
 	canBook: canBook,
-
-	// NB: Both joinQueue and getStatus will get the position in the queue, but
-	// joinQueue will update the queue while getStatus will not
-	joinQueue: joinQueue,
-	getStatus: getStatus,
-	leaveQueue: leaveQueue,
 	makeBooking: makeBooking,
 	makeTransaction: makeTransaction
 };
 
-// TODO: Increase number of people allowed through at a time from 1
-var bookQueue = new Queue(1);
-
-// TODO: Do something with event_id	
-function joinQueue(user_id, event_id) {
-	return bookQueue.joinQueue(user_id);
-}
-
-// TODO: Do something with event_id	
-function getStatus(user_id, event_id) {
-	return bookQueue.getStatus(user_id);
-}
-
-// TODO: Do something with event_id	
-function leaveQueue(user_id, event_id) {
-	return bookQueue.leaveQueue(user_id);
-}
-
+// TODO: Per-group opening/closing times
 function canBook(user_id, event_id, callback) {
 	// check if the event booking start date is in the past
 	var eventSql = "SELECT * FROM event WHERE id=?";
@@ -45,36 +22,20 @@ function canBook(user_id, event_id, callback) {
 		var now = new Date().getTime() / 1000;
 
 		if (now < eventDetails[0].launch_time) {
+			var niceStart = moment.unix(eventDetails[0].launch_time).calendar();
+			niceStart = niceStart.toLowerCase();
+			niceStart = niceStart.replace(/am/g,'AM').replace(/pm/g, 'PM');
 			return callback(null, {
 				open: false,
-				reason: __("Booking is not yet open")
+				reason: __("Booking is not yet open. Booking opens " + niceStart)
 			});
 		}
 
 		if (now > eventDetails[0].close_time) {
 			return callback(null, {
 				open: false,
-				reason: __("Booking has closed")
+				reason: __("Booking has closed.")
 			});
-		}
-
-		// check if the user is at the front of the queue (join if not in queue)
-		var status = joinQueue(user_id, event_id);
-		if (!status.ready) {
-			if (!status.queueing) {
-				return callback(null, {
-					open: false,
-					reason: __("User is not in the queue")
-				});
-			} else {
-				return callback(null, {
-					open: false,
-					queueing: true,
-					position: status.position,
-					of: status.of,
-					reason: __("User is not at the head of queue (%s/%s)", status.position, status.of)
-				});
-			}
 		}
 
 		return callback(null, {

@@ -6,7 +6,7 @@ function DashController($scope, APICaller, User) {
 
 	/*** DECLARATION ***/
 	//TODO: stop exposing vm on every controller!
-	// e = vm;
+	e = vm;
 
 	// initialise scope vars 
 	vm.ticketsAvailable = [];
@@ -30,7 +30,7 @@ function DashController($scope, APICaller, User) {
 	var userPromise = User.current();
 	userPromise.$promise.then(function(user) {
 		
-		APICaller.get('ticket/getByUser/' + userPromise.id, function(err, data) {
+		APICaller.get('ticket/getByUser/' + user.id, function(err, data) {
 			if (err!==undefined && err!==null) return console.log(err);
 
 			vm.ticketsBooked = data.real;
@@ -42,7 +42,7 @@ function DashController($scope, APICaller, User) {
 			updateTotal();
 		});
 
-		APICaller.get('waiting_list', function(err, data) {
+		APICaller.get('waiting_list/getByUser/' + user.id, function(err, data) {
 			if (err!==undefined && err!==null) return console.log(err);
 
 			vm.waitingListTickets = data;
