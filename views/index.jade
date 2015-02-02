@@ -2,7 +2,6 @@ extends ./main.jade
 
 block scripts
 	script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
-	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
@@ -12,15 +11,21 @@ block title
 block content
 	.container
 		.col-md-12
-			h1(style="padding-bottom:10px;") Emma May Ball - Tickets
-			p(style="padding-bottom:10px;") If you are an Emmanuel College Alumnus, please use the alternative login. Otherwise, you can use Raven.
-		.col-md-4
+			h1(style="padding-bottom:10px;") Emmanuel College May Ball - Tickets
+			p(style="padding-bottom:10px;") 
+
+				| If you are a current student, please log in with Raven. If
+				| not (e.g. Alumni of Emmanuel College), please login
+				| with/register for a Ticketing Account.
+
+		.col-md-3
 		.col-md-2(style="text-align:center;")
-			a(href="/login/raven", class="btn btn-info", style="width:100%;") Raven login &raquo;
+			a(href="/login/raven", class="btn btn-info", style="width:100%;") Login with #[br] Raven &raquo;
 		.col-md-2(style="text-align:center;")
-			a(href="/login/mabel", class="btn btn-primary", style="width:100%;") Alternative login &raquo;
-		.col-md-4
+			a(href="/register", class="btn btn-primary", style="width:100%;") Ticketing #[br] Registration &raquo;
+		.col-md-2(style="text-align:center;")
+			a(href="/login/mabel", class="btn btn-primary", style="width:100%;") Ticketing #[br] Login &raquo;
+		.col-md-3
 		.col-md-12
 			hr
-			p To login to the admin panel, click #[a(href="/admin") here].
 

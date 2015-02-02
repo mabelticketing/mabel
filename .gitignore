@@ -37,3 +37,6 @@ assets/components
 
 # for tom
 src/config-backup.js
+
+# ignore compiled html
+compiled_html

@@ -1,6 +1,7 @@
 var express = require("express");
 var apiRouter = require("../routes.js");
 var api = require("../api.js");
+var Q = require("q");
 var router = express.Router({
 	mergeParams: true
 });
@@ -9,8 +10,7 @@ module.exports = router;
 router.route("/:event_id")
 	.post(
 		function(req, res, next) {
-			// check we can book (that we're at the front of the queue an' all)
-			//console.log(req.body);
+			// check that booking is open
 			api.booking.canBook(req.user.id, req.params.event_id, function(err, result) {
 				if (err) return next(err);
 				if (!result.open) return next("Booking not open for this user");
@@ -81,7 +81,7 @@ router.route("/:event_id")
 			}
 
 			// get ticket types available to user
-			api.ticket_type.getForUser(req.user, req.params.event_id)
+			var verificationPromise = api.ticket_type.getForUser(req.user, req.params.event_id)
 				.then(function(result) {
 					for (var i=0; i<result.length; i++) {
 						var ticket_type_id = result[i].id;
@@ -103,8 +103,6 @@ router.route("/:event_id")
 					}
 					// check payment methods are available to user
 					if (!subset(paymentMethodIDs, availablePaymentMethods)) {
-						console.log(paymentMethodIDs);
-						console.log(availablePaymentMethods);
 						throw "You have requested payment methods not available to your account.";
 					}
 					// find ticket allowance
@@ -131,25 +129,69 @@ router.route("/:event_id")
 						// "College Bill" was used more than once
 						throw "You are not allowed to put more than one ticket on your college bill.";
 					}
+				});
+
+			var bookingPromise = verificationPromise.then(function() {
 					return api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate);
-				})
-				.then(function(result) {
-						//console.log(result);
-						res.mabel = {};
-						res.mabel.tickets = result;
-				})
-				.then(function() {
-					// ticket insert worked
-					// leave the queue
-					var result = api.booking.leaveQueue(req.user.id, req.params.event_id);
-					result.success = true;
-					result.tickets = res.mabel.tickets;
+				});
+
+			var confirmationPromise = Q.all([bookingPromise, api.ticket_type.getAll({},1)])
+				.then(function(data) {
+					var tickets = data[0];
+					var types 	= data[1];
+					// create map ids -> names
+					var typeNames = {};
+					var i, name;
+					for (i=0; i<types.length; i++) {
+						typeNames[types[i].id] = types[i].name;
+					}
+
+					// add ticket type names to response
+					for (i=0; i<tickets.ticketsAllocated.length; i++) {
+						name = typeNames[tickets.ticketsAllocated[i].request.ticket_type_id];
+						tickets.ticketsAllocated[i].request.ticket_type_name = name;
+					}
+					for (i=0; i<tickets.ticketsRejected.length; i++) {
+						name = typeNames[tickets.ticketsRejected[i].request.ticket_type_id];
+						tickets.ticketsRejected[i].request.ticket_type_name = name;
+					}
+
+					// should use a filter in angular but doing this instead - sorry
+					var ticketsExclDonations = {
+						ticketsAllocated: [],
+						ticketsRejected: []
+					};
+
+					for (i=0; i<tickets.ticketsAllocated.length; i++) {
+						if (tickets.ticketsAllocated[i].request.ticket_type_id !== 5) {
+							ticketsExclDonations.ticketsAllocated.push(tickets.ticketsAllocated[i]);
+						}
+					}
+					for (i=0; i<tickets.ticketsRejected.length; i++) {
+						if (tickets.ticketsRejected[i].request.ticket_type_id !== 5) {
+							ticketsExclDonations.ticketsRejected.push(tickets.ticketsRejected[i]);
+						}
+					}
+					
+					// assemble result
+					// TODO: put lots of useful information in here, externalise it
+					var result = {
+						success: true,
+						// total: ,
+						tickets: ticketsExclDonations
+					};
+					return result;
+				});
+
+			confirmationPromise.then(function(result) {
+					// TODO: send email to user
+					// send result back to client
 					res.json(result);
 				})
 				.fail(function(err) {
 					res.json({
-						error: err,
-						success: false
+						success: false,
+						error: err
 					});
 				});
 		}
@@ -161,24 +203,5 @@ router.route("/open/:event_id")
 		function(req, res) {
 			//console.log("Received");
 			api.booking.canBook(req.user.id, req.params.event_id, apiRouter.marshallResult(res));
-		}
-	);
-
-// determine whether the current user is able to book or not
-router.route("/queue/:event_id")
-	// TODO: Do something with event_id
-	.post( // join the queue
-		function(req, res) {
-			res.json(api.booking.joinQueue(req.user.id, req.params.event_id));
-		}
-	)
-	.get( // get queue status
-		function(req, res) {
-			res.json(api.booking.getStatus(req.user.id, req.params.event_id));
-		}
-	)
-	.delete( // leave the queue
-		function(req, res) {
-			res.json(api.booking.leaveQueue(req.user.id, req.params.event_id));
 		}
 	);

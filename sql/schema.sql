@@ -136,6 +136,21 @@ create table ticket (
 	FOREIGN KEY (status_id) REFERENCES ticket_status(id)
 );
 
+### WAITING LIST ###
+
+create table waiting_list (
+	id int auto_increment not null,
+	user_id int not null,
+	ticket_type_id int not null,
+	payment_method_id int not null,
+	book_time int,
+	has_donation boolean not null DEFAULT 0,
+	primary key (id),
+	FOREIGN KEY (user_id) REFERENCES user(id),
+	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id),
+	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
+);
+
 ### TRANSACTIONS ###
 
 create table transaction (
