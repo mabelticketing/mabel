@@ -8,6 +8,17 @@ module.exports = {
 	getFilteredSQL:getFilteredSQL
 };
 
+var pool  = mysql.createPool({
+  connectionLimit : 100,
+  host            : config.db_host,
+  user            : config.db_user,
+  password        : config.db_password,
+  database        : config.db_db,
+	// TODO: Don't enable this. Ideally write code that only makes one statement query at a time.
+  multipleStatements: true
+});
+
+
 function getConnection(opts) {
 	if (opts === undefined) opts = {};
 	opts.host = config.db_host;
@@ -146,24 +157,27 @@ function runSql() {
 		callback(err);
 	});
 
-	var conn = getConnection({
-		multipleStatements: (multiStatements !== undefined && multiStatements)
-	});
-	conn.query(sql, function(err, rows) {
+	pool.getConnection(function(err, conn) {
 		if (err) {
-			// if we get a deadlock, just try again
-			// http://stackoverflow.com/questions/643122/how-to-detect-deadlocks-in-mysql-innodb
-			if (err.errno === 1213) {
-				return d.resolve(runSql(sql));
-			} else {
-				return d.reject(err);
+			return d.reject(err);
+		} 
+		conn.query(sql, function(err, rows) {
+			conn.release();
+			if (err) {
+				// if we get a deadlock, just try again
+				// http://stackoverflow.com/questions/643122/how-to-detect-deadlocks-in-mysql-innodb
+				if (err.errno === 1213) {
+					return d.resolve(runSql(sql));
+				} else {
+					return d.reject(err);
+				}
 			}
-		}
-		rows.queryData = data;
-		rows.querySql = sql;
-		d.resolve(rows);
+			rows.queryData = data;
+			rows.querySql = sql;
+			d.resolve(rows);
+		});
+		
 	});
-	conn.end();
 
 	return d.promise;
 }
