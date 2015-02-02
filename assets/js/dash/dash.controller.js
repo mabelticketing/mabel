@@ -17,6 +17,7 @@ function DashController($scope, APICaller, User) {
 	vm.saveTicket       = saveTicket;
 	vm.cancelTicket     = cancelTicket;
 	vm.clearStatus      = clearStatus;
+	vm.cancelWaitingTicket = cancelWaitingTicket;
 
 	/*** INITIAL ACTION ***/
 
@@ -29,7 +30,7 @@ function DashController($scope, APICaller, User) {
 	var userPromise = User.current();
 	userPromise.$promise.then(function(user) {
 		
-		APICaller.get('ticket', function(err, data) {
+		APICaller.get('ticket/getByUser/' + user.id, function(err, data) {
 			if (err!==undefined && err!==null) return console.log(err);
 
 			vm.ticketsBooked = data.real;
@@ -39,6 +40,12 @@ function DashController($scope, APICaller, User) {
 			vm.donationTickets = data.extra;
 
 			updateTotal();
+		});
+
+		APICaller.get('waiting_list/getByUser/' + user.id, function(err, data) {
+			if (err!==undefined && err!==null) return console.log(err);
+
+			vm.waitingListTickets = data;
 		});
 
 
@@ -95,7 +102,21 @@ function DashController($scope, APICaller, User) {
 			}
 		}
 	}
+	function cancelWaitingTicket(ticket) {
 
+		if (window.confirm("Do you really want to leave the waiting list?")) { 
+			APICaller.del('/waiting_list/' + ticket.id, function(err) {
+				if (err!==undefined && err!==null) return console.log(err);
+				
+				for (var i=0; i<vm.waitingListTickets.length; i++) {
+					if (vm.waitingListTickets[i] === ticket) {
+						vm.waitingListTickets.splice(i, 1);
+						break;
+					}
+				}
+			});
+		}
+	}
 	function updateTotal() {
 
 		vm.totalValue = 0;

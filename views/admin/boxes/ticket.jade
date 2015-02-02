@@ -1,0 +1,5 @@
+.box.box-solid.box-primary(ng-controller="TicketController as ticket")
+	.box-header
+		h3.box-title Tickets
+	.box-body.table-responsive.no-padding
+		mabel-table(resource="ticket.resource", initialisor="ticket.initialisor", filename="'tickets'", columns="ticket.columns", click-event="ticket.clickEvent")

@@ -1,4 +1,6 @@
-table.table.table-hover(ng-table="tableParams", template-header="mabel-table-header", show-filter="true")
+//- a.btn.btn-primary(ng-mousedown="csv.generate()" ng-href="{{ csv.link() }}" download="test.csv") Export to CSV
+
+table.table.table-hover(ng-table="tableParams", template-header="mabel-table-header", show-filter="true", export-csv="csv")
 	tbody
 		tr(ng-repeat="item in $data track by item.id"
 			ng-click="selectItem(item)" tooltip="{{item._error}}" tooltip-placement="top")
@@ -22,3 +24,4 @@ table.table.table-hover(ng-table="tableParams", template-header="mabel-table-hea
 				input(ng-if="column.type!==undefined" type="{{column.type}}" ng-model="newItem[column.name]" name="{{column.name}}")
 			td
 				button(ng-click="submitNew()" class="btn btn-primary btn-xs") Create New Entry
+a.btn.btn-primary.btn-sm(style="margin-left:10px; margin-bottom:10px;", ng-click='csv.generate($event, getFilename() + ".csv")' href='') Download Data

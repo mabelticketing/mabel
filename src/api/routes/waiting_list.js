@@ -12,7 +12,7 @@ router.route("/")
 			if (apiRouter.isAdmin(req.user)) {
 				next();
 			} else {
-				apiRouter.marshallPromise(res, api.ticket.getByUser(req.user.id));
+				apiRouter.marshallPromise(res, api.waitingList.getByUser(req.user.id));
 			}
 		},
 		function(req, res) {
@@ -23,18 +23,18 @@ router.route("/")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			apiRouter.marshallPromise(res, api.ticket.getAll(opts));
+			apiRouter.marshallPromise(res, api.waitingList.getAll(opts));
 		}
 	)
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket.insert(apiRouter.stripMeta(req.body)));
+			apiRouter.marshallPromise(res, api.waitingList.insert(apiRouter.stripMeta(req.body)));
 		}
 	);
 
 function checkTicketAccess(req, res, next) {
-	api.ticket.get(req.params.id)
+	api.waitingList.get(req.params.id)
 		.then(function(ticket) {		
 			if (ticket.user_id === req.user.id) {
 				// authorised because I can see my own tickets
@@ -50,28 +50,22 @@ router.route("/:id")
 	.get(
 		checkTicketAccess,
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket.get(req.params.id));
+			apiRouter.marshallPromise(res, api.waitingList.get(req.params.id));
 		}
 	)
 	.post(
-		checkTicketAccess,
+		apiRouter.checkAdmin(),
 		function(req, res) {
-			// An admin can change anything - but a user can only change guest name
-			// TODO: confirmation email?
-			var ticket = apiRouter.stripMeta(req.body);
-			if (!apiRouter.isAdmin(req.user)) {
-				ticket = {guest_name:ticket.guest_name, id:req.params.id};
-			}
-			apiRouter.marshallPromise(res, api.ticket.update(ticket));
+			apiRouter.marshallPromise(res, api.waitingList.update(req.body));
 		}
 	)
 	.delete(
 		checkTicketAccess,
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket.del(req.params.id)
+			apiRouter.marshallPromise(res, api.waitingList.del(req.params.id)
 				.then(function(result) {
 					if (result.affectedRows > 0) {
-						// TODO: confirmation email + notification to admins
+						// TODO: confirmation email (+ notification to admins)?
 						return {success:true};
 					} else {
 						return {success:false};
@@ -84,6 +78,6 @@ router.route("/:id")
 router.route("/getByUser/:id")
 	.get(
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket.getByUser(req.params.id));
+			apiRouter.marshallPromise(res, api.waitingList.getByUser(req.params.id));
 		}
 	);
