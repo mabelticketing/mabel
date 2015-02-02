@@ -174,8 +174,10 @@ router.route("/:event_id")
 					}
 					
 					// assemble result
+					// TODO: put lots of useful information in here, externalise it
 					var result = {
 						success: true,
+						// total: ,
 						tickets: ticketsExclDonations
 					};
 					return result;
