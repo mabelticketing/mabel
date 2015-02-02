@@ -1,6 +1,7 @@
 var express = require("express");
 var apiRouter = require("../routes.js");
 var api = require("../api.js");
+var Q = require("q");
 var router = express.Router({
 	mergeParams: true
 });
@@ -80,6 +81,8 @@ router.route("/:event_id")
 					});
 			}
 
+			var ticketsAllocByID = ticketsRejecByID = {};
+
 			// get ticket types available to user
 			api.ticket_type.getForUser(req.user, req.params.event_id)
 				.then(function(result) {
@@ -103,8 +106,6 @@ router.route("/:event_id")
 					}
 					// check payment methods are available to user
 					if (!subset(paymentMethodIDs, availablePaymentMethods)) {
-						console.log(paymentMethodIDs);
-						console.log(availablePaymentMethods);
 						throw "You have requested payment methods not available to your account.";
 					}
 					// find ticket allowance
@@ -131,25 +132,60 @@ router.route("/:event_id")
 						// "College Bill" was used more than once
 						throw "You are not allowed to put more than one ticket on your college bill.";
 					}
-					return api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate);
-				})
-				.then(function(result) {
-						//console.log(result);
-						res.mabel = {};
-						res.mabel.tickets = result;
-				})
-				.then(function() {
-					// ticket insert worked
-					// leave the queue
-					var result = api.booking.leaveQueue(req.user.id, req.params.event_id);
-					result.success = true;
-					result.tickets = res.mabel.tickets;
+
+					return Q.all([
+						api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate),
+						api.ticket_type.getAll({},1)
+					]);
+				}).then(function(data) {
+					var tickets = data[0];
+					var types 	= data[1];
+					// create map ids -> names
+					var typeNames = {};
+					for (var i=0; i<types.length; i++) {
+						typeNames[types[i]["id"]] = types[i]["name"];
+					}
+
+					// add ticket type names to response
+					for (var i=0; i<tickets.ticketsAllocated.length; i++) {
+						var name = typeNames[tickets.ticketsAllocated[i].request.ticket_type_id];
+						tickets.ticketsAllocated[i].request.ticket_type_name = name;
+					}
+					for (var i=0; i<tickets.ticketsRejected.length; i++) {
+						var name = typeNames[tickets.ticketsRejected[i].request.ticket_type_id];
+						tickets.ticketsRejected[i].request.ticket_type_name = name;
+					}
+
+					// should use a filter in angular but doing this instead - sorry
+					var ticketsExclDonations = {
+						ticketsAllocated: [],
+						ticketsRejected: []
+					};
+
+					for (var i=0; i<tickets.ticketsAllocated.length; i++) {
+						if (tickets.ticketsAllocated[i].request.ticket_type_id != 5) {
+							ticketsExclDonations.ticketsAllocated.push(tickets.ticketsAllocated[i]);
+						}
+					}
+					for (var i=0; i<tickets.ticketsRejected.length; i++) {
+						if (tickets.ticketsRejected[i].request.ticket_type_id != 5) {
+							ticketsExclDonations.ticketsRejected.push(tickets.ticketsRejected[i]);
+						}
+					}
+
+					// assemble result
+					var result = {
+						success: true,
+						tickets: ticketsExclDonations
+					};
+
+					// send result back
 					res.json(result);
 				})
 				.fail(function(err) {
 					res.json({
-						error: err,
-						success: false
+						success: false,
+						error: err
 					});
 				});
 		}

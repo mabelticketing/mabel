@@ -114,5 +114,25 @@ block content
 										input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
 
 			div(ng-switch-when="done")
-				p YOUR BOOKING HAS BEEN MADE ** DISPLAY BOOKING &amp; LINK TO MANAGEMENT PAGE ETC
+				.slide
+					section.slide-content
+						h1 Confirmation
+						p A summary of your booking is below.
+						p(ng-if="bookingCtrl.ticketResult.ticketsRejected.length > 0") We weren't able to book all of the tickets you requested. These tickets have been added to the waiting list. You will be contacted if these tickets become available.
+						table.table.table-striped.table-hover
+							thead
+								tr
+									th Ticket
+									th Status
+							tbody
+								tr(ng-repeat="ticket in bookingCtrl.ticketResult.ticketsAllocated")
+									td {{ ticket.request.ticket_type_name }}
+									td
+										span.label.label-info Booked
+								tr(ng-repeat="ticket in bookingCtrl.ticketResult.ticketsRejected")
+									td {{ ticket.request.ticket_type_name }}
+									td
+										span.label.label-warning Waiting list
+						p(ng-if="bookingCtrl.ticketResult.ticketsAllocated.length > 0") You may now visit the #[a(href="/dash") ticket management page], where you will need to add ticket holder names to your tickets.
+						p(ng-if="bookingCtrl.ticketResult.ticketsAllocated.length > 0") The name change deadline hasn't been decided yet but it will be some time during Easter term.
 
