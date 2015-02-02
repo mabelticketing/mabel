@@ -12,8 +12,8 @@ getByUser: getByUser,
 };
 module.exports = api;
 
-function get(ticket_id) {
-	var sql = "SELECT a.id, user_id, user.name AS booking_user_name, ticket_type_id, \
+function getDetailed(ticket_id) {
+	var sql = "SELECT a.id, user_id, guest_name as guest_name, user.name AS booking_user_name, ticket_type_id, \
 					ticket_type.name AS ticket_type_name, status_id, ticket_status.name AS status_name, book_time\
 				FROM (SELECT * FROM ticket WHERE id=?) AS a \
 				JOIN user ON a.user_id=user.id \
@@ -23,13 +23,18 @@ function get(ticket_id) {
 		return values[0];
 	});
 }
+function get(ticket_id) {
+	return runSql("SELECT * FROM ticket WHERE id=?", [ticket_id]).then(function(values) {
+		return values[0];
+	});
+}
 
 function update(ticket) {
 	var sql = "UPDATE ticket SET ? WHERE id=?;";
 	var promise = runSql(sql, [ticket, ticket.id]);
 
 	return promise.then(function(result) {
-		return get(result.insertId);
+		return get(ticket.id);
 	});
 }
 
