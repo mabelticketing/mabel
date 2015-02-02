@@ -5,7 +5,7 @@
 	.box-header(data-toggle="tooltip" title="{{userDetail.user._error}}" data-placement="bottom")
 		h3.box-title User Detail
 	//- form(editable-form)
-	.box-body(ng-show="userDetail.user === undefined")
+	.box-body(ng-show="userDetail.user === undefined || userDetail.user === null")
 		div Please select a user.
 	.box-body(ng-show="userDetail.user.id === undefined")
 		div.italic Loading...
