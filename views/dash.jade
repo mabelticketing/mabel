@@ -81,23 +81,22 @@ block content
 							td &pound;{{ ticket.price | number:2 }}
 							td(style="text-align:right")
 								button.btn.btn-xs(ng-click="dashCtrl.saveTicket(ticket)") Save 
-								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)")  Cancel Ticket
+								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") Cancel Ticket
 								span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
-			
-						tr(ng-if="dashCtrl.donationValue > 0")
-							td(colspan=2) Donations
-							td
-							td
+						tr(ng-if="dashCtrl.donationValue > 0") 
+							td(colspan=2) 
+								| Donations
+							td 
+							td 
 							td &pound;{{ dashCtrl.donationValue | number:2 }}
-							td
+							td 
 					tfoot
 						tr
 							th(colspan=2) Total
 							td
 							td
 							td
-								b
-									&pound;{{ dashCtrl.totalValue | number:2 }}
+								b &pound;{{ dashCtrl.totalValue | number:2 }}
 							td
 				
 				p(style="font-size:2em; margin-top:20px; text-align:center;")
