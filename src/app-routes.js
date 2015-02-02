@@ -192,24 +192,26 @@ router.route("/confirm/resend/:email")
 
 // TODO: everything below this point should be precompiled HTML
 
-router.get('/dash',
-	function(req, res) {
-		res.render("dash.jade");
-	}
-);
+router.get('/dash', function(req, res) {
+	res.render("dash.jade");
+});
 
 router.get('/admin', function(req, res) {
 	res.render("admin/dash.jade");
 });
+
 router.get('/admin/event', function(req, res) {
 	res.render("admin/event.jade");
 });
+
 router.get('/admin/users', function(req, res) {
 	res.render("admin/users.jade");
 });
+
 router.get('/admin/tickets', function(req, res) {
 	res.render("admin/tickets.jade");
 });
+
 router.get('/admin/transactions', function(req, res) {
 	res.render("admin/transactions.jade");
 });
@@ -218,11 +220,12 @@ router.get('/book', function(req, res) {
 	res.render("book.jade");
 });
 
-router.get('/confirmation',
-	function(req, res) {
-		// display confirmation page
-		res.render('confirmation.jade');
-	});
+// NOTE: I don't think this is used so I commented it out just in case
+// router.get('/confirmation',
+// 	function(req, res) {
+// 		// display confirmation page
+// 		res.render('confirmation.jade');
+// 	});
 
 router.get("/", function(req, res) {
 	res.render("index.jade");

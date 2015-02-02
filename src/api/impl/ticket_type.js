@@ -1,4 +1,5 @@
 var connection = require("./connection.js");
+var mysql = require("mysql");
 var runSql = connection.runSql;
 var Q = require("q");
 
@@ -33,11 +34,9 @@ function getForUser(user, event_id) {
 
 function getAll(opts, event_id) {
 
-	var conn = connection.getConnection();
-	opts.where = "event_id=" + conn.escape(event_id);
-	var sql = connection.getFilteredSQL("ticket_type", opts, conn);
-	conn.end();
-
+	opts.where = "event_id=" + mysql.escape(event_id);
+	var sql = connection.getFilteredSQL("ticket_type", opts);
+	
 	return runSql(sql, true);
 }
 
