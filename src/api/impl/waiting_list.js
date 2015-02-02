@@ -4,7 +4,7 @@ var runSql = connection.runSql;
 var api = {
 	get: get,
 	getAll: getAll,
-getByUser: getByUser,
+	getByUser: getByUser,
 	insert: insert,
 	del: del,
 	update: update
@@ -45,9 +45,7 @@ function del(ticket_id) {
 }
 
 function getAll(opts) {
-	var conn = connection.getConnection();
-	var sql = connection.getFilteredSQL("waiting_list", opts, conn);
-	conn.end();
+	var sql = connection.getFilteredSQL("waiting_list", opts);
 
 	return runSql(sql, true);
 }

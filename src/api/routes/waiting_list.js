@@ -74,3 +74,10 @@ router.route("/:id")
 			);
 		}
 	);
+
+router.route("/getByUser/:id")
+	.get(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.waitingList.getByUser(req.params.id));
+		}
+	);

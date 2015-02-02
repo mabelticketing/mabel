@@ -52,9 +52,7 @@ function del(ticket_id) {
 }
 
 function getAll(opts) {
-	var conn = connection.getConnection();
-	var sql = connection.getFilteredSQL("ticket", opts, conn);
-	conn.end();
+	var sql = connection.getFilteredSQL("ticket", opts);
 
 	return runSql(sql, true);
 }

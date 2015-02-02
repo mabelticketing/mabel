@@ -6,7 +6,7 @@ function DashController($scope, APICaller, User) {
 
 	/*** DECLARATION ***/
 	//TODO: stop exposing vm on every controller!
-	e = vm;
+	// e = vm;
 
 	// initialise scope vars 
 	vm.ticketsAvailable = [];
