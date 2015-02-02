@@ -80,10 +80,8 @@ router.route("/:event_id")
 					});
 			}
 
-			var ticketsAllocByID = ticketsRejecByID = {};
-
 			// get ticket types available to user
-			api.ticket_type.getForUser(req.user, req.params.event_id)
+			var verificationPromise = api.ticket_type.getForUser(req.user, req.params.event_id)
 				.then(function(result) {
 					for (var i=0; i<result.length; i++) {
 						var ticket_type_id = result[i].id;
@@ -131,27 +129,30 @@ router.route("/:event_id")
 						// "College Bill" was used more than once
 						throw "You are not allowed to put more than one ticket on your college bill.";
 					}
+				});
 
-					return Q.all([
-						api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate),
-						api.ticket_type.getAll({},1)
-					]);
-				}).then(function(data) {
+			var bookingPromise = verificationPromise.then(function() {
+					return api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate);
+				});
+
+			var confirmationPromise = Q.all([bookingPromise, api.ticket_type.getAll({},1)])
+				.then(function(data) {
 					var tickets = data[0];
 					var types 	= data[1];
 					// create map ids -> names
 					var typeNames = {};
-					for (var i=0; i<types.length; i++) {
-						typeNames[types[i]["id"]] = types[i]["name"];
+					var i, name;
+					for (i=0; i<types.length; i++) {
+						typeNames[types[i].id] = types[i].name;
 					}
 
 					// add ticket type names to response
-					for (var i=0; i<tickets.ticketsAllocated.length; i++) {
-						var name = typeNames[tickets.ticketsAllocated[i].request.ticket_type_id];
+					for (i=0; i<tickets.ticketsAllocated.length; i++) {
+						name = typeNames[tickets.ticketsAllocated[i].request.ticket_type_id];
 						tickets.ticketsAllocated[i].request.ticket_type_name = name;
 					}
-					for (var i=0; i<tickets.ticketsRejected.length; i++) {
-						var name = typeNames[tickets.ticketsRejected[i].request.ticket_type_id];
+					for (i=0; i<tickets.ticketsRejected.length; i++) {
+						name = typeNames[tickets.ticketsRejected[i].request.ticket_type_id];
 						tickets.ticketsRejected[i].request.ticket_type_name = name;
 					}
 
@@ -161,13 +162,13 @@ router.route("/:event_id")
 						ticketsRejected: []
 					};
 
-					for (var i=0; i<tickets.ticketsAllocated.length; i++) {
-						if (tickets.ticketsAllocated[i].request.ticket_type_id != 5) {
+					for (i=0; i<tickets.ticketsAllocated.length; i++) {
+						if (tickets.ticketsAllocated[i].request.ticket_type_id !== 5) {
 							ticketsExclDonations.ticketsAllocated.push(tickets.ticketsAllocated[i]);
 						}
 					}
-					for (var i=0; i<tickets.ticketsRejected.length; i++) {
-						if (tickets.ticketsRejected[i].request.ticket_type_id != 5) {
+					for (i=0; i<tickets.ticketsRejected.length; i++) {
+						if (tickets.ticketsRejected[i].request.ticket_type_id !== 5) {
 							ticketsExclDonations.ticketsRejected.push(tickets.ticketsRejected[i]);
 						}
 					}
@@ -177,8 +178,12 @@ router.route("/:event_id")
 						success: true,
 						tickets: ticketsExclDonations
 					};
+					return result;
+				});
 
-					// send result back
+			confirmationPromise.then(function(result) {
+					// TODO: send email to user
+					// send result back to client
 					res.json(result);
 				})
 				.fail(function(err) {
