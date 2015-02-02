@@ -90,7 +90,9 @@ block content
 							th(colspan=2) Total
 							td
 							td
-							td &pound;{{ dashCtrl.totalValue | number:2 }}
+							td
+								b
+									&pound;{{ dashCtrl.totalValue | number:2 }}
 							td
 				p(ng-if="dashCtrl.ticketsBooked.length === 0") 
 					em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here. #[a(href="/book") Click here] to make a booking.
