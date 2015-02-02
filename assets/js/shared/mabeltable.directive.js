@@ -9,7 +9,8 @@ function MabelTable(ngTableParams, $rootScope) {
 			initialisor: '=',
 			Resource: '=resource',
 			columns: '=',
-			clickEvent: '='
+			clickEvent: '=',
+			filename: '='
 		},
 		link: function($scope, element) {
 			var vm = $scope;
@@ -48,6 +49,14 @@ function MabelTable(ngTableParams, $rootScope) {
 					});
 				}
 			});
+
+			vm.getFilename = function() {
+				var name = vm.filename || 'data-export';
+				var d = new Date();
+				var time = d.toLocaleString();
+				time = time.replace(/[^a-zA-Z0-9 -_():]/g,'-');
+				return name + " " + time;
+			};
 
 			vm.showTip = function(id) {
 				console.log('show .badge-' + id);

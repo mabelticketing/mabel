@@ -10,8 +10,7 @@ module.exports = router;
 router.route("/:event_id")
 	.post(
 		function(req, res, next) {
-			// check we can book (that we're at the front of the queue an' all)
-			//console.log(req.body);
+			// check that booking is open
 			api.booking.canBook(req.user.id, req.params.event_id, function(err, result) {
 				if (err) return next(err);
 				if (!result.open) return next("Booking not open for this user");
@@ -172,7 +171,7 @@ router.route("/:event_id")
 							ticketsExclDonations.ticketsRejected.push(tickets.ticketsRejected[i]);
 						}
 					}
-
+					
 					// assemble result
 					var result = {
 						success: true,
@@ -197,24 +196,5 @@ router.route("/open/:event_id")
 		function(req, res) {
 			//console.log("Received");
 			api.booking.canBook(req.user.id, req.params.event_id, apiRouter.marshallResult(res));
-		}
-	);
-
-// determine whether the current user is able to book or not
-router.route("/queue/:event_id")
-	// TODO: Do something with event_id
-	.post( // join the queue
-		function(req, res) {
-			res.json(api.booking.joinQueue(req.user.id, req.params.event_id));
-		}
-	)
-	.get( // get queue status
-		function(req, res) {
-			res.json(api.booking.getStatus(req.user.id, req.params.event_id));
-		}
-	)
-	.delete( // leave the queue
-		function(req, res) {
-			res.json(api.booking.leaveQueue(req.user.id, req.params.event_id));
 		}
 	);

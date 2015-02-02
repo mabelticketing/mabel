@@ -52,13 +52,16 @@ router.use("/ticket",
 router.use("/transaction",
 	require("./routes/transaction.js"));
 
+router.use("/waiting_list",
+	require("./routes/waiting_list.js"));
+
 function isInGroup(user, groupId) {
-	return user.groups.indexOf(groupId) < 0;
+	return user.groups.indexOf(groupId) > -1;
 }
 
 function checkGroup(groupId) {
 	return function(req, res, next) {
-		if (isInGroup(req.user, groupId)) {
+		if (!isInGroup(req.user, groupId)) {
 			return next("You do not have permission to access this resource");
 		}
 		next();
@@ -66,7 +69,7 @@ function checkGroup(groupId) {
 }
 
 function isAdmin(user) {
-	isInGroup(user, 1);
+	return isInGroup(user, 1);
 }
 
 function checkAdmin() {
