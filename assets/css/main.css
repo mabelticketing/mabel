@@ -7,7 +7,6 @@ body {
   padding: 0px;
   font-family: Roboto;
   font-weight: 300;
-  line-height: 0px;
   color: #333; }
 
 h1 {
@@ -42,4 +41,13 @@ hr {
 	margin-top: 30px;
 	margin-bottom: 30px;
 	border-bottom: 1px solid #e6e6e6;
+}
+
+.btn-xlarge {
+    padding: 18px 28px;
+    font-size: 22px;
+    line-height: normal;
+    -webkit-border-radius: 8px;
+       -moz-border-radius: 8px;
+            border-radius: 8px;
 }
