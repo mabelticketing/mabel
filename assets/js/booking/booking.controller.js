@@ -142,7 +142,6 @@ function BookingController($scope, APICaller, User, $interval) {
 	function submitBooking() {
 		vm.meta.errorMsg = "";
 		APICaller.post("booking/1", vm.booking, function(err, result) {
-			console.log(result);
 			if (err) {
 				vm.meta.errorMsg = err;
 				return console.log(err); // error handling

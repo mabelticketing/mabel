@@ -24,7 +24,10 @@ JOIN ( \
 	ON A.user_id = transaction.user_id;";
 
 function getByUser(user_id) {
-	var sql = "SELECT * FROM transaction WHERE user_id = ?";
+	var sql = "SELECT transaction.id id, value, payment_method.name payment_method, transaction_time, notes \
+		FROM transaction \
+		JOIN payment_method \
+			ON payment_method_id=payment_method.id;";
 	return runSql(sql, [user_id]);
 }
 

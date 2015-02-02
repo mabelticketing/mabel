@@ -8,6 +8,7 @@ block scripts
 	
 	// bootstrap
 	script(type="text/javascript" src="/components/angular-bootstrap/ui-bootstrap.min.js")
+	script(type="text/javascript", src="/components/moment/moment.js")
 
 	// shared
 	script(type="text/javascript", src="/js/shared/mabel.shared.js")
@@ -17,7 +18,6 @@ block scripts
 	script(type="text/javascript", src="/js/shared/user.factory.js")
 
 	// dash
-	script(type="text/javascript", src="/components/moment/moment.js")
 	script(type="text/javascript", src="/js/dash/mabel.dash.js")
 	script(type="text/javascript", src="/js/dash/dash.controller.js")
 
@@ -48,14 +48,19 @@ block content
 					.panel-heading
 						h4.panel-heading(style="margin:0px;padding:0px;") The following tickets are available for booking:
 					.panel-body
-						//- TODO:replace N
-						p(ng-if="dashCtrl.ticketsAvailable.length != 0")
-							| You will be able to purchase {{dashCtrl.ticketsAvailable[0].allowance}} more ticket{{dashCtrl.ticketsAvailable[0].allowance===1?"":"s"}}.
-						ul
-							li(ng-repeat="ticket in dashCtrl.ticketsAvailable") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
-						p(ng-if="dashCtrl.ticketsAvailable.length == 0", style="font-style:italic;") We couldn't find any tickets available to you.
-						p If you think there is a problem with the available tickets listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
-				h2 Your tickets
+						p(ng-if="dashCtrl.ticketsAvailableLoading") #[em Loading...]
+						p(ng-if="!dashCtrl.ticketsAvailableLoading && dashCtrl.ticketsAvailable.length === 0", style="font-style:italic;")
+							| We couldn't find any tickets available to you.
+						p(ng-if="(!dashCtrl.ticketsAvailableLoading) && dashCtrl.ticketsAvailable.length > 0 && dashCtrl.ticketsAvailable[0].allowance > 0")
+							| You will be able to purchase {{dashCtrl.ticketsAvailable[0].allowance}} more ticket{{dashCtrl.ticketsAvailable[0].allowance===1?"":"s"}} of the following type:
+							ul
+								li(ng-repeat="ticket in dashCtrl.ticketsAvailable") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
+						p If you think there is a problem with the tickets available listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
+
+				h2 Tickets
+				p(ng-if="dashCtrl.ticketsBookedLoading") #[em Loading...]
+				p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)") 
+					em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
 				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked.length !== 0")
 					thead
 						tr
@@ -92,10 +97,15 @@ block content
 							td
 							td &pound;{{ dashCtrl.totalValue | number:2 }}
 							td
-				p(ng-if="dashCtrl.ticketsBooked.length === 0") 
-					em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here. #[a(href="/book") Click here] to make a booking.
-
+				
+				p(style="font-size:2em; margin-top:20px; text-align:center;")
+					a.btn.btn-xlarge.btn-success(href="/book") Make a Booking
+				
 				h2 Waiting List
+
+				p(ng-if="dashCtrl.waitingListLoading") #[em Loading...]
+				p(ng-if="!dashCtrl.transactionsLoading && !(dashCtrl.waitingListTickets.length > 0)") 
+					em You are not currently in the waiting list for any tickets.
 				table.table.table-striped.table-hover(ng-if="dashCtrl.waitingListTickets.length > 0")
 					thead
 						tr
@@ -113,20 +123,33 @@ block content
 								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  Leave Waiting List
 								span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
 
-				p(ng-if="! (dashCtrl.waitingListTickets.length > 0)") 
-					em You are not currently in the waiting list for any tickets.
 
-				div(ng-if="dashCtrl.transactions.length == 0")
-					h2 Billing
+				h2 Billing
+				p(ng-if="dashCtrl.transactionsLoading") #[em Loading...]
+				div(ng-if="!dashCtrl.transactionsLoading && dashCtrl.transactions.length === 0")
 					p #[em We have not yet processed any transactions from you.]
-				table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length != 0")
+				table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length !== 0")
 					thead
 						tr
-							th Date of booking
-							th Payment method
+							th Payment Method
+							th Notes
+							th Value
+							th Date Processed
 					tbody
 						tr(ng-repeat="transaction in dashCtrl.transactions")
-							td {{ transaction.transaction_time }}
-							td {{ transaction.payment_method_id }}
+							td {{ transaction.payment_method }}
+							td {{ transaction.notes }}
+							td &pound;{{ transaction.value | number: 2}}
+							td {{ transaction.time }}
+					tfoot
+						tr 
+							th Total
+							td
+							td &pound;{{ dashCtrl.totalTransactions | number: 2 }}
+							td
 				hr
-				p If you have any other queries regarding tickets, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com]. Please allow a few days before seeing cheques confirmed on this page.
+				p 
+
+					| If you have any other queries regarding tickets, please
+					| contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
+					| Please allow a few days before seeing cheques confirmed on this page.

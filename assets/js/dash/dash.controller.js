@@ -1,3 +1,4 @@
+/* global moment */
 angular.module('mabel.dash')
 	.controller("DashController", DashController);
 
@@ -14,9 +15,17 @@ function DashController($scope, APICaller, User) {
 	vm.donationTickets  = [];
 	vm.transactions     = [];
 
-	vm.saveTicket       = saveTicket;
-	vm.cancelTicket     = cancelTicket;
-	vm.clearStatus      = clearStatus;
+	vm.totalValue        = 0;
+	vm.totalTransactions = 0;
+
+	vm.waitingListLoading      = true;
+	vm.transactionsLoading     = true;
+	vm.ticketsBookedLoading    = true;
+	vm.ticketsAvailableLoading = true;
+
+	vm.saveTicket          = saveTicket;
+	vm.cancelTicket        = cancelTicket;
+	vm.clearStatus         = clearStatus;
 	vm.cancelWaitingTicket = cancelWaitingTicket;
 
 	/*** INITIAL ACTION ***/
@@ -25,6 +34,7 @@ function DashController($scope, APICaller, User) {
 		if (err) return console.log(err);
 		// assign response to tickets array
 		vm.ticketsAvailable = data;
+		vm.ticketsAvailableLoading = false;
 	});
 
 	var userPromise = User.current();
@@ -39,6 +49,7 @@ function DashController($scope, APICaller, User) {
 			// but here I'm assuming exclusively donations - not very generalised.
 			vm.donationTickets = data.extra;
 
+			vm.ticketsBookedLoading = false;
 			updateTotal();
 		});
 
@@ -46,12 +57,27 @@ function DashController($scope, APICaller, User) {
 			if (err!==undefined && err!==null) return console.log(err);
 
 			vm.waitingListTickets = data;
+
+			vm.waitingListLoading = false;
 		});
 
 
 		APICaller.get('transaction/getByUser/'+user.id, function(err, data) {
 			if (err!==undefined && err!==null) return console.log(err);
-			vm.transactions = data;
+			vm.transactions = [];
+			vm.totalTransactions = 0;
+
+			for (var i=0; i<data.length; i++) {
+				vm.transactions.push({
+					time: moment.unix(data[i].transaction_time).format("Mo MMM LT"),
+					payment_method: data[i].payment_method,
+					notes: data[i].notes,
+					value: data[i].value
+				});
+				vm.totalTransactions += data[i].value;
+			}
+			
+			vm.transactionsLoading = false;
 		});
 	});
 	
