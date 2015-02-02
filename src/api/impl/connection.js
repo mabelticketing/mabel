@@ -19,7 +19,7 @@ function getConnection(opts) {
 	return conn;
 }
 
-function getFilteredSQL(table, opts, conn) {
+function getFilteredSQL(table, opts) {
 	var sql = "SELECT * from " + table;
 
 	var whereClause = "";
@@ -34,16 +34,16 @@ function getFilteredSQL(table, opts, conn) {
 		for (var i in opts.filter) {
 			if (opts.filter[i].length < 1) continue;
 			hasWhere = true;
-			wheres.push(conn.escapeId(i) + " LIKE " +  conn.escape('%' + opts.filter[i] + '%'));
+			wheres.push(mysql.escapeId(i) + " LIKE " +  mysql.escape('%' + opts.filter[i] + '%'));
 		}
 	}
 	if (hasWhere) {
 		whereClause = " WHERE " + wheres.join(" AND ");
 	}
 
-	if (opts.size !== undefined) {
+	// if (opts.size !== undefined) {
 		sql += " JOIN (SELECT COUNT(*) AS $count FROM " + table + whereClause + ") AS c";
-	}
+	// }
 	sql += whereClause;
 
 	if (opts.order !== undefined) {
@@ -57,19 +57,19 @@ function getFilteredSQL(table, opts, conn) {
 			} else if (opts.order[p].match(/^desc$/i) !== null) {
 				dir = "DESC";
 			}
-			orders.push(conn.escapeId(p) + " " +  dir);
+			orders.push(mysql.escapeId(p) + " " +  dir);
 		}
 		if (hasOrder) {
 			sql += " ORDER BY " + orders.join(", ");
 		}
 	}
 
-	if (opts.size !== undefined) {
+	if (opts.size !== undefined && !isNaN(opts.size) ) {
 		sql += " LIMIT ";
-		if (opts.from !== undefined) {
-			sql += conn.escape(opts.from) + ",";
+		if (opts.from !== undefined && !isNaN(opts.from) ) {
+			sql += mysql.escape(opts.from) + ",";
 		}
-		sql += conn.escape(opts.size);
+		sql += mysql.escape(opts.size);
 	}
 	sql += ";";
 	return sql;

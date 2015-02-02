@@ -12,10 +12,7 @@ module.exports = {
 
 function getAll(opts) {
 	// TODO: visibility of groups for admins of different events?
-
-	var conn = connection.getConnection();
-	var sql = connection.getFilteredSQL("user_group", opts, conn);
-	conn.end();
+	var sql = connection.getFilteredSQL("user_group", opts);
 
 	return runSql(sql, true);
 }
