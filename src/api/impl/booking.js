@@ -130,7 +130,7 @@ function makeBooking(user_id, tickets, addDonations) {
 			}
 		}
 
-		Q.all([
+		return Q.all([
 			Q.all(donationPromises)
 			.then(function(dResults) {
 				for (var j = 0; j < dResults.length; j++) {
@@ -153,6 +153,7 @@ function makeBooking(user_id, tickets, addDonations) {
 						});
 					}
 				}
+				return ticketsRejected;
 			})
 		])
 		.then(function(dwResults) {
