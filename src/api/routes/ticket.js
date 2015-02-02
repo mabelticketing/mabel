@@ -81,7 +81,6 @@ router.route("/:id")
 		}
 	);
 
-// TODO: this should just go through the / route, since we have the user id in req.user.id
 router.route("/getByUser/:id")
 	.get(
 		function(req, res) {

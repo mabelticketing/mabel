@@ -27,7 +27,7 @@ function update(ticket) {
 	var promise = runSql(sql, [ticket, ticket.id]);
 
 	return promise.then(function(result) {
-		return get(result.insertId);
+		return get(ticket.id);
 	});
 }
 

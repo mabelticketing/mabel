@@ -19,19 +19,19 @@ function TicketTypesController(TicketType) {
 			name: 'name',
 			type: 'text',
 			sortable: 'name',
-			filter: {description:'text'}
+			filter: {name:'text'}
 		}, {
 			title: 'Price',
 			name: 'price',
 			type: 'text',
 			sortable: 'price',
-			filter: {name:'text'}
+			filter: {price:'text'}
 		}, {
 			title: 'Ticket Limit',
 			name: 'ticket_limit',
 			type: 'text',
 			sortable: 'ticket_limit',
-			filter: {name:'text'}
+			filter: {ticket_limit:'text'}
 		}
 	];
 }
