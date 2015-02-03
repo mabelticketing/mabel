@@ -29,12 +29,12 @@ app.use("/api", APIRouter);
 app.use('/', express.static(__dirname + '/assets'));
 
 
-var c = new Cluster({
-	port: config.port || 2000
-});
-c.listen(function(cb) {
-	cb(app);
-});
+// var c = new Cluster({
+	// port: config.port || 2000
+// });
+// c.listen(function(cb) {
+	// cb(app);
+// });
 
 
-// app.listen(config.port || 2000);
+app.listen(config.port || 2000);
