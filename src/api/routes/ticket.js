@@ -59,10 +59,17 @@ router.route("/:id")
 			// An admin can change anything - but a user can only change guest name
 			// TODO: confirmation email?
 			var ticket = apiRouter.stripMeta(req.body);
-			if (!apiRouter.isAdmin(req.user)) {
-				ticket = {guest_name:ticket.guest_name, id:req.params.id};
+			var t = {};
+			if (ticket.guest_name) t.guest_name = ticket.guest_name;
+			if (ticket.id) t.id = ticket.id;
+			if (apiRouter.isAdmin(req.user)) {
+				if (ticket.user_id) t.user_id = ticket.user_id;
+				if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
+				if (ticket.status_id) t.status_id = ticket.status_id;
+				if (ticket.payment_method_id) t.payment_method_id = ticket.payment_method_id;
+				if (ticket.book_time) t.book_time = ticket.book_time;
 			}
-			apiRouter.marshallPromise(res, api.ticket.update(ticket));
+			apiRouter.marshallPromise(res, api.ticket.update(t));
 		}
 	)
 	.delete(
