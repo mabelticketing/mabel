@@ -52,7 +52,6 @@ function send(to, subject, template, data) {
 				console.log(sendError);
 				return;
 			}
-			console.log("sent");
 			d.resolve(body);
 		});
 
