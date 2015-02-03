@@ -5,14 +5,14 @@ module.exports = function(grunt) {
         jade: {
             compile: {
                 files: {
-                    "./compiled_html/index.html": "./views/index.jade",
-                    "./compiled_html/dash/index.html": "./views/dash.jade",
-                    "./compiled_html/book/index.html": "./views/book.jade",
-                    "./compiled_html/admin/index.html": "./views/admin/dash.jade",
-                    "./compiled_html/admin/event/index.html": "./views/admin/event.jade",
-                    "./compiled_html/admin/tickets.html": "./views/admin/tickets.jade",
-                    "./compiled_html/admin/transactions.html": "./views/admin/transactions.jade",
-                    "./compiled_html/admin/users/index.html": "./views/admin/users.jade",
+                    "./assets/index.html": "./views/index.jade",
+                    "./assets/dash.html": "./views/dash.jade",
+                    "./assets/book.html": "./views/book.jade",
+                    "./assets/admin.html": "./views/admin/dash.jade",
+                    "./assets/admin/event.html": "./views/admin/event.jade",
+                    "./assets/admin/tickets.html": "./views/admin/tickets.jade",
+                    "./assets/admin/transactions.html": "./views/admin/transactions.jade",
+                    "./assets/admin/users.html": "./views/admin/users.jade",
                 }
             }
         }
