@@ -192,10 +192,6 @@ router.route("/confirm/resend/:email")
 
 // TODO: everything below this point should be precompiled HTML
 
-router.get('/dash', function(req, res) {
-	res.render("dash.jade");
-});
-
 router.get('/admin', function(req, res) {
 	res.render("admin/dash.jade");
 });
@@ -214,6 +210,10 @@ router.get('/admin/tickets', function(req, res) {
 
 router.get('/admin/transactions', function(req, res) {
 	res.render("admin/transactions.jade");
+});
+
+router.get('/dash', function(req, res) {
+	res.render("dash.jade");
 });
 
 router.get('/book', function(req, res) {
