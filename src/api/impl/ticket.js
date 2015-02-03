@@ -5,7 +5,7 @@ var config = require("../../config.js");
 var api = {
 	get: get,
 	getAll: getAll,
-getByUser: getByUser,
+	getByUser: getByUser,
 	insert: insert,
 	del: del,
 	update: update
