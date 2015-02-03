@@ -56,7 +56,6 @@ router.route('/login/mabel')
 			})(req, res, next);
 		},
 		function(req, res) {
-			console.log(req.user.token); // helper for now, if needed TODO: remove
 			// store cookie - loginConfirmation will then redirect to /dash
 			res.render("loginConfirmation.jade", {
 				token: req.user.token
@@ -69,7 +68,6 @@ router.get('/login/raven',
 		session: false
 	}),
 	function(req, res) {
-		console.log(req.user.token); // helper for now, if needed TODO: remove
 		// store cookie - loginConfirmation will then redirect to /dash
 		res.render("loginConfirmation.jade", {
 			token: req.user.token
