@@ -53,6 +53,8 @@ function UserDetailController(User, UserGroup, $scope, $rootScope) {
 				}
 			});
 
+		}, function() {
+			user = null;
 		});
 	}
 }
