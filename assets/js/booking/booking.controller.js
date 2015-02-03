@@ -1,3 +1,4 @@
+/* global moment */
 angular.module('mabel.booking')
 	.controller("BookingController", BookingController);
 
@@ -156,8 +157,9 @@ function BookingController($scope, APICaller, User, $interval) {
 			}
 			// need to do more with booking stuff
 			if (result.success) {
+				console.log(result);
 				vm.status = "done";
-				vm.ticketResult = result.tickets;
+				vm.ticketResult = result;
 				return;
 			}
 			// weird, no error but success is false;
