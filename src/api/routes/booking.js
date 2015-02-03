@@ -1,6 +1,9 @@
 var express = require("express");
 var apiRouter = require("../routes.js");
 var api = require("../api.js");
+var moment = require("moment");
+var emailer = require("../../emailer.js");
+var unidecode = require('unidecode');
 var Q = require("q");
 var router = express.Router({
 	mergeParams: true
@@ -135,25 +138,43 @@ router.route("/:event_id")
 					return api.booking.makeBooking(req.user.id, ticketsRequested, req.body.donate);
 				});
 
-			var confirmationPromise = Q.all([bookingPromise, api.ticket_type.getAll({},1)])
-				.then(function(data) {
+			// TODO: payment method data, user data
+			var confirmationPromise = 
+				Q.all([
+					bookingPromise,
+					api.user.get(req.user.id),
+					api.ticket_type.getAll({},1),
+					api.payment_method.getAll(req.user.id)
+				]).then(function(data) {
 					var tickets = data[0];
-					var types 	= data[1];
-					// create map ids -> names
-					var typeNames = {};
-					var i, name;
-					for (i=0; i<types.length; i++) {
-						typeNames[types[i].id] = types[i].name;
+					var user = data[1];
+					var i, type, payment_method, totalPrice = 0, donationPrice = 0;
+
+					// create map ids -> types
+					var types = {};
+					for (i=0; i< data[2].length; i++) {
+						types[ data[2][i].id ] = data[2][i];
 					}
 
-					// add ticket type names to response
+					var payment_methods = {};
+					for (i=0; i< data[3].length; i++) {
+						payment_methods[ data[3][i].id ] = data[3][i];
+					}
+
+					// add data to response
 					for (i=0; i<tickets.ticketsAllocated.length; i++) {
-						name = typeNames[tickets.ticketsAllocated[i].request.ticket_type_id];
-						tickets.ticketsAllocated[i].request.ticket_type_name = name;
+						type = types[tickets.ticketsAllocated[i].request.ticket_type_id];
+						payment_method = payment_methods[tickets.ticketsAllocated[i].request.payment_method];
+						
+						tickets.ticketsAllocated[i].request.ticket_type = type;
+						tickets.ticketsAllocated[i].request.payment_method = payment_method;
 					}
 					for (i=0; i<tickets.ticketsRejected.length; i++) {
-						name = typeNames[tickets.ticketsRejected[i].request.ticket_type_id];
-						tickets.ticketsRejected[i].request.ticket_type_name = name;
+						type = types[tickets.ticketsRejected[i].request.ticket_type_id];
+						payment_method = payment_methods[tickets.ticketsRejected[i].request.payment_method];
+						
+						tickets.ticketsRejected[i].request.ticket_type = type;
+						tickets.ticketsRejected[i].request.payment_method = payment_method;
 					}
 
 					// should use a filter in angular but doing this instead - sorry
@@ -163,12 +184,17 @@ router.route("/:event_id")
 					};
 
 					for (i=0; i<tickets.ticketsAllocated.length; i++) {
-						if (tickets.ticketsAllocated[i].request.ticket_type_id !== 5) {
+						// TODO: parameterise donation_ticket_type_id
+						type = tickets.ticketsAllocated[i].request.ticket_type;
+						if (type.id !== 5) {
 							ticketsExclDonations.ticketsAllocated.push(tickets.ticketsAllocated[i]);
+						} else {
+							donationPrice += type.price;
 						}
+						totalPrice += type.price;
 					}
 					for (i=0; i<tickets.ticketsRejected.length; i++) {
-						if (tickets.ticketsRejected[i].request.ticket_type_id !== 5) {
+						if (tickets.ticketsRejected[i].request.ticket_type.id !== 5) {
 							ticketsExclDonations.ticketsRejected.push(tickets.ticketsRejected[i]);
 						}
 					}
@@ -177,16 +203,21 @@ router.route("/:event_id")
 					// TODO: put lots of useful information in here, externalise it
 					var result = {
 						success: true,
-						// total: ,
-						tickets: ticketsExclDonations
+						totalPrice: totalPrice,
+						donationPrice: donationPrice,
+						tickets: ticketsExclDonations,
+						payment_deadline: moment().add(14,'d').format("dddd, MMMM Do YYYY"),
+						user: user,
+						sampleID: tickets.ticketsAllocated.length>0?tickets.ticketsAllocated[0].rowId:123
 					};
 					return result;
 				});
 
 			confirmationPromise.then(function(result) {
-					// TODO: send email to user
-					// send result back to client
+					
 					res.json(result);
+					return emailer.send("'" + unidecode(result.user.name) + "' <" + result.user.email + ">", "Emmanuel College May Ball 2015 Booking Confirmation",
+						"bookConf.jade", result);
 				})
 				.fail(function(err) {
 					res.json({
