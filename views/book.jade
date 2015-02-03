@@ -33,6 +33,7 @@ block title
 
 block content
 	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)
+		a(href="/logout" class="btn btn-default btn-xs" style="position:absolute;top:10px;right:10px") Logout
 		div(ng-switch="bookingCtrl.status")
 			
 			div(ng-switch-when="unavailable")
