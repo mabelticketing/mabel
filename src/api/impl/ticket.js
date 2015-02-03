@@ -59,7 +59,7 @@ function getAll(opts) {
 
 function getByUser(user_id) {
 	var sql = "SELECT ticket_type.name name, ticket.book_time book_time, ticket.id id, \
-				ticket_type.id type_id, ticket_type.price price, ticket.guest_name guest_name, \
+				ticket_type.id ticket_type_id, ticket_type.price price, ticket.guest_name guest_name, \
 				ticket_status.name status, payment_method.name payment_method \
 			FROM ticket \
 			JOIN ticket_type ON ticket.ticket_type_id=ticket_type.id \
