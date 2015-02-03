@@ -1,0 +1,105 @@
+h1 Booking Successful
+p Thank you for booking tickets to Emmanuel College May Ball 2015. A summary of your booking is below.
+table.emailTable
+	thead
+		tr
+			th Ticket Number
+			th Ticket Type
+			th Payment Method
+			th Price
+			th Status
+	tbody
+		each ticket in tickets.ticketsAllocated 
+			tr
+				td # #{ ticket.rowId }
+				td #{ ticket.request.ticket_type.name }
+				td #{ ticket.request.payment_method.name }
+				td &pound;#{ ticket.request.ticket_type.price }
+				td
+					span.label.label-info Booked
+		each ticket in tickets.ticketsRejected
+			tr
+				td -
+				td #{ ticket.request.ticket_type.name }
+				td #{ ticket.request.payment_method.name }
+				td -
+				td
+					span.label.label-warning Waiting list
+		if (donationPrice > 0)
+			tr
+				th Donations
+				td
+				td 
+				td &pound;#{donationPrice}
+				td
+	tfoot
+		tr
+			th Total Due
+			td
+			td
+			td &pound;#{totalPrice}
+			td
+
+if (tickets.ticketsRejected.length > 0)
+	p We weren't able to book all of the tickets you requested, so these tickets have been added to the waiting list. You will be contacted if these tickets become available.
+
+if (totalPrice > 0)
+	h2 Payment Information
+	p Payment must be received within #[strong 14] days of booking (i.e. before #[strong #{payment_deadline} ]). 
+		| Any tickets which are not paid for by this date may be cancelled without further notice.
+
+	h4 Cheque Payments
+	p 
+		| To pay for tickets by #[strong Cheque], 
+		| please hand in a cheque made payable to 
+		| #[strong Emmanuel College May Ball] 
+		| to the Emmanuel College Porter's Lodge. 
+		| Please ensure that your surname and ticket
+		| number are written on the back of the
+		| cheque. To pay for multiple tickets with a
+		| single cheque, please include the ticket
+		| numbers for all the tickets you wish to pay
+		| for.
+
+	h4 Bank Transfer Payments
+	p 
+		| To pay for tickets by #[strong Bank Transfer], 
+		| please send the amount due to the following
+		| account:
+
+		table.emailTable(style="padding-bottom:10px;")
+			tr 
+				th(style="padding: 5px;padding-right: 20px;") Account Number
+				td 60067911
+			tr
+				th(style="padding: 5px;") Sort Code
+				td 20-17-19
+			tr
+				th(style="padding: 5px;") Account name
+				td Emmanuel College May Ball
+	p 
+		| Please set the payment reference to your
+		| surname followed by the ticket number above. 
+		| For example, if your name is John Smith, 
+		| your ticket reference should be 
+		| #[em SMITH #{sampleID}]
+		| . To pay for multiple tickets with a single
+		| payment, simply use the ticket number of the
+		| first ticket booked.
+
+
+	h4 College Bill Payments
+	p 
+		| To pay for tickets by #[strong College Bill], 
+		| no further action needs to be taken. The
+		| price of your ticket will be added to your
+		| Lent term bill. Please note that payment by
+		| college bill is only available to current
+		| students at Emmanuel College, and that only
+		| one ticket may be put on your end of term
+		| bill.
+
+if (tickets.ticketsAllocated.length > 0)
+	h2 Ticket Management
+	p You may now visit the #[a(href="http://tickets.emmamayball.com/dash") ticket management page], where you can add guest names to your tickets, or cancel them.
+	p You will be able to change the names on your ticket via the management page above until #[b 7th June].

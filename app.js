@@ -3,6 +3,7 @@ var express   = require("express");
 var app       = express();
 var passport  = require("passport");
 var config    = require('./src/config.js');
+var Cluster   = require('cluster2');
 require("./src/passport-config.js");
 
 // make visible outside module
@@ -27,5 +28,13 @@ app.use("/api", APIRouter);
 // serve static content in assets from root
 app.use('/', express.static(__dirname + '/assets'));
 
-// listen on port 2000
-app.listen(config.port || 2000);
+
+var c = new Cluster({
+	port: config.port || 2000
+});
+c.listen(function(cb) {
+	cb(app);
+});
+
+
+// app.listen(config.port || 2000);

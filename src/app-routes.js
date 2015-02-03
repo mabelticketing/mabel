@@ -192,10 +192,6 @@ router.route("/confirm/resend/:email")
 
 // TODO: everything below this point should be precompiled HTML
 
-router.get('/dash', function(req, res) {
-	res.render("dash.jade");
-});
-
 router.get('/admin', function(req, res) {
 	res.render("admin/dash.jade");
 });
@@ -216,6 +212,10 @@ router.get('/admin/transactions', function(req, res) {
 	res.render("admin/transactions.jade");
 });
 
+router.get('/dash', function(req, res) {
+	res.render("dash.jade");
+});
+
 router.get('/book', function(req, res) {
 	res.render("book.jade");
 });
@@ -226,6 +226,24 @@ router.get('/book', function(req, res) {
 // 		// display confirmation page
 // 		res.render('confirmation.jade');
 // 	});
+router.get('/loaderio-61a9cbc6546d52335ff60b3e0bc0592d',
+	function(req, res) {
+		res.type('text/plain');
+		res.set('Content-Type', 'text/plain');
+		res.send('loaderio-61a9cbc6546d52335ff60b3e0bc0592d');
+	});
+
+router.get('/mu-b71b91c7-69521387-684f86b3-c1bbca15',
+	function(req, res) {
+		res.type('text/plain');
+		res.set('Content-Type', 'text/plain');
+		res.send('42');
+	});
+router.get('/confirmation',
+	function(req, res) {
+		// display confirmation page
+		res.render('confirmation.jade');
+	});
 
 router.get("/", function(req, res) {
 	res.render("index.jade");
