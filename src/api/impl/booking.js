@@ -22,12 +22,10 @@ function canBook(user_id, event_id, callback) {
 		var now = new Date().getTime() / 1000;
 
 		if (now < eventDetails[0].launch_time) {
-			var niceStart = moment.unix(eventDetails[0].launch_time).calendar();
-			niceStart = niceStart.toLowerCase();
-			niceStart = niceStart.replace(/am/g,'AM').replace(/pm/g, 'PM');
 			return callback(null, {
 				open: false,
-				reason: __("Booking is not yet open. Booking opens " + niceStart)
+				reason: __("Booking is not yet open. Booking opens $$$startTime$$$"),
+				startTime: eventDetails[0].launch_time
 			});
 		}
 
