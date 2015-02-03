@@ -14,6 +14,7 @@ function DashController($scope, APICaller, User) {
 	vm.ticketsBooked    = [];
 	vm.donationTickets  = [];
 	vm.transactions     = [];
+	vm.changedTickets   = [];
 
 	vm.totalValue        = 0;
 	vm.totalTransactions = 0;
@@ -24,9 +25,13 @@ function DashController($scope, APICaller, User) {
 	vm.ticketsAvailableLoading = true;
 
 	vm.saveTicket          = saveTicket;
+	vm.saveTickets         = saveTickets;
+	vm.setChanged          = setChanged;
 	vm.cancelTicket        = cancelTicket;
 	vm.clearStatus         = clearStatus;
 	vm.cancelWaitingTicket = cancelWaitingTicket;
+
+	vm.saveBtnClass = "primary";
 
 	/*** INITIAL ACTION ***/
 
@@ -87,7 +92,7 @@ function DashController($scope, APICaller, User) {
 	function saveTicket(ticket) {
 		ticket._status = "warning";
 		// TODO: This kind of get/save/delete thing is literally what $resources are for
-		APICaller.post('/ticket/' + ticket.id, ticket, function(err) {
+		APICaller.post('ticket/' + ticket.id, ticket, function(err) {
 				if (err!==undefined && err!==null) {
 					ticket._status = "danger";
 					alert(err);
@@ -98,13 +103,32 @@ function DashController($scope, APICaller, User) {
 
 	}
 
+	function setChanged(ticket) {
+		if (vm.changedTickets.indexOf(ticket) < 0) 
+			vm.changedTickets.push(ticket);
+	}
+
+	function saveTickets() {
+		vm.saveBtnClass = "warning";
+		
+		APICaller.post('ticket/multi/', vm.changedTickets, function(err) {
+				if (err!==undefined && err!==null) {
+					vm.saveBtnClass = "danger";
+					alert(err);
+					return console.log(err);
+				}
+				alert("Thank you, your changes have been saved.");
+				vm.saveBtnClass = "success";
+		});
+	}
+
 	function clearStatus(ticket) {
 		ticket._status = "";
 	}
 
 	function cancelTicket(ticket) {
 		if (window.confirm("Do you really want to cancel this ticket?")) { 
-			APICaller.del('/ticket/' + ticket.id, function(err) {
+			APICaller.del('ticket/' + ticket.id, function(err) {
 				if (err!==undefined && err!==null) return console.log(err);
 				
 				for (var i=0; i<vm.ticketsBooked.length; i++) {
@@ -131,7 +155,7 @@ function DashController($scope, APICaller, User) {
 	function cancelWaitingTicket(ticket) {
 
 		if (window.confirm("Do you really want to leave the waiting list?")) { 
-			APICaller.del('/waiting_list/' + ticket.id, function(err) {
+			APICaller.del('waiting_list/' + ticket.id, function(err) {
 				if (err!==undefined && err!==null) return console.log(err);
 				
 				for (var i=0; i<vm.waitingListTickets.length; i++) {

@@ -31,6 +31,8 @@ node_modules
 *.sublime-workspace
 
 assets/config.js
+assets/admin
+assets/*.html
 
 # anything installed by bower
 assets/components

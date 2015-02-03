@@ -1,6 +1,7 @@
 var express = require("express");
 var apiRouter = require("../routes.js");
 var api = require("../api.js");
+var Q = require("q");
 var router = express.Router({
 	mergeParams: true
 });
@@ -33,6 +34,96 @@ router.route("/")
 		}
 	);
 
+
+router.route("/multi/:ids")
+	.delete(
+		function(req, res) {
+			var ids = req.params.ids.split(",");
+			var authPromises = [];
+			var authedIds = [];
+
+			// prepare function outside of loop
+			var deleteTicket = function(ticket_id) {
+				if (apiRouter.isAdmin(req.user)) {
+					// authorised because I am an admin
+					authedIds.push(ticket_id);
+				} else {
+					authPromises.push(api.ticket.get(ticket_id)
+						.then(function(ticket) {
+							if (ticket.user_id === req.user.id) {
+								authedIds.push(ticket_id);
+							} else {
+								throw "Not authorised to delete " + ticket_id;
+							}
+						}));
+				}
+			};
+
+			for (var i=0; i<ids.length; i++) {
+				deleteTicket(ids[i]);
+			} 
+
+			apiRouter.marshallPromise(res, Q.all(authPromises).then(function() {
+				var promises = [];
+				for (var i=0; i<authedIds.length; i++ ) {
+					promises.push(api.ticket.del(authedIds[i]));
+				}
+				return Q.all(promises);
+			}));
+		}
+	);
+
+router.route("/multi/")
+	.post(
+		function(req, res) {
+			var tickets = req.body;
+			var authPromises = [];
+			var authedTickets = [];
+
+			// prepare function outside of loop
+			var authTicket = function(ticket) {
+				if (apiRouter.isAdmin(req.user)) {
+					// authorised because I am an admin
+					authedTickets.push(ticket);
+				} else {
+					authPromises.push(api.ticket.get(ticket.id)
+						.then(function(t) {
+							if (t.user_id === req.user.id) {
+								authedTickets.push(ticket);
+							} else {
+								throw "Not authorised to access " + ticket.id;
+							}
+						}));
+				}
+			};
+
+			for (var i=0; i<tickets.length; i++) {
+				authTicket(tickets[i]);
+			} 
+
+			apiRouter.marshallPromise(res, Q.all(authPromises).then(function() {
+				var promises = [];
+				for (var i=0; i<authedTickets.length; i++ ) {
+
+					var ticket = authedTickets[i];
+					var t = {};
+					if (ticket.guest_name) t.guest_name = ticket.guest_name;
+					if (ticket.id) t.id = ticket.id;
+					if (apiRouter.isAdmin(req.user)) {
+						if (ticket.user_id) t.user_id = ticket.user_id;
+						if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
+						if (ticket.status_id) t.status_id = ticket.status_id;
+						if (ticket.payment_method_id) t.payment_method_id = ticket.payment_method_id;
+						if (ticket.book_time) t.book_time = ticket.book_time;
+					}
+					promises.push(api.ticket.update(t));
+				}
+				return Q.all(promises);
+			}));
+		}
+	);
+
+
 function checkTicketAccess(req, res, next) {
 	api.ticket.get(req.params.id)
 		.then(function(ticket) {		
@@ -59,10 +150,17 @@ router.route("/:id")
 			// An admin can change anything - but a user can only change guest name
 			// TODO: confirmation email?
 			var ticket = apiRouter.stripMeta(req.body);
-			if (!apiRouter.isAdmin(req.user)) {
-				ticket = {guest_name:ticket.guest_name, id:req.params.id};
+			var t = {};
+			if (ticket.guest_name) t.guest_name = ticket.guest_name;
+			if (ticket.id) t.id = ticket.id;
+			if (apiRouter.isAdmin(req.user)) {
+				if (ticket.user_id) t.user_id = ticket.user_id;
+				if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
+				if (ticket.status_id) t.status_id = ticket.status_id;
+				if (ticket.payment_method_id) t.payment_method_id = ticket.payment_method_id;
+				if (ticket.book_time) t.book_time = ticket.book_time;
 			}
-			apiRouter.marshallPromise(res, api.ticket.update(ticket));
+			apiRouter.marshallPromise(res, api.ticket.update(t));
 		}
 	)
 	.delete(
