@@ -155,9 +155,7 @@ function BookingController($scope, APICaller, User, $interval) {
 				vm.meta.errorMsg = err;
 				return console.log(err); // error handling
 			}
-			// need to do more with booking stuff
 			if (result.success) {
-				console.log(result);
 				vm.status = "done";
 				vm.ticketResult = result;
 				return;

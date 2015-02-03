@@ -216,8 +216,10 @@ router.route("/:event_id")
 			confirmationPromise.then(function(result) {
 					
 					res.json(result);
+					console.log(result.user.name + " booked some tickets - " + result.tickets.ticketsAllocated.length + " booked, " + result.tickets.ticketsRejected.length + " waiting list (£" + result.totalPrice + ")");
 					return emailer.send("'" + unidecode(result.user.name) + "' <" + result.user.email + ">", "Emmanuel College May Ball 2015 Booking Confirmation",
 						"bookConf.jade", result);
+
 				})
 				.fail(function(err) {
 					res.json({
