@@ -226,6 +226,24 @@ router.get('/book', function(req, res) {
 // 		// display confirmation page
 // 		res.render('confirmation.jade');
 // 	});
+router.get('/loaderio-783588602a61bc66660c25c1864e7987',
+	function(req, res) {
+		res.type('text/plain');
+		res.set('Content-Type', 'text/plain');
+		res.send('loaderio-783588602a61bc66660c25c1864e7987');
+	});
+
+router.get('/mu-b71b91c7-69521387-684f86b3-c1bbca15',
+	function(req, res) {
+		res.type('text/plain');
+		res.set('Content-Type', 'text/plain');
+		res.send('42');
+	});
+router.get('/confirmation',
+	function(req, res) {
+		// display confirmation page
+		res.render('confirmation.jade');
+	});
 
 router.get("/", function(req, res) {
 	res.render("index.jade");
