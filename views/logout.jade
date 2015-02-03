@@ -1,24 +1,28 @@
-doctype html
-html
-	head
-		title Login Successful
-		script(type="text/javascript").
-			function createCookie(name,value,days) {
-				if (days) {
-					var date = new Date();
-					date.setTime(date.getTime()+(days*24*60*60*1000));
-					var expires = "; expires="+date.toGMTString();
-				}
-				else var expires = "";
-				document.cookie = name+"="+value+expires+"; path=/";
+extends ./main.jade
+
+block scripts
+	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	link(rel="stylesheet", type="text/css", href="/css/main.css")
+	script(type="text/javascript").
+		function createCookie(name,value,days) {
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime()+(days*24*60*60*1000));
+				var expires = "; expires="+date.toGMTString();
 			}
-			createCookie("mabelAuthToken", "",-1);
-	body
-		h1 Logout successful.
-		a(href="/admin") Admin Panel 
-		br
-		a(href="/") Home Page
-		br
-		a(href="/login/raven") Login with Raven
-		br
-		a(href="/login/mabel") Login with a ticketing account
+			else var expires = "";
+			document.cookie = name+"="+value+expires+"; path=/";
+		}
+		createCookie("mabelAuthToken", "",-1);
+
+block title
+	title Logout Successful
+
+block content
+	.container
+		.col-md-12
+			h1(style="padding-bottom:10px;") Logout Successful!
+			p(style="padding-bottom:10px;") 
+				| You have been logged out of our ticketing system. 
+				| Click #[a(href="/") here] to return to the ticketing home.
+			hr
