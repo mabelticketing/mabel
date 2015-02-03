@@ -6,13 +6,13 @@ module.exports = function(grunt) {
             compile: {
                 files: {
                     "./assets/index.html": "./views/index.jade",
-                    "./assets/dash.html": "./views/dash.jade",
-                    "./assets/book.html": "./views/book.jade",
-                    "./assets/admin.html": "./views/admin/dash.jade",
-                    "./assets/admin/event.html": "./views/admin/event.jade",
-                    "./assets/admin/tickets.html": "./views/admin/tickets.jade",
-                    "./assets/admin/transactions.html": "./views/admin/transactions.jade",
-                    "./assets/admin/users.html": "./views/admin/users.jade",
+                    "./assets/dash/index.html": "./views/dash.jade",
+                    "./assets/book/index.html": "./views/book.jade",
+                    "./assets/admin/index.html": "./views/admin/dash.jade",
+                    "./assets/admin/event/index.html": "./views/admin/event.jade",
+                    "./assets/admin/tickets/index.html": "./views/admin/tickets.jade",
+                    "./assets/admin/transactions/index.html": "./views/admin/transactions.jade",
+                    "./assets/admin/users/index.html": "./views/admin/users.jade",
                 }
             }
         }
