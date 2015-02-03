@@ -75,7 +75,7 @@ function RavenStrategyCallback(crsid, params, done) {
 				// if user not in table then put them in
 				tokenPromise = register({
 					// TODO: et a better name than this?
-					name: "Mabel User",
+					name: "",
 					email: crsid + "@cam.ac.uk",
 					crsid: crsid,
 					is_verified: 1
@@ -185,7 +185,9 @@ function register(user) {
 			});
 			return deferred.promise;
 		})
-		.then(function(groups) {
+		.then(function(result) {
+			var groups = result.groups;
+			if (user.name === undefined || user.name === null || user.name.length<1 || user.name === "Mabel User") user.name = result.name;
 			if (user.password !== undefined) {
 				var hash = crypto.createHash('md5');
 				hash.update(user.password);
