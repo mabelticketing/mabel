@@ -67,7 +67,7 @@ block content
 												tbody
 													tr(ng-repeat="ticket in bookingCtrl.available_tickets", style="background-color:#ffffff;")
 														td {{ ticket.name }}
-														td £{{ ticket.price }}
+														td &pound;{{ ticket.price }}
 														td
 															div
 																input(type="hidden" 
@@ -88,7 +88,7 @@ block content
 												label
 													p
 														input(type="checkbox", ng-model="bookingCtrl.booking.donate") 
-														| I wish to make a charitable donation of #[b £2.00] per ticket to your charitable causes.
+														| I wish to make a charitable donation of #[b &pound;2.00] per ticket to your charitable causes.
 												p You can find out more about our charitable causes on our #[a(href="http://emmamayball.com") homepage].
 									.form-group(ng-if="bookingCtrl.meta.ticketQuantity > 0")
 										label.col-lg-2.control-label Summary
@@ -96,16 +96,16 @@ block content
 											table.table.table-striped
 												tbody(ng-repeat="ticketType in bookingCtrl.booking.tickets", ng-if="ticketType.quantity > 0")
 													tr(style="background-color:#ffffff;")
-														th {{ ticketType.name }} (£{{ ticketType.price | number:2 }}) 
+														th {{ ticketType.name }} (&pound;{{ ticketType.price | number:2 }}) 
 													tr(ng-repeat="method in ticketType.payment_methods track by $index" style="background-color:#ffffff;")
 														td Payment method for {{ticketType.name}} Ticket {{$index + 1}}: 
 															select(ng-model="ticketType.payment_methods[$index]" ng-options="m.id as m.name for m in bookingCtrl.payment_methods")
 												tbody
 													tr(ng-if="bookingCtrl.booking.donate", style="background-color:#ffffff;")
-														td #[b Charitable donation @ £2.00 per ticket]
+														td #[b Charitable donation @ &pound;2.00 per ticket]
 												tfoot
 													tr.info
-														td Total cost: #[b £{{ bookingCtrl.meta.bookingSum | number:2 }}]
+														td Total cost: #[b &pound;{{ bookingCtrl.meta.bookingSum | number:2 }}]
 									div.alert.alert-danger(ng-if="bookingCtrl.meta.errorMsg.length > 0")
 										button.close(type="button", aria-label="Close", ng-click="bookingCtrl.meta.errorMsg = '';") 
 											span(aria-hidden="true") &times;
