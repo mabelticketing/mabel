@@ -121,7 +121,12 @@ function BookingController($scope, APICaller, User, $interval) {
 		} else {
 			vm.status = "unavailable";
 			document.title = "Mabel Ticketing | Booking Unavailable";
-			vm.reason = status.reason;
+			var reason = status.reason;
+			var niceStart = moment.unix(status.startTime).calendar();
+			niceStart = niceStart.toLowerCase();
+			niceStart = niceStart.replace(/am/g,'AM').replace(/pm/g, 'PM');
+			reason = reason.replace("$$$startTime$$$", niceStart);
+			vm.reason = reason;
 		}
 	}
 
