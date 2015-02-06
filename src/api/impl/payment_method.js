@@ -15,7 +15,7 @@ function get(payment_method_id, callback) {
 		});
 
 	if (callback !== undefined) {
-		p.then(function(result) {callback(null, result);}, callback);
+	p.then(function(result) {callback(null, result);}, callback);
 	}
 	
 	return p;
