@@ -1,6 +1,10 @@
 var express   = require("express");
 var apiRouter = require("../routes.js");
 var api       = require("../api.js");
+var emailer    = require("../../emailer.js");
+var unidecode  = require("unidecode");
+var Q  = require("q");
+
 
 var router = express.Router({
 	mergeParams: true
@@ -31,7 +35,26 @@ router.route("/")
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.transaction.insert(apiRouter.stripMeta(req.body)));
+			var t = apiRouter.stripMeta(req.body);
+			var p = api.transaction.insert(t);
+
+			Q.all([p, api.user.get(req.user.id), api.payment_method.get(t.payment_method_id)])
+				.then(function(result) {
+					var transaction = result[0];
+					var user = result[1];
+					var payment_method = result[2];
+
+					// mailgun doesn't seem to like certain characters in the address
+					return emailer.send("'" + unidecode(user.name) + "' <" + user.email + ">", "Payment Processed",
+						"paymentConf.jade", {
+							user: user,
+							transaction: transaction,
+							payment_method: payment_method
+						});
+				});
+
+			// don't need to wait for the email to return a result to the caller
+			apiRouter.marshallPromise(res, p);
 		}
 	);
 

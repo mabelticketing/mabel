@@ -34,9 +34,11 @@ function insert(transaction) {
 	var sql = "INSERT INTO transaction SET ?, transaction_time=UNIX_TIMESTAMP();";
 	var promise = runSql(sql, [transaction]);
 
-	return promise.then(function(result) {
+	var p = promise.then(function(result) {
+		// TODO: confirmation email
 		return get(result.insertId);
 	});
+	return p;
 }
 
 function del(transaction_id) {
