@@ -2,23 +2,23 @@
 # Schema for initialising the MySQL database
 # 
 # NB I have introduced foreign key dependencies, which means we have to create and delete in the right order
-drop table if exists email_destination;
-drop table if exists email;
-drop table if exists transaction;
-drop table if exists ticket;
-drop table if exists group_payment_method_access;
-drop table if exists payment_method;
-drop table if exists group_access_right;
-drop table if exists user_group_membership;
-drop table if exists user_group;
-drop table if exists user;
-drop table if exists ticket_status;
-drop table if exists ticket_type;
-drop table if exists event;
+-- drop table if exists email_destination;
+-- drop table if exists email;
+-- drop table if exists transaction;
+-- drop table if exists ticket;
+-- drop table if exists group_payment_method_access;
+-- drop table if exists payment_method;
+-- drop table if exists group_access_right;
+-- drop table if exists user_group_membership;
+-- drop table if exists user_group;
+-- drop table if exists user;
+-- drop table if exists ticket_status;
+-- drop table if exists ticket_type;
+-- drop table if exists event;
 
 ### EVENTS ###
 
-create table event (
+create table if not exists event (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	launch_time int not null,
@@ -29,7 +29,7 @@ create table event (
 
 ### TICKET TYPES ###
 
-create table ticket_type (
+create table if not exists ticket_type (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	price DECIMAL(5,2) not null,
@@ -41,7 +41,7 @@ create table ticket_type (
 
 ### TICKET STATUSES ###
 
-create table ticket_status (
+create table if not exists ticket_status (
 	id int auto_increment not null,
 	name varchar(32) not null,
 	primary key (id)
@@ -49,7 +49,7 @@ create table ticket_status (
 
 ### USERS ###
 
-create table user (
+create table if not exists user (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	email varchar(100) not null,
@@ -65,7 +65,7 @@ create table user (
 
 ### GROUPS ###
 
-create table user_group (
+create table if not exists user_group (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	description varchar(1000),
@@ -75,7 +75,7 @@ create table user_group (
 
 ### GROUP MEMBERSHIPS ###
 
-create table user_group_membership (
+create table if not exists user_group_membership (
 	id int auto_increment not null,
 	user_id int not null,
 	group_id int not null,
@@ -87,7 +87,7 @@ create table user_group_membership (
 
 ### GROUP ACCESS RIGHTS ###
 
-create table group_access_right (
+create table if not exists group_access_right (
 	id int auto_increment not null,
 	group_id int not null,
 	ticket_type_id int not null,
@@ -99,7 +99,7 @@ create table group_access_right (
 
 ### PAYMENT METHODS ###
 
-create table payment_method (
+create table if not exists payment_method (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	description varchar(128),
@@ -109,7 +109,7 @@ create table payment_method (
 	FOREIGN KEY (event_id) REFERENCES event(id)
 );
 
-create table group_payment_method_access (
+create table if not exists group_payment_method_access (
 	id int auto_increment not null,
 	group_id int not null,
 	payment_method_id int not null,
@@ -121,7 +121,7 @@ create table group_payment_method_access (
 
 ### TICKET ###
 
-create table ticket (
+create table if not exists ticket (
 	id int auto_increment not null,
 	user_id int not null,
 	ticket_type_id int not null,
@@ -138,7 +138,7 @@ create table ticket (
 
 ### WAITING LIST ###
 
-create table waiting_list (
+create table if not exists waiting_list (
 	id int auto_increment not null,
 	user_id int not null,
 	ticket_type_id int not null,
@@ -153,7 +153,7 @@ create table waiting_list (
 
 ### TRANSACTIONS ###
 
-create table transaction (
+create table if not exists transaction (
 	id int auto_increment not null,
 	user_id int not null,
 	value DECIMAL(6,2) not null,
@@ -168,7 +168,7 @@ create table transaction (
 
 ### MAIL LOGS ###
 
-create table email (
+create table if not exists email (
 	id int auto_increment not null,
 	from_email varchar(100) not null,
 	send_time int not null,
@@ -176,7 +176,7 @@ create table email (
 	primary key (id)
 );
 
-create table email_destination (
+create table if not exists email_destination (
 	id int auto_increment not null,
 	address varchar(100) not null,
 	user int,
@@ -184,3 +184,51 @@ create table email_destination (
 	primary key (id),
 	foreign key (email_id) references email(id)
 );
+
+
+### Useful Views ###
+CREATE  OR REPLACE VIEW ticket_summary AS 
+	SELECT 
+		ticket_type.id id, 
+		ticket_type.name name, 
+		COUNT(*) sold, 
+		ticket_type.ticket_limit ticket_limit, 
+		ticket_type.ticket_limit-COUNT(*) available 
+	FROM 
+		ticket 
+		JOIN 
+			ticket_type 
+		ON 
+			ticket.ticket_type_id=ticket_type.id 
+	GROUP BY ticket_type.id;
+
+CREATE OR REPLACE VIEW waiting_list_summary AS 
+	SELECT 
+		ticket_type.id id, 
+		ticket_type.name name, 
+		COUNT(*) sold, 
+		ticket_type.ticket_limit ticket_limit, 
+		ticket_type.ticket_limit-COUNT(*) available 
+	FROM 
+		waiting_list 
+		JOIN 
+			ticket_type 
+		ON 
+			waiting_list.ticket_type_id=ticket_type.id 
+	GROUP BY ticket_type.id;
+
+CREATE OR REPLACE VIEW tickets_grouped_by_user AS 
+	SELECT user_id, GROUP_CONCAT(id ORDER BY id ASC SEPARATOR ', ') tickets
+		FROM ticket
+		GROUP BY user_id; 
+
+CREATE OR REPLACE VIEW transaction_with_tickets AS
+	SELECT transaction.id id, value, payment_method.name payment_method, user.name name, notes, tickets, transaction_time
+	FROM transaction
+	JOIN payment_method
+		ON payment_method.id = payment_method_id
+	JOIN user
+		ON user.id = user_id
+	JOIN 
+		tickets_grouped_by_user
+		ON tickets_grouped_by_user.user_id = transaction.user_id;
