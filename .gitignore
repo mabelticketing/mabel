@@ -32,6 +32,8 @@ node_modules
 
 assets/config.js
 assets/admin
+assets/dash
+assets/book
 assets/*.html
 
 # anything installed by bower
