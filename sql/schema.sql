@@ -218,17 +218,17 @@ CREATE OR REPLACE VIEW waiting_list_summary AS
 	GROUP BY ticket_type.id;
 
 CREATE OR REPLACE VIEW tickets_grouped_by_user AS 
-	SELECT user_id, GROUP_CONCAT(id ORDER BY id ASC SEPARATOR ', ') tickets
+	SELECT user_id, user.name name, GROUP_CONCAT(ticket.id ORDER BY ticket.id ASC SEPARATOR ', ') tickets
 		FROM ticket
+	JOIN user 
+		ON user.id=user_id
 		GROUP BY user_id; 
 
 CREATE OR REPLACE VIEW transaction_with_tickets AS
-	SELECT transaction.id id, value, payment_method.name payment_method, user.name name, notes, tickets, transaction_time
+	SELECT transaction.id id, value, payment_method.name payment_method, notes, tickets, transaction_time
 	FROM transaction
 	JOIN payment_method
 		ON payment_method.id = payment_method_id
-	JOIN user
-		ON user.id = user_id
 	JOIN 
 		tickets_grouped_by_user
 		ON tickets_grouped_by_user.user_id = transaction.user_id;
