@@ -1,0 +1,5 @@
+.box.box-solid.box-primary(ng-controller="WaitingListController as wl")
+	.box-header
+		h3.box-title WaitingList
+	.box-body.table-responsive.no-padding
+		mabel-table(resource="wl.resource", initialisor="wl.initialisor", filename="'waiting-list'", columns="wl.columns", click-event="wl.clickEvent")

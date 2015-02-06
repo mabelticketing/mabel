@@ -12,8 +12,13 @@ block prepend variables
 
 block content
 	.row
-		.col-md-12
+		.col-md-8
 			include boxes/ticket.jade
+		.col-md-4
+			include boxes/ticket-summary.jade
+	.row
+		.col-md-8
+			include boxes/waiting-list.jade
 	.row
 		.col-md-8
 			include boxes/ticket-types.jade
@@ -26,5 +31,8 @@ block append scripts
 	script(type = "text/javascript" src="/js/admin/tickettypedetail.controller.js")
 	script(type = "text/javascript" src="/js/admin/tickettypes.controller.js")
 	script(type = "text/javascript" src="/js/admin/ticket.controller.js")
+	script(type = "text/javascript" src="/js/admin/ticketsummary.controller.js")
 	script(type = "text/javascript" src="/js/admin/ticket.factory.js")
+	script(type = "text/javascript" src="/js/admin/waitinglist.controller.js")
+	script(type = "text/javascript" src="/js/admin/waitinglist.factory.js")
 	script(type = "text/javascript" src="/js/shared/usergroup.factory.js")
