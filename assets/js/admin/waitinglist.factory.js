@@ -1,21 +1,14 @@
 /* global moment */
 angular.module('mabel.admin')
-	.factory('Ticket', Ticket);
+	.factory('WaitingList', WaitingList);
 
-function Ticket(MabelToken, MabelResource) {
-	return MabelResource('/api/ticket/:id', 
+function WaitingList(MabelToken, MabelResource) {
+	return MabelResource('/api/waiting_list/:id', 
 		{
 			access_token: MabelToken,
 			id: '@id'
 		}, 
 		{
-			// add a custom action to retrieve a summary of tickets sold
-			'summary': {
-				method: 'GET',
-				url: '/api/ticket/summary',
-				isArray: true,
-				mabelSerialize: true
-			}
 		},
 		{
 			serialize: serialize,

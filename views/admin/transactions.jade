@@ -13,7 +13,9 @@ block prepend variables
 block content
 	.row
 		.col-md-12
-			p TODO...
+			include boxes/transaction.jade
 
 block append scripts
 	script(type = "text/javascript" src="/js/shared/mabeltable.directive.js")
+	script(type = "text/javascript" src="/js/admin/transaction.controller.js")
+	script(type = "text/javascript" src="/js/admin/transaction.factory.js")

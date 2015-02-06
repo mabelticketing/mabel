@@ -1,13 +1,13 @@
 angular.module('mabel.admin')
-	.controller("TicketController", TicketController);
+	.controller("WaitingListController", WaitingListController);
 
-function TicketController(Ticket) {
+function WaitingListController(WaitingList) {
 	var vm = this;
-	vm.resource = Ticket;
+	vm.resource = WaitingList;
 	vm.initialisor = function() {
-		return new Ticket();
+		return new WaitingList();
 	};
-	vm.clickEvent = 'mabel.ticket.selected';
+	vm.clickEvent = 'mabel.waitinglist.selected';
 	// TODO: Get more readable columns than all these IDs
 	vm.columns = [
 		{
@@ -27,18 +27,6 @@ function TicketController(Ticket) {
 			type: 'text',
 			sortable: 'ticket_type_id',
 			filter: {ticket_type_id:'text'}
-		}, {
-			title: 'Guest Name',
-			name: 'guest_name',
-			type: 'text',
-			sortable: 'guest_name',
-			filter: {guest_name:'text'}
-		}, {
-			title: 'Status ID',
-			name: 'status_id',
-			type: 'text',
-			sortable: 'status_id',
-			filter: {status_id:'text'}
 		}, {
 			title: 'Booking Time',
 			name: 'book_time',
