@@ -38,7 +38,7 @@ router.route("/")
 			var t = apiRouter.stripMeta(req.body);
 			var p = api.transaction.insert(t);
 
-			Q.all([p, api.user.get(req.user.id), api.payment_method.get(t.payment_method_id)])
+			Q.all([p, api.user.get(t.user_id), api.payment_method.get(t.payment_method_id)])
 				.then(function(result) {
 					var transaction = result[0];
 					var user = result[1];
