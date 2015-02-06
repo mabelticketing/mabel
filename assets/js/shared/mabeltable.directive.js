@@ -11,7 +11,8 @@ function MabelTable(ngTableParams, $rootScope) {
 			columns: '=',
 			clickEvent: '@',
 			filename: '@',
-			query: '@'
+			query: '@',
+			readOnly: '@readonly'
 		},
 		link: function($scope, element) {
 			var vm = $scope;
