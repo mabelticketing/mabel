@@ -73,6 +73,20 @@ router.route("/multi/:ids")
 		}
 	);
 
+router.route("/summary/")
+	.get(
+		apiRouter.checkAdmin(),
+		function(req, res) {
+			var opts = {};
+			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
+			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
+			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
+			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
+		
+			apiRouter.marshallPromise(res, api.ticket.summary(opts));
+		}
+	);
+
 router.route("/multi/")
 	.post(
 		function(req, res) {

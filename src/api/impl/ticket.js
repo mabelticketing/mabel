@@ -5,7 +5,8 @@ var config = require("../../config.js");
 var api = {
 	get: get,
 	getAll: getAll,
-getByUser: getByUser,
+	getByUser: getByUser,
+	summary: summary,
 	insert: insert,
 	del: del,
 	update: update
@@ -53,6 +54,12 @@ function del(ticket_id) {
 
 function getAll(opts) {
 	var sql = connection.getFilteredSQL("ticket", opts);
+
+	return runSql(sql, true);
+}
+
+function summary(opts) {
+	var sql = connection.getFilteredSQL("ticket_summary", opts);
 
 	return runSql(sql, true);
 }

@@ -8,6 +8,13 @@ function Ticket(MabelToken, MabelResource) {
 			id: '@id'
 		}, 
 		{
+			// add a custom action to retrieve a summary of tickets sold
+			'summary': {
+				method: 'GET',
+				url: '/api/ticket/summary',
+				isArray: true,
+				mabelSerialize: true
+			}
 		},
 		{} // no special serialization needed
 	);

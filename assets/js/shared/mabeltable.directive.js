@@ -9,15 +9,17 @@ function MabelTable(ngTableParams, $rootScope) {
 			initialisor: '=',
 			Resource: '=resource',
 			columns: '=',
-			clickEvent: '=',
-			filename: '='
+			clickEvent: '@',
+			filename: '@',
+			query: '@'
 		},
 		link: function($scope, element) {
 			var vm = $scope;
 
-
-			vm.newItem = vm.initialisor();
-			vm.newItem.defineMeta();
+			if (vm.initialisor !== undefined) {
+				vm.newItem = vm.initialisor();
+				vm.newItem.defineMeta();
+			}
 
 			vm.tableParams = new ngTableParams({
 				page: 1, // show first page
@@ -33,7 +35,10 @@ function MabelTable(ngTableParams, $rootScope) {
 					var filter = params.filter();
 					var sorting = params.sorting();
 
-					vm.Resource.query({
+					var query = "query";
+					if (vm.query !== undefined) query = vm.query;
+
+					vm.Resource[query]({
 						from: (pageNumber - 1) * pageSize,
 						size: pageSize,
 						order: sorting,
