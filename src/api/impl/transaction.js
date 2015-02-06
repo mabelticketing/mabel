@@ -77,7 +77,7 @@ function getByUser(user_id) {
 	var sql = "SELECT transaction.id id, value, payment_method.name payment_method, transaction_time, notes \
 		FROM transaction \
 		JOIN payment_method \
-			ON payment_method_id=payment_method.id;";
+			ON payment_method_id=payment_method.id WHERE user_id=?";
 	return runSql(sql, [user_id]);
 }
 
