@@ -6,7 +6,7 @@ function MabelTable(ngTableParams, $rootScope) {
 		restrict: 'AE',
 		templateUrl: '/views/admin/boxes/mabeltable',
 		scope: {
-			initialisor: '=',
+			initialisor: '&',
 			Resource: '=resource',
 			columns: '=',
 			clickEvent: '@',

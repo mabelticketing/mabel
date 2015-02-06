@@ -1,0 +1,5 @@
+.box.box-solid.box-primary(ng-controller="TransactionController as transaction")
+	.box-header
+		h3.box-title Transactions
+	.box-body.table-responsive.no-padding
+		mabel-table(resource="transaction.resource", initialisor="transaction.initialisor()", filename="'transactions'", columns="transaction.columns", click-event="transaction.clickEvent")
