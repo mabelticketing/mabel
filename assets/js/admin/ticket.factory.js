@@ -15,6 +15,12 @@ function Ticket(MabelToken, MabelResource) {
 				url: '/api/ticket/summary',
 				isArray: true,
 				mabelSerialize: true
+			},
+			'summary_byuser': {
+				method: 'GET',
+				url: '/api/ticket/summary/byuser',
+				isArray: true,
+				mabelSerialize: true
 			}
 		},
 		{

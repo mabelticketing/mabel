@@ -7,6 +7,7 @@ var api = {
 	getAll: getAll,
 	getByUser: getByUser,
 	summary: summary,
+	summary_byuser: summary_byuser,
 	insert: insert,
 	del: del,
 	update: update
@@ -40,7 +41,9 @@ function update(ticket) {
 }
 
 function insert(ticket) {
-	var sql = "INSERT INTO ticket SET ?;";
+	var sql = "INSERT INTO ticket SET ?";
+	if (ticket.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
+	sql += ";";
 	var promise = runSql(sql, [ticket]);
 
 	return promise.then(function(result) {
@@ -60,6 +63,12 @@ function getAll(opts) {
 
 function summary(opts) {
 	var sql = connection.getFilteredSQL("ticket_summary", opts);
+
+	return runSql(sql, true);
+}
+
+function summary_byuser(opts) {
+	var sql = connection.getFilteredSQL("tickets_grouped_by_user", opts);
 
 	return runSql(sql, true);
 }

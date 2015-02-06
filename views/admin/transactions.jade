@@ -12,10 +12,14 @@ block prepend variables
 
 block content
 	.row
-		.col-md-12
+		.col-md-8
 			include boxes/transaction.jade
+		.col-md-4
+			include boxes/user-ticket-summary.jade
 
 block append scripts
 	script(type = "text/javascript" src="/js/shared/mabeltable.directive.js")
 	script(type = "text/javascript" src="/js/admin/transaction.controller.js")
 	script(type = "text/javascript" src="/js/admin/transaction.factory.js")
+	script(type = "text/javascript" src="/js/admin/ticket.factory.js")
+	script(type = "text/javascript" src="/js/admin/userticketsummary.controller.js")

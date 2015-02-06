@@ -9,7 +9,7 @@ function MabelTable(ngTableParams, $rootScope) {
 			initialisor: '=',
 			Resource: '=resource',
 			columns: '=',
-			clickEvent: '@',
+			clickEvent: '=',
 			filename: '@',
 			query: '@',
 			readOnly: '@readonly'
@@ -73,7 +73,7 @@ function MabelTable(ngTableParams, $rootScope) {
 				element.find('.badge-' + id).tooltip('hide');
 			};
 
-			if ($scope.clickEvent !== undefined) {
+			if (vm.clickEvent !== undefined) {
 				vm.selectItem = function(item) {
 					$rootScope.$emit($scope.clickEvent, item);
 				};
