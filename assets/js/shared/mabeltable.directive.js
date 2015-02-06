@@ -10,14 +10,17 @@ function MabelTable(ngTableParams, $rootScope) {
 			Resource: '=resource',
 			columns: '=',
 			clickEvent: '=',
-			filename: '='
+			filename: '@',
+			query: '@',
+			readOnly: '@readonly'
 		},
 		link: function($scope, element) {
 			var vm = $scope;
 
-
-			vm.newItem = vm.initialisor();
-			vm.newItem.defineMeta();
+			if (vm.initialisor !== undefined) {
+				vm.newItem = vm.initialisor();
+				vm.newItem.defineMeta();
+			}
 
 			vm.tableParams = new ngTableParams({
 				page: 1, // show first page
@@ -33,7 +36,10 @@ function MabelTable(ngTableParams, $rootScope) {
 					var filter = params.filter();
 					var sorting = params.sorting();
 
-					vm.Resource.query({
+					var query = "query";
+					if (vm.query !== undefined) query = vm.query;
+
+					vm.Resource[query]({
 						from: (pageNumber - 1) * pageSize,
 						size: pageSize,
 						order: sorting,
@@ -67,7 +73,7 @@ function MabelTable(ngTableParams, $rootScope) {
 				element.find('.badge-' + id).tooltip('hide');
 			};
 
-			if ($scope.clickEvent !== undefined) {
+			if (vm.clickEvent !== undefined) {
 				vm.selectItem = function(item) {
 					$rootScope.$emit($scope.clickEvent, item);
 				};

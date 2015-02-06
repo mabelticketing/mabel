@@ -8,14 +8,14 @@ table.table.table-hover(ng-table="tableParams", template-header="mabel-table-hea
 				span.badge(ng-class="{'bg-green':item._status==='success','bg-red':item._status==='error','bg-yellow':item._status==='pending'}" 
 					style="color:transparent!important;" class="badge-{{item.id}}") {{ ((item._status !== undefined && item._status.length>1)? ".":"") }}
 			td(ng-repeat="column in columns" sortable="column.name" filter="column.filter") 
-				span(ng-if="column.type===undefined || !item.$edit") {{ item[column.name] }}
+				span(ng-if="column.type===undefined || !item.$edit") {{ item[column.name].toString() }}
 				input(ng-if="column.type!==undefined && item.$edit" type="{{column.type}}" ng-model="item[column.name]" name="{{column.name}}")
-			td(data-title="'Actions'")
+			td(ng-if="readOnly===undefined")
 				button(ng-if="!item.$edit" class="btn btn-default btn-xs" ng-click="startEdit(item)") Edit
 				button(ng-if="item.$edit" class="btn btn-primary btn-xs" ng-click="saveEdit(item)") Save
 				button(ng-if="item.$edit" class="btn btn-danger btn-xs" ng-click="delete(item)") Delete
 				button(ng-if="item.$edit" class="btn btn-default btn-xs" ng-click="cancelEdit(item)") Cancel
-	tfoot
+	tfoot(ng-if="readOnly===undefined")
 		tr(data-toggle="tooltip" tooltip="{{item._error}}" tooltip-placement="right")
 			td(data-title="' '" style="min-width:35px")
 				span.badge(ng-class="{'bg-green':newItem._status==='success','bg-red':newItem._status==='error','bg-yellow':newItem._status==='pending'}" 
