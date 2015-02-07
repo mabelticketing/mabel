@@ -6,6 +6,7 @@ var api = {
 	getAll: getAll,
 	getByUser: getByUser,
 	insert: insert,
+	summary: summary,
 	del: del,
 	update: update
 };
@@ -46,6 +47,11 @@ function del(ticket_id) {
 
 function getAll(opts) {
 	var sql = connection.getFilteredSQL("waiting_list", opts);
+
+	return runSql(sql, true);
+}
+function summary(opts) {
+	var sql = connection.getFilteredSQL("waiting_list_summary", opts);
 
 	return runSql(sql, true);
 }

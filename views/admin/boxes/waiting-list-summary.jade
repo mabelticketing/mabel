@@ -1,0 +1,5 @@
+.box.box-solid.box-primary(ng-controller="WaitingListSummaryController as wl")
+	.box-header
+		h3.box-title Waiting List Summary
+	.box-body.table-responsive.no-padding
+		mabel-table(resource="wl.resource", filename="wl-summary", columns="wl.columns", readonly="true", query="summary")
