@@ -8,8 +8,12 @@ table.table.table-hover(ng-table="tableParams", template-header="mabel-table-hea
 				span.badge(ng-class="{'bg-green':item._status==='success','bg-red':item._status==='error','bg-yellow':item._status==='pending'}" 
 					style="color:transparent!important;" class="badge-{{item.id}}") {{ ((item._status !== undefined && item._status.length>1)? ".":"") }}
 			td(ng-repeat="column in columns" sortable="column.name" filter="column.filter") 
-				span(ng-if="column.type===undefined || !item.$edit") {{ item[column.name].toString() }}
-				input(ng-if="column.type!==undefined && item.$edit" type="{{column.type}}" ng-model="item[column.name]" name="{{column.name}}")
+				span(ng-if="column.type===undefined || !item.$edit") 
+					span(ng-if="column.type==='date'") {{ item[column.name].format("DD MMM YYYY HH:mm") }}
+					span(ng-if="column.type!=='date'") {{ item[column.name].toString() }}
+				input(ng-if="column.type!==undefined && column.type==='date'&& item.$edit" type='text' date="item[column.name]"
+					data-date-format="DD MMM YYYY HH:mm" datetimepicker)
+				input(ng-if="column.type!==undefined && column.type!=='date' && item.$edit" type="{{column.type}}" ng-model="item[column.name]" name="{{column.name}}")
 			td(ng-if="readOnly===undefined")
 				button(ng-if="!item.$edit" class="btn btn-default btn-xs" ng-click="startEdit(item)") Edit
 				button(ng-if="item.$edit" class="btn btn-primary btn-xs" ng-click="saveEdit(item)") Save
@@ -21,7 +25,10 @@ table.table.table-hover(ng-table="tableParams", template-header="mabel-table-hea
 				span.badge(ng-class="{'bg-green':newItem._status==='success','bg-red':newItem._status==='error','bg-yellow':newItem._status==='pending'}" 
 					style="color:transparent!important;" class="badge-new") {{ ((newItem._status !== undefined && newItem._status.length>1)? ".":"") }}
 			td(ng-repeat="column in columns")
-				input(ng-if="column.type!==undefined" type="{{column.type}}" ng-model="newItem[column.name]" name="{{column.name}}")
+
+				input(ng-if="column.type!==undefined && column.type==='date'" type='text' date="newItem[column.name]"
+					data-date-format="DD MMM YYYY HH:mm" datetimepicker)
+				input(ng-if="column.type!==undefined && column.type!=='date'" type="{{column.type}}" ng-model="newItem[column.name]" name="{{column.name}}")
 			td
 				button(ng-click="submitNew()" class="btn btn-primary btn-xs") Create New Entry
 a.btn.btn-primary.btn-sm(style="margin-left:10px; margin-bottom:10px;", ng-click='csv.generate($event, getFilename() + ".csv")' href='') Download Data

@@ -31,6 +31,12 @@ function UserListController(User) {
 			sortable: 'email',
 			filter: {email:'text'}
 		}, {
+			title: 'Registration Time',
+			name: 'registration_time',
+			type: 'date',
+			sortable: 'registration_time',
+			filter: {registration_time:'text'}
+		}, {
 			title: 'CRSID',
 			name: 'crsid',
 			type: 'text',

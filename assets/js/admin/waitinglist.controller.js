@@ -30,6 +30,7 @@ function WaitingListController(WaitingList) {
 		}, {
 			title: 'Booking Time',
 			name: 'book_time',
+			type: 'date',
 			sortable: 'book_time'
 		}, {
 			title: 'Payment Method ID',
