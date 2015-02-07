@@ -18,9 +18,7 @@ CREATE OR REPLACE VIEW waiting_list_summary AS
 	SELECT 
 		ticket_type.id id, 
 		ticket_type.name name, 
-		COUNT(*) sold, 
-		ticket_type.ticket_limit ticket_limit, 
-		ticket_type.ticket_limit-COUNT(*) available 
+		COUNT(*) sold
 	FROM 
 		waiting_list 
 		JOIN 

@@ -9,6 +9,13 @@ function WaitingList(MabelToken, MabelResource) {
 			id: '@id'
 		}, 
 		{
+			// add a custom action to retrieve a summary of tickets sold
+			'summary': {
+				method: 'GET',
+				url: '/api/waiting_list/summary',
+				isArray: true,
+				mabelSerialize: true
+			},
 		},
 		{
 			serialize: serialize,
