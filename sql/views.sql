@@ -5,7 +5,7 @@ CREATE  OR REPLACE VIEW ticket_summary AS
 		ticket_type.name name, 
 		COUNT(ticket.id) sold, 
 		ticket_type.ticket_limit ticket_limit, 
-		ticket_type.ticket_limit-COUNT(*) available 
+		ticket_type.ticket_limit-COUNT(ticket.id) available 
 	FROM 
 		ticket 
 		RIGHT JOIN 
