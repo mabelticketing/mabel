@@ -83,7 +83,6 @@ function makeBooking(user_id, tickets, addDonations) {
 		);
 	}
 
-	// TODO: parameterise this
 	var donation_ticket_type_id = config.donation_ticket_type_id;
 
 	// wait until all queries have been made

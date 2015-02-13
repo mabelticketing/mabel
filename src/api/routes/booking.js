@@ -96,7 +96,7 @@ router.route("/:event_id")
 						throw "You have requested ticket types not available to your account.";
 					}
 					// get available payment methods to the user
-					return api.payment_method.getAll(req.user.id);
+					return api.payment_method.getByUser(req.user.id);
 				})
 				.then(function(result) {
 					for (i=0; i<result.length; i++) {
@@ -144,7 +144,7 @@ router.route("/:event_id")
 					bookingPromise,
 					api.user.get(req.user.id),
 					api.ticket_type.getAll({},1),
-					api.payment_method.getAll(req.user.id)
+					api.payment_method.getAll()
 				]).then(function(data) {
 					var tickets = data[0];
 					var user = data[1];

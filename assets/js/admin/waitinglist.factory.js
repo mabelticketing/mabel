@@ -15,7 +15,7 @@ function WaitingList(MabelToken, MabelResource) {
 				url: '/api/waiting_list/summary',
 				isArray: true,
 				mabelSerialize: true
-			},
+			}
 		},
 		{
 			serialize: serialize,
