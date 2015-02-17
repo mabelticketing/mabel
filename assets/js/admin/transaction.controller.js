@@ -42,6 +42,8 @@ function TransactionController(Transaction) {
 		}, {
 			title: 'Time Processed',
 			name: 'transaction_time',
+			type: 'date',
 			sortable: 'transaction_time'
-		}	];
+		}
+	];
 }
