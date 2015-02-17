@@ -3,12 +3,12 @@ CREATE  OR REPLACE VIEW ticket_summary AS
 	SELECT 
 		ticket_type.id id, 
 		ticket_type.name name, 
-		COUNT(*) sold, 
+		COUNT(ticket.id) sold, 
 		ticket_type.ticket_limit ticket_limit, 
-		ticket_type.ticket_limit-COUNT(*) available 
+		ticket_type.ticket_limit-COUNT(ticket.id) available 
 	FROM 
 		ticket 
-		JOIN 
+		RIGHT JOIN 
 			ticket_type 
 		ON 
 			ticket.ticket_type_id=ticket_type.id 
@@ -18,10 +18,10 @@ CREATE OR REPLACE VIEW waiting_list_summary AS
 	SELECT 
 		ticket_type.id id, 
 		ticket_type.name name, 
-		COUNT(*) sold
+		COUNT(waiting_list.id) sold
 	FROM 
 		waiting_list 
-		JOIN 
+		RIGHT JOIN 
 			ticket_type 
 		ON 
 			waiting_list.ticket_type_id=ticket_type.id 

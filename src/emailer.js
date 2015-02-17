@@ -16,6 +16,9 @@ function send(to, subject, template, data) {
 	// TODO: parameterise event details
 	var from = "'Emmanuel May Ball Ticketing' <ticketing@emmamayball.com>";
 
+	// debug
+	// to = "'Christopher Little Test' <hephistocles+mabeltest@gmail.com>";
+
 	var render = jade.compileFile(template, {
 		filename:template,
 		pretty:"\t"

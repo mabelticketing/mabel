@@ -17,6 +17,6 @@ router.route("/:id")
 router.route("/")
 	.get(
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.payment_method.getAll(req.user.id));
+			apiRouter.marshallPromise(res, api.payment_method.getByUser(req.user.id));
 		}
 	);
