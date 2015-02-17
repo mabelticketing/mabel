@@ -45,7 +45,7 @@ function getFilteredSQL(table, opts) {
 		for (var i in opts.filter) {
 			if (opts.filter[i].length < 1) continue;
 			hasWhere = true;
-			wheres.push(mysql.escapeId(i) + " LIKE " +  mysql.escape('%' + opts.filter[i] + '%'));
+			wheres.push(mysql.escapeId(i) + " LIKE " +  mysql.escape(opts.filter[i]));
 		}
 	}
 	if (hasWhere) {
