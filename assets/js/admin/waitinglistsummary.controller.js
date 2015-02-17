@@ -1,9 +1,9 @@
 angular.module('mabel.admin')
 	.controller("WaitingListSummaryController", WaitingListSummaryController);
 
-function WaitingListSummaryController(Ticket) {
+function WaitingListSummaryController(WaitingList) {
 	var vm = this;
-	vm.resource = Ticket;
+	vm.resource = WaitingList;
 	vm.columns = [
 		{
 			title: 'Type ID',

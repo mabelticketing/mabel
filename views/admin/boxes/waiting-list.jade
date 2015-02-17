@@ -1,5 +1,6 @@
 .box.box-solid.box-primary(ng-controller="WaitingListController as wl")
 	.box-header
 		h3.box-title Waiting List
+		button.btn.btn-warning(style="float:right;margin:4px;" ng-click="wl.transferAll()") Transfer Tickets From Waiting List
 	.box-body.table-responsive.no-padding
 		mabel-table(resource="wl.resource", initialisor="wl.initialisor", filename="'waiting-list'", columns="wl.columns", click-event="wl.clickEvent")
