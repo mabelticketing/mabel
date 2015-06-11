@@ -46,6 +46,7 @@ router.route("/admit")
 
 router.route("/admit/:id")
 	.post(function(req, res) {
+		console.log("Admitted ticket #" + req.params.id + " @ " + (new Date()).toString());
 		apiRouter.marshallPromise(res, api.ticket.admit(req.params.id));
 	});
 
