@@ -3,7 +3,7 @@ angular.module('mabel.shared')
 		var token = $cookies.mabelAuthToken;
 		if (token === null || token === undefined) {
 			alert("Please log in before proceeding.");
-			window.location = "/";
+			window.location = "/login/raven";
 			return null;
 		}
 		return token;
