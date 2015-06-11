@@ -210,6 +210,10 @@ router.get('/admin/transactions', function(req, res) {
 	res.render("admin/transactions.jade");
 });
 
+router.get('/admin/scan', function(req, res) {
+	res.render("admin/scan.jade");
+});
+
 router.get('/dash', function(req, res) {
 	res.render("dash.jade");
 });

@@ -3,7 +3,7 @@ var express   = require("express");
 var app       = express();
 var passport  = require("passport");
 var config    = require('./src/config.js');
-var Cluster   = require('cluster2');
+// var Cluster   = require('cluster2');
 require("./src/passport-config.js");
 
 // make visible outside module
