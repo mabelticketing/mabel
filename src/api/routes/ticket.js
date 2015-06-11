@@ -38,6 +38,16 @@ router.route("/")
 			apiRouter.marshallPromise(res, api.ticket.insert(apiRouter.stripMeta(req.body)));
 		}
 );
+router.route("/admit")
+	.get(
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.ticket.admitted());
+		});
+
+router.route("/admit/:id")
+	.post(function(req, res) {
+		apiRouter.marshallPromise(res, api.ticket.admit(req.params.id));
+	});
 
 function generateConfirmationsForWaitingList(ticketPromise) {
 	var mapify = function(results) {
@@ -157,6 +167,13 @@ router.route("/process_waiting_list/:id")
 				});
 		}
 );
+router.route("/getAllDetailed/")
+	.get(
+		apiRouter.checkAdmin(),
+		function(req, res) {
+			apiRouter.marshallPromise(res, api.ticket.getAllDetailed());
+		}
+	);
 
 router.route("/process_waiting_list/")
 	.post(
@@ -315,7 +332,8 @@ function checkTicketAccess(req, res, next) {
 				// Requesting someone else's details, so only allowed if I am admin
 				return (apiRouter.checkAdmin())(req, res, next);
 			}
-		});
+		},
+		next);
 }
 
 router.route("/:id")

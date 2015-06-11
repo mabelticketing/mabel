@@ -1,0 +1,59 @@
+
+extends ./includes/main.jade
+
+block prepend scripts
+	style(type="text/css").
+		.scan-input {
+		  height: 100px;
+		  font-size: 70px;
+		  text-align: center;
+		  width: 500px;
+		  margin: auto;
+		}
+
+block append scripts
+	script(type="text/javascript", src="/components/underscore/underscore-min.js")
+	script(type = "text/javascript" src="/js/admin/scan.controller.js")
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Scan"
+	- subtitle = "Admit Guests"
+	- breadcrumb = [{name:"Scan"}]
+	- sidebarItems = [{link:"/", name:"Dashboard"}, {link:"/admin/event", name:"Event"}, {link:"/admin/users", name:"Users"}, {link:"/admin/tickets", name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}, {link:"/admin/scan", name:"Scan", selected:true}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	div(ng-controller="ScanController as scan")
+		.row
+			.col-md-12
+				h1 Scan guests
+				.progress
+					.progress-bar.progress-bar-success.progress-bar-striped.active(
+						role="progressbar" style="width:{{100* scan.admitted / scan.allTickets.length }}%; min-width:8em")
+						| {{ scan.admitted }} / {{scan.allTickets.length }} guests admitted ({{100* scan.admitted / scan.allTickets.length | number : 0 }}%)
+		.row		
+			.col-md-2
+			.col-md-8
+				input.scan-input.input-lg.form-control(type="numeric" ng-model="scan.searchTerm" autofocus)
+			.col-md-2
+		.row(ng-repeat="t in scan.searchResults | limitTo: 10 | orderBy: id")
+			.col-md-12(style="background-color:#eee; margin-top:20px")
+				div(style="display:inline-block; width:80%; vertical-align:middle;")
+					h3 {{t.guest_name}} - {{t.ticket_type_name}} #[small #[em ({{t.status_name}})]]
+					h5 Guest of 
+						strong {{t.booking_user_name}}
+					h6 #[em Ticket ID]: # {{t.id}} &nbsp;&nbsp;&nbsp;&nbsp;
+						| #[em Booker ID]: # {{t.user_id}} &nbsp;&nbsp;&nbsp;&nbsp;
+						| {{t.booking_user_email}}
+				div(style="display:inline-block; width:15%; vertical-align:middle; text-align:center")
+					button.btn.btn-lg(ng-click="scan.admit(t)" ng-class="t.status") Admit
+		.row(ng-if="scan.searchResults.length>10")
+			.col-md-12
+				h3 Only the first 10 results are shown.
+		.row(ng-if="scan.searchResults.length<1")
+			.col-md-12
+				h3 No results found.
+		.row(style="height:50px")
