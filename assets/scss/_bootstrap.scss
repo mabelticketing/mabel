@@ -1,0 +1,29 @@
+/**
+ * _bootstrap.scss
+ *
+ * No, not THAT bootstrap. Assemble
+ * partials together. Will be output
+ * to main.css
+ *
+ */
+
+// import variables first so they
+// can be accessed from partials.
+@import
+  'variables';
+
+// import base partials
+@import
+  'base/core',
+  'base/fonts';
+
+// import modules
+@import
+  'modules/buttons',
+  'modules/forms',
+  'modules/slides';
+
+// import _shame.scss last so it
+// can override what it needs to.
+@import
+  'shame';
