@@ -15,9 +15,24 @@ module.exports = function(grunt) {
                     "./assets/admin/users/index.html": "./views/admin/users.jade",
                 }
             }
+        },
+        sass: {
+          options: {
+              style: 'compressed'
+          },
+          dist: {
+            files: [{
+              expand: true,
+              cwd: 'assets/scss',
+              src: ['bootstrap.scss'],
+              dest: '../css',
+              ext: '.css'
+            }]
+          }
         }
     });
 
+    grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-jade');
 
 };
