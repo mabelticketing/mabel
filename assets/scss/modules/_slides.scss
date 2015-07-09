@@ -1,0 +1,26 @@
+/**
+ * _slides.scss
+ *
+ * Not entirely sure what this is for - TLF
+ *
+ */
+
+.slide {
+  width: 100%;
+  line-height: normal;
+  background-color: #ffffff;
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 50px;
+}
+
+.slide-full {
+  height: 100%;
+}
+
+.slide-content {
+  max-width: 900px;
+  margin: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}

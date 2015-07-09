@@ -1,0 +1,30 @@
+/**
+ * _core.scss
+ *
+ * Styling for usual HTML elements can
+ * go here. e.g. h2
+ *
+ */
+
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  font-family: $font--main;
+  font-weight: 300;
+  color: $col--dark-grey;
+}
+
+h1 {
+  font-family: Roboto;
+  font-weight: 100;
+  font-size: 3em;
+}
+
+hr {
+  width: 60%;
+  border: none;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid $col--light-grey;
+}
