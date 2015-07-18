@@ -1,12 +1,13 @@
 {
   "name": "Mabel",
   "version": "0.1.0",
-  "description": "May ball ticketing system",
+  "description": "A May Ball ticketing system",
   "repository": "https://github.com/mabelticketing/mabel",
   "contributors": [
     "Christopher Little <cl554@cam.ac.uk> (http://www.clittle.com)",
     "Thomas Le Feuvre <tjlefeuvre@gmail.com> (http://thomaslefeuvre.com)"
   ],
+  "license": "GNU General Public License v2.0",
   "start": "app.js",
   "scripts": {
     "start": "node app.js",
