@@ -8,12 +8,13 @@
 
 // import bootstrap
 @import
-  'bootstrap';
+  'vendor/bootstrap';
 
 // import variables so they can be accessed by partials.
 //  -> important: lots of bootstrap variables with obvious names e.g. $text-color so be careful with naming
 @import
-  'variables';
+  'utils/globals',
+  'themes/default';
 
 // import base partials
 @import
