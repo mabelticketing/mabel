@@ -1,0 +1,25 @@
+
+extends ./includes/main.jade
+
+block append scripts
+	script(type="text/javascript", src="/components/jsbarcode/JsBarcode.js")
+	script(type="text/javascript", src="/components/jsbarcode/EAN_UPC.js")
+	script(type="text/javascript", src="/components/jsbarcode/CODE128.js")
+	script(type = "text/javascript" src="/js/admin/barcode.controller.js")
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Barcodes"
+	- subtitle = "Generated stickers"
+	- breadcrumb = [{name:"Barcodes"}]
+	- sidebarItems = [{link:"/admin", name:"Dashboard"}, {link:"/admin/event", name:"Event"}, {link:"/admin/users", name:"Users"}, {link:"/admin/tickets", name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}, {link:"/admin/barcodes", name:"Barcodes", selected:true}, {link:"/admin/scan", name:"Scan"}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	div(ng-controller="BarcodeController as barcode")
+	.row
+		.col-md-12
+			h1 Ticket barcodes
+			canvas#barcode
