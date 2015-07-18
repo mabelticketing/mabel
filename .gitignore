@@ -36,6 +36,10 @@ assets/dash
 assets/book
 assets/*.html
 
+# sass
+.sass-cache/
+assets/css/main.min.css*
+
 # anything installed by bower
 assets/components
 

@@ -1,0 +1,33 @@
+/**
+ * _main.scss
+ *
+ * Assemble partials together. Will be output
+ * to main.css
+ *
+ */
+
+// import bootstrap
+@import
+  'vendor/bootstrap';
+
+// import variables so they can be accessed by partials.
+//  -> important: lots of bootstrap variables with obvious names e.g. $text-color so be careful with naming
+@import
+  'utils/globals',
+  'themes/default';
+
+// import base partials
+@import
+  'base/core',
+  'base/fonts';
+
+// import modules
+@import
+  'modules/buttons',
+  'modules/forms',
+  'modules/slides';
+
+// import _shame.scss last so it
+// can override what it needs to.
+@import
+  'shame';
