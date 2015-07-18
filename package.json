@@ -1,18 +1,21 @@
 {
   "name": "Mabel",
   "version": "0.1.0",
-  "description": "May ball ticketing system",
+  "description": "A May Ball ticketing system",
+  "repository": "https://github.com/mabelticketing/mabel",
   "contributors": [
     "Christopher Little <cl554@cam.ac.uk> (http://www.clittle.com)",
     "Thomas Le Feuvre <tjlefeuvre@gmail.com> (http://thomaslefeuvre.com)"
   ],
+  "license": "GNU General Public License v2.0",
   "start": "app.js",
   "scripts": {
     "clean": "rm -rf assets/views/",
 
     "pre-build": "npm run clean",    
-    "build:jade":"./precompile.sh",
-    "build": "npm run build:jade",
+    "build:jade":"./jade.sh",
+    "build:sass": "sass assets/scss/main.scss:assets/css/main.min.css --style compressed",
+    "build": "npm run build:jade ; npm run build:sass",
 
     "dev": "parallelshell \"nodemon --debug app.js\" \"node-inspector\"",
     
