@@ -5,6 +5,8 @@ block append scripts
 	script(type="text/javascript", src="/components/jsbarcode/JsBarcode.js")
 	script(type="text/javascript", src="/components/jsbarcode/EAN_UPC.js")
 	script(type="text/javascript", src="/components/jsbarcode/CODE128.js")
+	script(type="text/javascript", src="/components/bower-pdfkit/pdfkit-0.7.0.js")
+	script(type="text/javascript", src="/components/bower-pdfkit/blob-stream-v0.1.2.js")
 	script(type = "text/javascript" src="/js/admin/barcode.controller.js")
 
 block prepend variables
@@ -22,4 +24,11 @@ block content
 	.row
 		.col-md-12
 			h1 Ticket barcodes
-			canvas#barcode
+			//- svg#barcode
+			//- br
+			//- canvas#barcode2
+			//- br
+			//- img#barcode3
+			//- br
+			//- svg#barcode4
+			iframe#pdf(style="width:100%; height:500px;")

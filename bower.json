@@ -22,7 +22,8 @@
     "jspdf": "~1.1.135",
     "ng-table": "~0.3.3",
     "ng-table-export": "https://github.com/davisford/ng-table-export.git",
-    "underscore": "~1.8.3"
+    "underscore": "~1.8.3",
+    "bower-pdfkit": "~0.7.0"
   },
   "resolutions": {
     "angular": "~1"
