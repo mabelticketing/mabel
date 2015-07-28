@@ -11,18 +11,13 @@
   "start": "app.js",
   "scripts": {
     "clean": "rm -rf assets/views/",
-
-    "pre-build": "npm run clean",    
-    "build:jade":"./jade.sh",
+    "pre-build": "npm run clean",
+    "build:jade": "./jade.sh",
     "build:sass": "sass assets/scss/main.scss:assets/css/main.min.css --style compressed",
     "build": "npm run build:jade ; npm run build:sass",
-
-    "dev": "parallelshell \"nodemon --debug app.js\" \"node-inspector\"",
-    
+    "dev": "parallelshell \"nodemon --debug app.js\" \"node-inspector\" \"livereload .\"",
     "test": "echo \"We haven't got any tests yet...\" && exit 0",
-    
     "prepare": "npm install && bower install && npm run build",
-
     "start": "node app.js"
   },
   "dependencies": {
@@ -46,7 +41,7 @@
     "mailgun-js": "~0.6.8"
   },
   "devDependencies": {
-    "live-reload": "^1.1.0",
+    "livereload": "latest",
     "parallelshell": "^1.2.0",
     "watch": "^0.16.0"
   }
