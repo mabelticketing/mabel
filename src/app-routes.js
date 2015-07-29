@@ -218,6 +218,10 @@ router.get('/admin/scan', function(req, res) {
 	res.render("admin/scan.jade");
 });
 
+router.get('/admin/reports', function(req, res) {
+	res.render("admin/reports.jade");
+});
+
 router.get('/dash', function(req, res) {
 	res.render("dash.jade");
 });

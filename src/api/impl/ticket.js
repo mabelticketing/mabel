@@ -210,19 +210,19 @@ function del(ticket_id) {
 function getAll(opts) {
 	var sql = connection.getFilteredSQL("ticket", opts);
 
-	return runSql(sql, true);
+	return runSql(sql);
 }
 
 function summary(opts) {
 	var sql = connection.getFilteredSQL("ticket_summary", opts);
 
-	return runSql(sql, true);
+	return runSql(sql);
 }
 
 function summary_byuser(opts) {
 	var sql = connection.getFilteredSQL("tickets_grouped_by_user", opts);
 
-	return runSql(sql, true);
+	return runSql(sql);
 }
 
 function getByUser(user_id) {

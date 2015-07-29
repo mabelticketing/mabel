@@ -6,5 +6,6 @@ angular.module('mabel.shared')
 			window.location = "/login/raven";
 			return null;
 		}
+		authToken = token;
 		return token;
 	});

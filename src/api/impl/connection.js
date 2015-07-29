@@ -5,7 +5,8 @@ var config = require("../../config");
 module.exports = {
 	getConnection: getConnection,
 	runSql: runSql,
-	getFilteredSQL:getFilteredSQL
+	getFilteredSQL:getFilteredSQL,
+	doQuery: doQuery
 };
 
 var pool  = mysql.createPool({
@@ -31,16 +32,28 @@ function getConnection(opts) {
 }
 
 function getFilteredSQL(table, opts) {
-	var sql = "SELECT * from " + table;
+	var sql = "SELECT ";
 
+	// columns
+	if (opts.columns !== undefined) 
+		sql += mysql.escapeId(opts.columns);
+	else 
+		sql += "*"
+
+	// table
+	sql += " FROM " + mysql.escapeId(table);
+
+	// prepare where clause
 	var whereClause = "";
 	var wheres = [];
 	var hasWhere = false;
+	// predefined where
 	if (opts.where !== undefined) {
 		hasWhere = true;
 		wheres.push(opts.where);	
 	}
 	
+	// automatic where
 	if (opts.filter !== undefined) {
 		for (var i in opts.filter) {
 			if (opts.filter[i].length < 1) continue;
@@ -48,6 +61,8 @@ function getFilteredSQL(table, opts) {
 			wheres.push(mysql.escapeId(i) + " LIKE " +  mysql.escape(opts.filter[i]));
 		}
 	}
+
+	// actually append the where clause
 	if (hasWhere) {
 		whereClause = " WHERE " + wheres.join(" AND ");
 	}
@@ -83,50 +98,21 @@ function getFilteredSQL(table, opts) {
 		sql += mysql.escape(opts.size);
 	}
 	sql += ";";
+	console.log(sql);
 	return sql;
 }
 
-// runSql(sql, data, callback, multiStatements)
-// runSql(sql, callback, multiStatements)
-// runSql(sql, data, multiStatements)
 // runSql(sql, data, callback)
 // runSql(sql, callback)
 // runSql(sql, data)
-// runSql(sql, multiStatements)
 // runSql(sql);
 function runSql() {
-	var sql, data = {}, callback = function(){}, multiStatements = false;
+	var sql, data = {},
+	callback = callback || function(){};
 	switch(arguments.length) {
-		case 4:
+		case 3:
 			data = arguments[1];
 			callback = arguments[2];
-			multiStatements = arguments[3];
-		case 3:
-			switch (typeof arguments[1]) {
-				case "function":
-					if (typeof arguments[2] !== "boolean") {
-						throw new Error("Invalid usage for runSql", arguments);
-					}
-					callback = arguments[1];
-					multiStatements = arguments[2];
-					break;
-				case "object":
-					data = arguments[1];
-					switch (typeof arguments[2]) {
-						case "boolean":
-							multiStatements = arguments[2];
-							break;
-						case "function":
-							callback = arguments[2];
-							break;
-						default:
-							throw new Error("Invalid usage for runSql", arguments);
-					}
-					break;
-				default:
-					throw new Error("Invalid usage for runSql", arguments);
-			}
-			break;
 		case 2:
 			switch (typeof arguments[1]) {
 				case "function":
@@ -135,45 +121,51 @@ function runSql() {
 				case "object":
 					data = arguments[1];
 					break;
-				case "boolean":
-					multiStatements = arguments[1];
-					break;
 				default:
 					throw new Error("Invalid usage for runSql", arguments);
 			}
 			break;
-		case 1: break;
+		case 1:
+			break;
 		default:
 			throw new Error("Invalid usage for runSql", arguments);
 	}
 	sql = mysql.format(arguments[0].replace(/(\t|\n)/g," ").replace(/\s+/g," "), data);
-	
+	var p = doQuery(sql)
+		.then(function (r) {
+			r.queryData = data;
+			r.querySql = sql;
+			return r;
+		});
+	p.then(function(value) {
+			callback(null, value);
+		}, function(err) {
+			callback(err);
+		});
+	return p;
+}
+
+
+function doQuery(sqlOrOptions) {
 	// create a promise which will be resolved when the query returns
 	// for backwards-compatibility, add the given callback to the promise 
 	var d = Q.defer();
-	d.promise.then(function(value) {
-		callback(null, value);
-	}, function(err) {
-		callback(err);
-	});
 
 	pool.getConnection(function(err, conn) {
 		if (err) {
 			return d.reject(err);
 		} 
-		conn.query(sql, function(err, rows) {
+		conn.query(sqlOrOptions, function(err, rows) {
 			conn.release();
 			if (err) {
 				// if we get a deadlock, just try again
 				// http://stackoverflow.com/questions/643122/how-to-detect-deadlocks-in-mysql-innodb
 				if (err.errno === 1213) {
-					return d.resolve(runSql(sql));
+					return d.resolve(doQuery(sqlOrOptions, callback));
 				} else {
 					return d.reject(err);
 				}
 			}
-			rows.queryData = data;
-			rows.querySql = sql;
 			d.resolve(rows);
 		});
 		

@@ -1,0 +1,82 @@
+
+extends ./includes/main.jade
+
+block append scripts
+	script(type="text/javascript", src="/components/underscore/underscore-min.js")
+	script(type = "text/javascript" src="/js/admin/report.controller.js")
+
+block prepend variables
+	//- these variable will normally be overridden by subpages
+	- title = "Reports"
+	- subtitle = "View Data"
+	- breadcrumb = [{name:"Reports"}]
+
+	//- notifications and user will normally come from the app-routes context
+	- notifications = notifications || []
+
+block content
+	div(ng-controller="ReportController as r")
+		.row
+			.col-md-12
+				h1 Reports
+				.box
+					.box-header
+						h3.box-title {{r.tables.join(", ")}}
+					.box-body
+						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
+							table.table.table-bordered.table-hover
+								thead
+									tr
+										th(ng-repeat="c in r.cols") 
+											{{c.Field}}
+											span(style="float:right; padding-left:5px") 
+												a(href="#", ng-click="r.rmCol(c)") X
+											span(style="float:right") 
+												a(href="#", ng-click="r.joinOn(c)") J
+								tbody
+									tr(ng-repeat="d in r.data")
+										// TODO: Format the data according to c.Type
+										td(ng-repeat="c in r.cols", ng-click="r.alert('update ' + c.table + ' set ' + c.Field + '=\"foo\";')") {{d[c.table + "_" + c.Field]}}	
+
+						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
+							.col-sm-5
+								p Showing {{(r.pageNum * r.pageSize)+1}} to {{ [(r.pageNum+1) * r.pageSize, r.dataSize] | min }} of {{r.dataSize}} entries.
+							.col-sm-7
+									ul.pagination(ng-click="updatePage()")
+										li.paginate_button(ng-if="r.pageNum>0", ng-click="r.updatePage(r.pageNum - 1)")
+											a(href="#") Previous
+										li.paginate_button(ng-if="r.pageNum>1", ng-click="r.updatePage(0)")
+											a(href="#") 1
+										//- li.paginate_button(ng-if="r.pageNum>2", ng-click="r.updatePage(1)")
+										//- 	a(href="#") 2
+										li.paginate_button(ng-if="r.pageNum>1")
+											a ...
+										li.paginate_button.active
+											a {{r.pageNum + 1}}
+										li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 2")
+											a ...
+										//- li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 3", ng-click="r.updatePage(r.dataSize/r.pageSize - 1)")
+										//- 	a(href="#") {{r.dataSize/r.pageSize - 1 | ceil}}
+										li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 2", ng-click="r.updatePage(r.dataSize/r.pageSize)")
+											a(href="#") {{r.dataSize/r.pageSize | ceil}}	
+										li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 1", ng-click="r.updatePage(r.pageNum + 1)")
+											a(href="#") Next
+						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
+							h4 Actions
+							ul
+								li(ng-click="r.alert('TODO')") 
+									a(href="#") Remove tables
+								li(ng-click="r.alert('TODO')") 
+									a(href="#") Hide/Show Columns
+								li(ng-click="r.alert('TODO')") 
+									a(href="#") Save Report Permanently
+								li
+									a(ng-click="r.getCSV()") Export Data
+									|  << This one actually does something.
+								li(ng-click="r.alert('TODO')") 
+									a(href="#") Send bulk email
+						row
+							h3 Select a table to begin
+							ul(ng-if="r.tables.length < 1")
+								li(ng-repeat="t in r.tableNames")
+									a(ng-click="r.table(t)") {{t}}
