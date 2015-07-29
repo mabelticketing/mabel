@@ -37,7 +37,7 @@ function getAll(opts, event_id) {
 	opts.where = "event_id=" + mysql.escape(event_id);
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 	
-	return runSql(sql, true);
+	return runSql(sql);
 }
 
 function insert(ticket_type, event_id) {
@@ -68,7 +68,7 @@ function del(ticket_type_id) {
 	var sql = "DELETE FROM ticket WHERE ticket_type_id=?; ";
 	sql += "DELETE FROM group_access_right WHERE ticket_type_id = ?; ";
 	sql += "DELETE FROM ticket_type WHERE id=?";
-	var p = runSql(sql, [ticket_type_id,ticket_type_id,ticket_type_id], true);
+	var p = runSql(sql, [ticket_type_id,ticket_type_id,ticket_type_id]);
 	return p.then(function() {
 		return {};
 	});
@@ -87,7 +87,7 @@ function setAllowedGroups(ticket_type_id, groups) {
 		data.push({ticket_type_id:ticket_type_id, group_id: parseInt(groups[i])});
 	}
 	// make sure to enable multi-statement
-	return runSql(sql, data, true);
+	return runSql(sql, data);
 }
 
 function update(ticket_type_id, ticket_type) {

@@ -91,7 +91,7 @@ function del(user_id, callback) {
 	runSql(sql, [user_id, user_id, user_id, user_id], function(err, result){
 		if (err) return callback(err);
 		callback(null, {});
-	}, true);
+	});
 }
 
 //TODO: We want users of different event sites to be separate

@@ -55,6 +55,9 @@ router.use("/transaction",
 router.use("/waiting_list",
 	require("./routes/waiting_list.js"));
 
+router.use("/schema",
+	require("./routes/schema.js"));
+
 function isInGroup(user, groupId) {
 	return user.groups.indexOf(groupId) > -1;
 }
@@ -86,6 +89,7 @@ function marshallResult(res) {
 function marshallPromise(res, promise) {
 	promise.then(function(value) {
 		if (value === undefined) value = {};
+		// console.log(value);
 		res.json(value);
 	}, function(err) {
 		console.log(err);

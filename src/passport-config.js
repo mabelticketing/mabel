@@ -221,7 +221,7 @@ function register(user) {
 }
 
 function getUser(userId) {
-    return connection.runSql("SELECT * FROM user WHERE id = ?", [userId], true)
+    return connection.runSql("SELECT * FROM user WHERE id = ?", [userId])
         .then(function(results) {
             if (results.length !== 1) {
                 throw {

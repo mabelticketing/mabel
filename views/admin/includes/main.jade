@@ -5,7 +5,7 @@ block variables
 	- subtitle = subtitle || ""
 	- breadcrumb = [{name:"Dashboard"}]
 	- notifications = notifications || []
-	- sidebarItems =  sidebarItems || [{link:"#", name:title, icon:"dashboard", selected:true}]
+	- sidebarItems = [{link:"/admin", name:"Dashboard"}, {link:"#", name:"Event"}, {link:"/admin/users", name:"Users"}, {link:"/admin/reports", name:"Reports"}, {link:"/admin/tickets", name:"Tickets"}, {link:"/admin/transactions", name:"Transactions"}, {link:"/admin/barcodes", name:"Barcodes"}, {link:"/admin/scan", name:"Scan"}]
 head
 	meta(charset='UTF-8')
 	title Mabel Ticketing | #{title}

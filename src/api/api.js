@@ -6,5 +6,6 @@ module.exports = {
 	payment_method : require("./impl/payment_method.js"),
 	booking        : require("./impl/booking.js"),
 	transaction    : require("./impl/transaction.js"),
-	waitingList	   : require("./impl/waiting_list.js")
+	waitingList	   : require("./impl/waiting_list.js"),
+	schema		   : require("./impl/schema.js")
 };

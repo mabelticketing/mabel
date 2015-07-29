@@ -48,7 +48,7 @@ function del(transaction_id) {
 function getAll(opts) {
 	var sql = connection.getFilteredSQL("transaction", opts);
 
-	return runSql(sql, true);
+	return runSql(sql);
 }
 
 
