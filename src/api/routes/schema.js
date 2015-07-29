@@ -24,6 +24,7 @@ router.route("/data")
 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
 			if (req.query.columns !== undefined) opts.columns = JSON.parse(req.query.columns);
 			if (req.query.joins !== undefined) opts.joins = sopts.joins = JSON.parse(req.query.joins);
+			if (req.query.filters !== undefined) opts.filter = sopts.filter = JSON.parse(req.query.filters);
 
 			apiRouter.marshallPromise(res, Q.all([api.schema.getData(opts, true), api.schema.getData(sopts)])
 				.then(function(results) {

@@ -2,16 +2,19 @@
 angular.module('mabel.admin')
 	.controller("ReportController", ReportController);
 
-function ReportController($scope, APICaller) {
+function ReportController($scope, APICaller, $modal) {
 	var vm = this;
+	var t = {
+		tables: [],
+		joins: [],
+		cols: [],
+		filters: [],
+		pageSize: 10
+	}
+	vm.pageNum = 1;
 	vm.tableNames = [];
-	vm.joins = []
-	vm.tables = [];
-	vm.schemata = [];
-	vm.cols = [];
-	vm.pageSize = 10;
-	vm.pageNum = 0
-	vm.csv = ""
+	vm.schemata = {};
+	vm.t = t;
 	r = vm;
 
 	APICaller.get("schema", {},
@@ -19,16 +22,21 @@ function ReportController($scope, APICaller) {
 			if (err) return alert("ERROR " + err);
 			vm.tableNames = data;
 		});
-	vm.updateData = function() {
-		var cols = vm.cols.map(function(c) {
-			return c.table + "." + c.Field;
-		});
+
+	function fieldify(col) {
+		return col.table + "." + col.Field;
+	}
+	vm.fieldify = fieldify;
+	vm.updateData = function updateData() {
+		console.log(r.pageNum);
+		// TODO: just send over t, and let the server unpick it
 		APICaller.get("schema/data", {
-				from: vm.pageNum * vm.pageSize,
-				size: vm.pageSize,
-				columns: JSON.stringify(cols),
-				tables: JSON.stringify(vm.tables),
-				joins: JSON.stringify(vm.joins)
+				from: (vm.pageNum - 1) * t.pageSize,
+				size: t.pageSize,
+				columns: JSON.stringify(t.cols.map(fieldify)),
+				tables: JSON.stringify(t.tables),
+				joins: JSON.stringify(t.joins),
+				filters: JSON.stringify(t.filters)
 			},
 			function(err, data) {
 				if (err) return alert("ERROR " + err);
@@ -39,54 +47,22 @@ function ReportController($scope, APICaller) {
 
 	}
 	vm.rmCol = function(col) {
-		vm.cols.splice(vm.cols.indexOf(col), 1);
+		t.cols.splice(t.cols.indexOf(col), 1);
 	}
-	vm.joinOn = function(col) {
-		// TODO: Something more elegant than prompt
-		var t = prompt("Which table would you like to join with? (" + vm.tableNames.join(", ") + ")");
-		if (vm.tables.indexOf(t) >= 0) return alert("That table is already displayed!");
-		if (vm.tableNames.indexOf(t) < 0) return alert("That table doesn't exist!");
 
-
-		if (vm.schemata[t] === undefined) {
-			// load schema
-			APICaller.get("schema/" + t, {},
-				function(err, data) {
-					if (err) return alert("ERROR " + err);
-					data.forEach(function(d) {
-						d.table = t;
-					})
-					vm.schemata[t] = data;
-					getField();
-				});
-		} else {
-			getField();
-		}
-
-		function getField() {
-			var fields = vm.schemata[t]
-			var s_fields = fields.map(function(a) {
-				return a.Field
-			});
-			var f = prompt("Which of the fields from '" + t + "' would you like to join '" + col.Field + "' onto? (" + s_fields.join(",") + ")");
-			if (s_fields.indexOf(f) < 0) return alert("That field doesn't exist!");
-
-			vm.tables.push(t);
-			vm.joins.push({
-				left: col.table + "." + col.Field,
-				right: t + "." + f
-			})
-			for (var i = 0; i < fields.length; i++) {
-				if (fields[i].Field !== f) {
-					vm.cols.push(fields[i]);
-				}
-			}
-			vm.updateData();
-		}
+	vm.filter = function(col) {
+		// TODO: Other filters as well as equals (e.g. <, <>)
+		// TODO (maybe): "OR" filters (currently it's a big conjunction)
+		var q = prompt("What would you like to search for the value of '" + col.Field + "'?")
+		t.filters.push({
+			field: fieldify(col),
+			precise: true, // TODO: make this imprecise for text fields
+			value: q // TODO: parseNumber for numeric fields
+		})
+		vm.updateData();
 	}
-	vm.table = function(table) {
-		vm.tables.push(table);
-		vm.pageNum = 0
+	vm.lookUpSchema = function(table, callback) {
+		if (callback === undefined) callback = function(){};
 		if (vm.schemata[table] === undefined) {
 			APICaller.get("schema/" + table, {},
 				function(err, data) {
@@ -95,60 +71,71 @@ function ReportController($scope, APICaller) {
 						d.table = table;
 					})
 					vm.schemata[table] = data;
-					vm.cols = data;
+					callback(data);
 				});
+		} else {
+			callback(vm.schemata[table])
 		}
-		vm.updateData();
 	}
-	vm.clearCSV = function() {
-		vm.csv = "";
+	vm.init = function(table) {
+		t.tables.push(table);
+		vm.pageNum = 1
+		// TODO (maybe): preload all schemata instead of on-demand?
+		vm.lookUpSchema(table, function(d) {
+			t.cols = d;
+			vm.updateData();
+		})
+		
 	}
 	vm.getCSV = function() {
 
 		// enclose a string in quotes so the comma is escaped.
 		// also replace any quote-marks with escaped versions.
 		function esc(s) {
-			return "\"" + (""+s).replace(/"/g,"\\\"") + "\""
+			return "\"" + ("" + s).replace(/"/g, "\\\"") + "\""
 		}
-
-		var cols = vm.cols.map(function(c) {
-			return c.table + "." + c.Field;
-		});
 
 		// first get all data, regardless of page limits
 		APICaller.get("schema/data", {
-				columns: JSON.stringify(cols),
-				tables: JSON.stringify(vm.tables),
-				joins: JSON.stringify(vm.joins)
+				columns: JSON.stringify(t.cols.map(fieldify)),
+				tables: JSON.stringify(t.tables),
+				joins: JSON.stringify(t.joins)
 			},
 			function(err, data) {
 				if (err) return alert("ERROR " + err);
 				data = data.data;
 				var csv = "";
-				for (var i = -1; i<data.length; i++) {
+				for (var i = -1; i < data.length; i++) {
 					var sep = "";
-					for (var j = 0; j<vm.cols.length; j++) {
+					for (var j = 0; j < t.cols.length; j++) {
 						// prepare the first row according to schema
-						if (i<0) {
-							csv += sep + esc(vm.cols[j].Field);
+						if (i < 0) {
+							csv += sep + esc(t.cols[j].Field);
 						} else {
-							csv += sep + esc(data[i][vm.cols[j].table + "_" + vm.cols[j].Field]);
+							csv += sep + esc(data[i][t.cols[j].table + "_" + t.cols[j].Field]);
 						}
 						sep = ",";
 					}
 					csv += "\n";
 				}
-				console.log(csv);
-				var a         = document.createElement('a');
-				a.href        = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-				a.target      = '_blank';
-				d = new Date();
-				a.download    = r.tables.join("-") + "_" + d.getDate() + "-" + d.getMonth() + '.csv';
+
+				var d = new Date();
+				var a = document.createElement('a');
+				a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+				a.target = '_blank';
+				a.download = t.tables.join("-") + "_" + d.getDate() + "-" + d.getMonth() + '.csv';
 
 				document.body.appendChild(a);
 				a.click();
 				document.body.removeChild(a);
 			});
+	}
+	vm.saveTable = function() {
+		alert("This doesn't work yet, but I've console.log'd the table description.")
+		// TODO: reduce t down further
+		// 	e.g. remove unneccessary bits of 'col'
+		// 	e.g. perhaps shrink property names (too far?)
+		console.log(JSON.stringify(t));
 	}
 	vm.updatePage = function(a) {
 		vm.pageNum = Math.ceil(a);
@@ -156,6 +143,49 @@ function ReportController($scope, APICaller) {
 	}
 	vm.alert = function(a) {
 		alert(a);
+	}
+	vm.showJoin = function(col) {
+
+		var modalInstance = $modal.open({
+			templateUrl: 'join.html',
+			controller: 'JoinModalController',
+			size: "sm",
+			resolve: {
+				tables: function () {
+					return vm.tableNames;
+				}, 
+				schemata: function () {
+					return vm.schemata;
+				}, 
+				lookUpSchema: function () {
+					return vm.lookUpSchema;
+				},
+				data: function() {
+					return col;
+				}
+			}
+		});
+
+		modalInstance.result.then(function (r) {
+			var field = r.field;
+
+			t.tables.push(field.table);
+			t.joins.push({
+				left: fieldify(col),
+				right: fieldify(field)
+			});
+
+			vm.lookUpSchema(field.table, function(fields) {
+				for (var i = 0; i < fields.length; i++) {
+					if (fields[i] !== field) {
+						t.cols.push(fields[i]);
+					}
+				}
+				vm.updateData();
+			});
+		}, function (err) {
+			// do something with dismissal?
+		});
 	}
 }
 
@@ -169,4 +199,21 @@ angular.module('mabel.admin').filter('min', function() {
 	return function(a) {
 		return Math.min.apply(null, a);
 	}
+});
+
+
+angular.module('mabel.admin').controller('JoinModalController', function($scope, $modalInstance, tables, schemata, lookUpSchema, data) {
+	$scope.result = {};
+	$scope.tables = tables;
+	$scope.schemata = schemata;
+	$scope.lookUpSchema = lookUpSchema;
+	$scope.data = data;
+
+	$scope.ok = function() {
+		$modalInstance.close($scope.result);
+	};
+
+	$scope.cancel = function() {
+		$modalInstance.dismiss('cancel');
+	};
 });

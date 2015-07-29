@@ -45,7 +45,7 @@ function getData(opts, join) {
 	console.log(sql);
 	var opts = {
 		sql: sql,
-		nestTables: (join?"_":false)
+		nestTables: (join?".":false)
 	}
 	return connection.doQuery(opts);
 }
@@ -80,17 +80,19 @@ function getDataSql(opts) {
 	}
 
 	// custom filters (user searches)
-	// filter looks like {id: {precise:true, value:56}, ....}
+	// filter looks like {id: {operator:"LIKE", value:56}, ....}
 	if (opts.filter !== undefined) {
-		for (var i in opts.filter) {
+		for (var i = 0; i< opts.filter.length; i++) {
 
 			// check for null filters and ignore them
 			if (opts.filter[i].value.length < 1) continue;
 
-			if (opts.filter[i].precise) {
-				wheres.push(mysql.escapeId(i) + "=" +  mysql.escape(opts.filter[i].value));
+			if (opts.filter[i].operator === "LIKE" ) {
+				wheres.push(mysql.escapeId(opts.filter[i].field) + " LIKE " +  mysql.escape("%" + opts.filter[i].value + "%"));
+			} else if (["=","<","<=",">",">=","<>"].indexOf(opts.filter[i].operator)>=0) {
+				wheres.push(mysql.escapeId(opts.filter[i].field) + opts.filter[i].operator +  mysql.escape(opts.filter[i].value));
 			} else {
-				wheres.push(mysql.escapeId(i) + " LIKE " +  mysql.escape("%" + opts.filter[i].value + "%"));
+				throw Error("Unknown operator " + opts.filter[i].operator);
 			}
 		}
 	}
