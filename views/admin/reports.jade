@@ -1,10 +1,6 @@
 
 extends ./includes/main.jade
 
-block append scripts
-	script(type="text/javascript", src="/components/underscore/underscore-min.js")
-	script(type = "text/javascript" src="/js/admin/report.controller.js")
-
 block prepend variables
 	//- these variable will normally be overridden by subpages
 	- title = "Reports"
@@ -21,46 +17,30 @@ block content
 				h1 Reports
 				.box
 					.box-header
-						h3.box-title {{r.tables.join(", ")}}
+						h3.box-title {{r.t.tables.join(", ")}}
 					.box-body
 						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
 							table.table.table-bordered.table-hover
 								thead
 									tr
-										th(ng-repeat="c in r.cols") 
+										th(ng-repeat="c in r.t.cols") 
 											{{c.Field}}
-											span(style="float:right; padding-left:5px") 
-												a(href="#", ng-click="r.rmCol(c)") X
-											span(style="float:right") 
-												a(href="#", ng-click="r.joinOn(c)") J
+									tr
+										th(ng-repeat="c in r.t.cols" style="text-align:right;") 
+											button.btn.btn-default(ng-click="r.filter(c)") S
+											button.btn.btn-default(ng-click="r.showJoin(c)") J
+											button.btn.btn-default(ng-click="r.rmCol(c)") X
 								tbody
 									tr(ng-repeat="d in r.data")
 										// TODO: Format the data according to c.Type
-										td(ng-repeat="c in r.cols", ng-click="r.alert('update ' + c.table + ' set ' + c.Field + '=\"foo\";')") {{d[c.table + "_" + c.Field]}}	
+										td(ng-repeat="c in r.t.cols") {{d[r.fieldify(c)]}}	
 
 						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
 							.col-sm-5
-								p Showing {{(r.pageNum * r.pageSize)+1}} to {{ [(r.pageNum+1) * r.pageSize, r.dataSize] | min }} of {{r.dataSize}} entries.
+								p Showing {{((r.pageNum-1) * r.t.pageSize)+1}} to {{ [(r.pageNum) * r.t.pageSize, r.dataSize] | min }} of {{r.dataSize}} entries.
 							.col-sm-7
-									ul.pagination(ng-click="updatePage()")
-										li.paginate_button(ng-if="r.pageNum>0", ng-click="r.updatePage(r.pageNum - 1)")
-											a(href="#") Previous
-										li.paginate_button(ng-if="r.pageNum>1", ng-click="r.updatePage(0)")
-											a(href="#") 1
-										//- li.paginate_button(ng-if="r.pageNum>2", ng-click="r.updatePage(1)")
-										//- 	a(href="#") 2
-										li.paginate_button(ng-if="r.pageNum>1")
-											a ...
-										li.paginate_button.active
-											a {{r.pageNum + 1}}
-										li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 2")
-											a ...
-										//- li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 3", ng-click="r.updatePage(r.dataSize/r.pageSize - 1)")
-										//- 	a(href="#") {{r.dataSize/r.pageSize - 1 | ceil}}
-										li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 2", ng-click="r.updatePage(r.dataSize/r.pageSize)")
-											a(href="#") {{r.dataSize/r.pageSize | ceil}}	
-										li.paginate_button(ng-if="r.dataSize/r.pageSize - r.pageNum > 1", ng-click="r.updatePage(r.pageNum + 1)")
-											a(href="#") Next
+									pagination.pagination-sm(total-items="r.dataSize" items-per-page="r.t.pageSize" ng-model="r.pageNum" max-size="5" direction-links="false" boundary-links="true" ng-change="r.updateData()")
+
 						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
 							h4 Actions
 							ul
@@ -68,15 +48,32 @@ block content
 									a(href="#") Remove tables
 								li(ng-click="r.alert('TODO')") 
 									a(href="#") Hide/Show Columns
-								li(ng-click="r.alert('TODO')") 
-									a(href="#") Save Report Permanently
+								li(ng-click="r.saveTable()") 
+									a(href="#") Pin Report To Dashboard
+									|  << This one does something but not what you want
 								li
 									a(ng-click="r.getCSV()") Export Data
-									|  << This one actually does something.
+									|  << This one does the right thing
 								li(ng-click="r.alert('TODO')") 
 									a(href="#") Send bulk email
-						row
+
+						row(ng-if="r.t.tables.length < 1")
 							h3 Select a table to begin
-							ul(ng-if="r.tables.length < 1")
+							ul
 								li(ng-repeat="t in r.tableNames")
-									a(ng-click="r.table(t)") {{t}}
+									a(ng-click="r.init(t)") {{t}}
+	
+
+block append scripts
+	script(type="text/javascript", src="/components/underscore/underscore-min.js")
+	script(type = "text/javascript" src="/js/admin/report.controller.js")
+	// templates
+	script(type="text/ng-template" id="join.html")
+		h2 Configure join for {{data.Field}}
+		div.form-group
+			label Table to join
+			select.form-control(ng-model="table" ng-change="lookUpSchema(table)" ng-options="ta for ta in tables")
+			label(ng-if="table!==undefined && schemata[table].length>0") Field to join
+			select.form-control(ng-if="table!==undefined && schemata[table].length>0", ng-model="result.field", ng-options="col as col.Field for col in schemata[table]")
+				//- option(ng-repeat="col in schemata[table]" ng-value="col") {{col.Field}}
+			button.btn.btn-default(ng-click="ok()" ng-if="result.field!==undefined") Done
