@@ -29,11 +29,11 @@ head
 				border-color: #00c0ef !important;
 				box-shadow: none;
 			}
-		link(href='/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
+		link(href='/lib/components/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet', type='text/css')
 		link(href='http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css', rel='stylesheet', type='text/css')
-		link(href='/components/admin-lte/css/iCheck/minimal/blue.css', rel='stylesheet', type='text/css')
-		link(href='/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
-		link(href='/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
+		link(href='/lib/components/admin-lte/css/iCheck/minimal/blue.css', rel='stylesheet', type='text/css')
+		link(href='/lib/components/admin-lte/css/AdminLTE.css', rel='stylesheet', type='text/css')
+		link(href='/lib/components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', rel='stylesheet', type='text/css')
 body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController as adminPage")
 	header.header
 		include ./header.jade
@@ -71,8 +71,8 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		script(src='/components/jquery/dist/jquery.min.js')
 			
 		// misc
-		script(type="text/javascript", src="/components/moment/moment.js")
-		script(type="text/javascript", src="/components/admin-lte/js/plugins/iCheck/icheck.min.js")
+		script(type="text/javascript", src="/lib/components/moment/moment.js")
+		script(type="text/javascript", src="/lib/components/admin-lte/js/plugins/iCheck/icheck.min.js")
 		script#mabel-table-header(type='text/ng-template')
 			tr
 				th 
@@ -91,10 +91,10 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		
 		// angular
 		script(type="text/javascript", src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.js")
-		script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
-		script(type="text/javascript" src="/components/angular-resource/angular-resource.js")
-		script(type="text/javascript" src="/components/ng-table/ng-table.js")
-		script(type="text/javascript" src="/components/ng-table-export/ng-table-export.js")
+		script(type="text/javascript" src="/lib/components/angular-cookies/angular-cookies.js")
+		script(type="text/javascript" src="/lib/components/angular-resource/angular-resource.js")
+		script(type="text/javascript" src="/lib/components/ng-table/ng-table.js")
+		script(type="text/javascript" src="/lib/components/ng-table-export/ng-table-export.js")
 
 		// bootstrap
 		//- script(src='/components/bootstrap/dist/js/bootstrap.min.js')
@@ -103,9 +103,9 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 			jQuery.fn.tooltip = function() {
 			};
 		script(src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.1.js")
-		script(type="text/javascript", src="/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
-		script(type="text/javascript", src="/components/bootstrap/js/collapse.js")
-		script(src='/components/admin-lte/js/AdminLTE/app.js')
+		script(type="text/javascript", src="/lib/components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js")
+		script(type="text/javascript", src="/lib/components/bootstrap/js/collapse.js")
+		script(src='/lib/components/admin-lte/js/AdminLTE/app.js')
 
 		// bootstrapping
 		script(type = "text/javascript" src="/js/mabel.js")
