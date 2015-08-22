@@ -10,18 +10,19 @@
   "license": "GNU General Public License v2.0",
   "start": "app.js",
   "scripts": {
-    "clean:public": "rimraf public/**/*.{html,js,css}",
+    "clean:public": "rimraf public/*.html public/**/*.html public/**/**/*.html public/css/*.css public/js/*.js public/lib/css/*.css public/lib/js/*.js",
     "clean:cache": "rimraf .sass-cache/",
     "clean": "parallelshell 'npm run clean:public' 'npm run clean:cache",
     "build:scripts": "echo 'TODO\n'",
     "watch:scripts": "echo 'TODO\n'",
     "build:sass": "sass assets/scss/main.scss:public/css/main.min.css --style compressed",
     "watch:sass": "sass --watch assets/scss:public/css",
-    "build:html": "jade views --out public",
-    "watch:html": "jade --watch views --out public",
-    "pre-build": "npm run clean",
-    "build": "npm run build:scripts & npm run build:sass & npm run build:html",
-    "watch": "parallelshell 'npm run watch:scripts' 'npm run watch:sass' 'npm run watch:html'",
+    "build:jade": "./jade-build.sh",
+    "watch:jade": "./jade-watch.sh",
+    "pre-build": "npm run clean && ./structure.sh",
+    "pre-watch": "./structure.sh",
+    "build": "npm run build:scripts & npm run build:sass & npm run build:jade",
+    "watch": "parallelshell 'npm run watch:scripts' 'npm run watch:sass' 'npm run watch:jade'",
     "dev": "parallelshell 'npm run watch -s' 'nodemon --debug app.js' 'node-inspector' 'livereload .'",
     "test": "echo \"We haven't got any tests yet...\" && exit 0",
     "start": "node app.js",
@@ -49,7 +50,10 @@
   },
   "devDependencies": {
     "livereload": "latest",
+    "node-inspector": "^0.12.2",
+    "nodemon": "^1.4.1",
     "parallelshell": "^1.2.0",
+    "rimraf": "^2.4.2",
     "watch": "^0.16.0"
   }
 }
