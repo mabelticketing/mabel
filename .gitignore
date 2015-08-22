@@ -43,8 +43,5 @@ assets/css/main.min.css*
 # anything installed by bower
 assets/components
 
-# for tom
-src/config-backup.js
-
-# ignore compiled html
-compiled_html
+# public
+public/
