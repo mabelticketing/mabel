@@ -6,29 +6,28 @@ extends ./main.jade
 
 block scripts
 	// angular
-	script(type="text/javascript", src="/components/angular/angular.js")
-	script(type="text/javascript", src="/components/angular-cookies/angular-cookies.js")
-	script(type="text/javascript", src="/components/angular-resource/angular-resource.js")
+	script(type="text/javascript" src="/lib/components/angular/angular.js")
+	script(type="text/javascript" src="/lib/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript" src="/lib/components/angular-resource/angular-resource.js")
 	
 	// bootstrap
-	script(type="text/javascript" src="/components/angular-bootstrap/ui-bootstrap.min.js")
-	script(type="text/javascript", src="/components/moment/moment.js")
+	script(type="text/javascript" src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
+	script(type="text/javascript" src="/lib/components/moment/moment.js")
 
 	// shared
-	script(type="text/javascript", src="/js/shared/mabel.shared.js")
-	script(type="text/javascript", src="/js/shared/apicaller.factory.js")
-	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
-	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
-	script(type="text/javascript", src="/js/shared/user.factory.js")
+	script(type="text/javascript" src="/js/shared/mabel.shared.js")
+	script(type="text/javascript" src="/js/shared/apicaller.factory.js")
+	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
+	script(type="text/javascript" src="/js/shared/mabelresource.factory.js")
+	script(type="text/javascript" src="/js/shared/user.factory.js")
 
 	// dash
-	script(type="text/javascript", src="/js/dash/mabel.dash.js")
-	script(type="text/javascript", src="/js/dash/dash.controller.js")
+	script(type="text/javascript" src="/js/dash/mabel.dash.js")
+	script(type="text/javascript" src="/js/dash/dash.controller.js")
 
-	// bootstrap
-	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	// css
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
-	style.
+	//- style. TODO: move somewhere better. wot is it anyway
 		.label-notifier {
 			color: transparent!important;
 			width: 1.5em;
@@ -45,118 +44,109 @@ block title
 
 block content
 	div(ng-app="mabel.dash" ng-controller="DashController as dashCtrl" ng-view)
-		a(href="/logout" class="btn btn-default btn-xs" style="position:absolute;top:10px;right:10px") Logout
-		.slide
-			section.slide-content
-				h1 Dashboard
-				.panel.panel-info
-					.panel-heading
-						h4.panel-heading(style="margin:0px;padding:0px;") The following tickets are available for booking:
-					.panel-body
-						p(ng-if="dashCtrl.ticketsAvailableLoading") #[em Loading...]
-						p(ng-if="!dashCtrl.ticketsAvailableLoading && dashCtrl.ticketsAvailable.length === 0", style="font-style:italic;")
-							| We couldn't find any tickets available to you.
-						p(ng-if="(!dashCtrl.ticketsAvailableLoading) && dashCtrl.ticketsAvailable.length > 0 && dashCtrl.ticketsAvailable[0].allowance > 0")
-							| You will be able to purchase {{dashCtrl.ticketsAvailable[0].allowance}} more ticket{{dashCtrl.ticketsAvailable[0].allowance===1?"":"s"}} of the following type:
-							ul
-								li(ng-repeat="ticket in dashCtrl.ticketsAvailable") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
-						p If you think there is a problem with the tickets available listed above, please contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com].
+		h1 Dashboard - [person name]
+		.panel.panel-info
+			.panel-heading
+				h4.panel-heading(style="margin:0px;padding:0px;") The following tickets are available for booking:
+			.panel-body
+				p(ng-if="dashCtrl.ticketsAvailableLoading") #[em Loading...]
+				p(ng-if="!dashCtrl.ticketsAvailableLoading && dashCtrl.ticketsAvailable.length === 0", style="font-style:italic;")
+					| We couldn't find any tickets available to you.
+				p(ng-if="(!dashCtrl.ticketsAvailableLoading) && dashCtrl.ticketsAvailable.length > 0 && dashCtrl.ticketsAvailable[0].allowance > 0")
+					| You will be able to purchase {{dashCtrl.ticketsAvailable[0].allowance}} more ticket{{dashCtrl.ticketsAvailable[0].allowance===1?"":"s"}} of the following type:
+					ul
+						li(ng-repeat="ticket in dashCtrl.ticketsAvailable") #[b {{ ticket.name }}] - &pound;{{ ticket.price | number:2 }}
+				p If you think there is a problem with the tickets available listed above, please contact #[a(href="#") nothardcoded@anyevent.com].
 
-				p(style="font-size:2em; margin-top:20px; text-align:center;")
-					a.btn.btn-xlarge.btn-success(href="/book") Make a New Booking
-				h2 Tickets
-				p(ng-if="dashCtrl.ticketsBookedLoading") #[em Loading...]
-				p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)") 
-					em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
-				table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked.length !== 0")
-					thead
-						tr
-							th(colspan=2) Ticket Number
-							th Guest Name
-							th Payment Method
-							th Price
-							th 
-					tbody
-						tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
-							td # {{ ticket.id }}
-							td #[em ({{ ticket.name }})]
-							td
-								input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.setChanged(ticket);" ng-focus="dashCtrl.clearStatus(ticket)")
+		p(style="font-size:2em; margin-top:20px; text-align:center;")
+			a.btn.btn-xlarge.btn-success(href="/book") Make a New Booking
+		h2 Tickets
+		p(ng-if="dashCtrl.ticketsBookedLoading") #[em Loading...]
+		p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)") 
+			em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
+		table.table.table-striped.table-hover(ng-if="dashCtrl.ticketsBooked.length !== 0")
+			thead
+				tr
+					th(colspan=2) Ticket Number
+					th Guest Name
+					th Payment Method
+					th Price
+					th 
+			tbody
+				tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
+					td # {{ ticket.id }}
+					td #[em ({{ ticket.name }})]
+					td
+						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.setChanged(ticket);" ng-focus="dashCtrl.clearStatus(ticket)")
 
-							//- TODO: allow users to change payment method
-							td {{ ticket.payment_method }}
-							td &pound;{{ ticket.price | number:2 }}
-							td(style="text-align:right")
-								//- button.btn.btn-xs(ng-click="dashCtrl.saveTicket(ticket)") Save 
-								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") Cancel Ticket
-								span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
-						tr(ng-if="dashCtrl.donationValue > 0") 
-							td(colspan=2) 
-								| Donations
-							td 
-							td 
-							td &pound;{{ dashCtrl.donationValue | number:2 }}
-							td 
-					tfoot
-						tr
-							th(colspan=2) Total
-							td
-							td
-							td
-								b &pound;{{ dashCtrl.totalValue | number:2 }}
-							td
-				p(style="font-size:2em; margin-top:20px; text-align:right;")
-					button.btn.btn-large(class="btn-{{dashCtrl.saveBtnClass}}" ng-click="dashCtrl.saveTickets()") Save Changes
-				
-				h2 Waiting List
+					//- TODO: allow users to change payment method
+					td {{ ticket.payment_method }}
+					td &pound;{{ ticket.price | number:2 }}
+					td(style="text-align:right")
+						//- button.btn.btn-xs(ng-click="dashCtrl.saveTicket(ticket)") Save 
+						button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") Cancel Ticket
+						span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
+				tr(ng-if="dashCtrl.donationValue > 0") 
+					td(colspan=2) 
+						| Donations
+					td 
+					td 
+					td &pound;{{ dashCtrl.donationValue | number:2 }}
+					td 
+			tfoot
+				tr
+					th(colspan=2) Total
+					td
+					td
+					td
+						b &pound;{{ dashCtrl.totalValue | number:2 }}
+					td
+		p(style="font-size:2em; margin-top:20px; text-align:right;")
+			button.btn.btn-large(class="btn-{{dashCtrl.saveBtnClass}}" ng-click="dashCtrl.saveTickets()") Save Changes
+		
+		h2 Waiting List
 
-				p(ng-if="dashCtrl.waitingListLoading") #[em Loading...]
-				p(ng-if="!dashCtrl.transactionsLoading && !(dashCtrl.waitingListTickets.length > 0)") 
-					em You are not currently in the waiting list for any tickets.
-				table.table.table-striped.table-hover(ng-if="dashCtrl.waitingListTickets.length > 0")
-					thead
-						tr
-							th Ticket Type
-							th Payment Method
-							th Price
-							th 
-					tbody
-						tr(ng-repeat="ticket in dashCtrl.waitingListTickets")
-							td {{ ticket.name }}
-							//- TODO: allow users to change payment method
-							td {{ ticket.payment_method }}
-							td &pound;{{ ticket.price | number:2 }}
-							td(style="text-align:right")
-								button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  Leave Waiting List
-								span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
+		p(ng-if="dashCtrl.waitingListLoading") #[em Loading...]
+		p(ng-if="!dashCtrl.transactionsLoading && !(dashCtrl.waitingListTickets.length > 0)") 
+			em You are not currently in the waiting list for any tickets.
+		table.table.table-striped.table-hover(ng-if="dashCtrl.waitingListTickets.length > 0")
+			thead
+				tr
+					th Ticket Type
+					th Payment Method
+					th Price
+					th 
+			tbody
+				tr(ng-repeat="ticket in dashCtrl.waitingListTickets")
+					td {{ ticket.name }}
+					//- TODO: allow users to change payment method
+					td {{ ticket.payment_method }}
+					td &pound;{{ ticket.price | number:2 }}
+					td(style="text-align:right")
+						button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  Leave Waiting List
+						span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
 
 
-				h2 Billing
-				p(ng-if="dashCtrl.transactionsLoading") #[em Loading...]
-				div(ng-if="!dashCtrl.transactionsLoading && dashCtrl.transactions.length === 0")
-					p #[em We have not yet processed any transactions from you.]
-				table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length !== 0")
-					thead
-						tr
-							th Payment Method
-							th Notes
-							th Value
-							th Date Processed
-					tbody
-						tr(ng-repeat="transaction in dashCtrl.transactions")
-							td {{ transaction.payment_method }}
-							td {{ transaction.notes }}
-							td &pound;{{ transaction.value | number: 2}}
-							td {{ transaction.time }}
-					tfoot
-						tr 
-							th Total
-							td
-							th &pound;{{ dashCtrl.totalTransactions | number: 2 }}
-							td
-				hr
-				p 
-
-					| If you have any other queries regarding tickets, please 
-					| contact #[a(href="mailto:ticketing@emmamayball.com") ticketing@emmamayball.com]. 
-					| Please allow a few days before seeing cheques confirmed on this page.
+		h2 Billing
+		p(ng-if="dashCtrl.transactionsLoading") #[em Loading...]
+		div(ng-if="!dashCtrl.transactionsLoading && dashCtrl.transactions.length === 0")
+			p #[em We have not yet processed any transactions from you.]
+		table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length !== 0")
+			thead
+				tr
+					th Payment Method
+					th Notes
+					th Value
+					th Date Processed
+			tbody
+				tr(ng-repeat="transaction in dashCtrl.transactions")
+					td {{ transaction.payment_method }}
+					td {{ transaction.notes }}
+					td &pound;{{ transaction.value | number: 2}}
+					td {{ transaction.time }}
+			tfoot
+				tr 
+					th Total
+					td
+					th &pound;{{ dashCtrl.totalTransactions | number: 2 }}
+					td
