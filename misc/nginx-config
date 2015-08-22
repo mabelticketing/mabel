@@ -17,7 +17,7 @@ server {
 	
 	}
 	location / {
-		root /var/nodewww/mabel-test/assets/;
+		root /var/nodewww/mabel-test/public/;
 	}
 }
 

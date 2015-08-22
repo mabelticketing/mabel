@@ -8,3 +8,4 @@ mkdir -p ./public/css
 mkdir -p ./public/js
 mkdir -p ./public/lib/css
 mkdir -p ./public/lib/js
+mkdir -p ./public/lib/components
