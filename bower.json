@@ -23,7 +23,8 @@
     "ng-table": "~0.3.3",
     "ng-table-export": "https://github.com/davisford/ng-table-export.git",
     "underscore": "~1.8.3",
-    "bower-pdfkit": "~0.7.0"
+    "bower-pdfkit": "~0.7.0",
+    "bootswatch-scss": "~3.2.0"
   },
   "resolutions": {
     "angular": "~1"
