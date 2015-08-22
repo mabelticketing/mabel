@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2015  Mabel Ticketing 
+ * GNU General Public License v2.0
+ * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
+ */
+
 module.exports = {
 	port : 0,
 	base_url : "",

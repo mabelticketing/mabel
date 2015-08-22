@@ -1,3 +1,10 @@
+/**
+ * Copyright (C) 2015  Mabel Ticketing 
+ * GNU General Public License v2.0
+ * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
+ */
+
+// imports
 var express = require("express");
 var passport = require("passport");
 var bodyParser = require('body-parser');
