@@ -95,15 +95,13 @@ function marshallResult(res) {
 
 function marshallPromise(res, promise) {
 	promise.then(function(value) {
-		if (value === undefined) value = {};
 		// console.log(value);
-		res.json(value);
+		res.json(value || {});
 	}, function(err) {
 		console.log(err);
 		res.status(500).send(err);
 	});
 }
-
 
 function stripMeta(obj) {
 	// delete any properties which start with $ or _
