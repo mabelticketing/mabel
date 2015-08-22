@@ -16,20 +16,19 @@ module.exports.app     = app;
 // set the default directory for templated pages
 app.set("views", __dirname + "/views");
 
-// set the default template engine to ejs - for static html
+// set the default template engine to jade
 app.locals.pretty = true;
 app.engine('jade', require('jade').__express);
 
-/* ROUTES */
-var APPRouter = require("./src/app-routes.js");
-var APIRouter = require("./src/api/routes.js");
-
+// initialise passportjs
 app.use(passport.initialize());
-app.use("/", APPRouter);
-app.use("/api", APIRouter);
 
-// serve static content in assets from root
-app.use('/', express.static(__dirname + '/assets'));
+// bind routers
+app.use("/", require("./src/app-routes.js"));
+app.use("/api", require("./src/api/routes.js"));
+
+// serve content in public/ from root
+app.use('/', express.static(__dirname + '/public'));
 
  /****************************************************************************** 
  * If you want to use clustering (run as many instances as you have processors
