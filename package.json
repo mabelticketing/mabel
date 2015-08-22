@@ -23,7 +23,7 @@
     "pre-watch": "./structure.sh",
     "build": "npm run build:scripts & npm run build:sass & npm run build:jade",
     "watch": "parallelshell 'npm run watch:scripts' 'npm run watch:sass' 'npm run watch:jade'",
-    "dev": "parallelshell 'npm run watch -s' 'nodemon --debug app.js' 'node-inspector' 'livereload .'",
+    "dev": "parallelshell 'npm run watch -s' 'nodemon --debug app.js'",
     "test": "echo \"We haven't got any tests yet...\" && exit 0",
     "start": "node app.js",
     "prepare": "npm install && bower install && npm run build"
