@@ -1,3 +1,10 @@
+/**
+ * Copyright (C) 2015  Mabel Ticketing 
+ * GNU General Public License v2.0
+ * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
+ */
+
+// imports
 var config = require('./config.js');
 var passport = require('passport');
 var connection = require("./api/impl/connection.js");
