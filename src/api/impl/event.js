@@ -5,27 +5,22 @@
  */
 
 var connection = require("./connection.js");
-var runSql = connection.runSql;
+var runSql     = connection.runSql;
 
 module.exports = {
 	get: get,
 	update: update
 };
 
-function get(event_id, callback) {
+function get(event_id) {
 	var sql = "SELECT * FROM event WHERE id=?;";
-	runSql(sql, [event_id], function(err, rows) {
-		if (err) return callback(err);
-		if (rows.length !== 1) return callback({error:rows.length + " events match"});
-		callback(null, rows[0]);
-	});
+	return runSql(sql, [event_id]);
 }
 
-function update(event_id, data, callback) {
+function update(event_id, data) {
 	var sql = "UPDATE event SET ? WHERE id=?;";
-	// return the upated object if the update was successful
-	runSql(sql, [data, event_id], function(err) {
-		if (err) return callback(err);
-		get(event_id, callback);
+	// return the updated object if the update was successful
+	return runSql(sql, [data, event_id]).then(function() {
+		return get(event_id);
 	});
 }
