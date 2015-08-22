@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2015  Mabel Ticketing 
+ * GNU General Public License v2.0
+ * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
+ */
+
 insert into event (id, name, launch_time, close_time, group_assignment_url) VALUES (
 	1,
 	'Emmanuel May Ball 2015', 
