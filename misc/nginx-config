@@ -1,6 +1,8 @@
 server {
 	listen 80;
 	server_name mabel.emmamayball.com demo.mabelticketing.co.uk;
+
+	error_page 404 /404.html;
 	
 	location ~ ^(/admin/?|/login/?|/logout/?$|/register/?|/confirm/?|/api/?) {
 		proxy_redirect off;
