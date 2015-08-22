@@ -12,7 +12,7 @@
   "scripts": {
     "clean:public": "rimraf public/*.html public/**/*.html public/**/**/*.html public/css/*.css public/js/*.js public/lib/css/*.css public/lib/js/*.js",
     "clean:cache": "rimraf .sass-cache/",
-    "clean": "parallelshell 'npm run clean:public' 'npm run clean:cache",
+    "clean": "parallelshell 'npm run clean:public' 'npm run clean:cache'",
     "build:scripts": "echo 'TODO\n'",
     "watch:scripts": "echo 'TODO\n'",
     "build:sass": "sass client/scss/main.scss:public/css/main.min.css --style compressed",
