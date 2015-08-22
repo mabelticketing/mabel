@@ -5,7 +5,7 @@
 			"follow_symlinks": true,
 			"path": "./",
 			"file_exclude_patterns": ["*.html", "*/bootstrap-flatly.min.css"],
-            "folder_exclude_patterns": ["node_modules", "assets/components", "assets/admin", "public"]
+            "folder_exclude_patterns": ["node_modules", "public", ".sass-cache"]
 		}
 	]
 }
