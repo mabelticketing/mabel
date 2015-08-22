@@ -1,37 +1,17 @@
 # mabel
 
-Ticketing System...
+Mabel is a powerful ticketing system. For non-technical information about the system, please visit our [website](http://mabelticketing.co.uk).
 
 ## License
 
-We use the ??? license - see [LICENSE](#).
+We use the GNU General Public License v2.0 - see the [LICENSE](https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt) file for more information.
 
-## Setup
+<!-- ## Setup
 
 ### Requirements
 
-These are the dependencies you will need to install to run Mabel:
-
-* **MySQL** - database.
-* ...
-
 ### Installation
-
-...
 
 ## Development
 
-### Grunt
-
-```
-	npm install -g grunt grunt-cli
-	npm install
-	grunt jade
-```
-TODO: not sure if grunt-cli is necessary
-
-If npm is throwing errors, maybe prepending `sudo ` to your commands will help.
-
-...grunt watch
-
-## Deployment
+## Deployment -->
