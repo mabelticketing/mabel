@@ -5,43 +5,40 @@
 extends ./main.jade
 
 block scripts	
-	script(type="text/javascript", src="/components/angular/angular.js")
+	script(type="text/javascript", src="/lib/components/angular/angular.js")
 	// bootstrap
-	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
-	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
 	title Mabel Ticketing | Login to Buy Tickets
 
 block content
-	div.slide
-			section.slide-content
-				h1 Login to Buy Tickets
-				.well
-					form.form-horizontal(method="POST")
-						fieldset
-							if error
-								div.alert.alert-dismissable.alert-danger
-									strong Error: 
-									!= error
-							legend Login with a ticketing account.
-								br
-								| If you are a current student, you should 
-								a(href="/login/raven") log in with Raven
-								|  instead.
-								br
-								| If you do not have a ticketing account, 
-								a(href="/register") click here to register
-								| .
-							.form-group
-								label.col-lg-2.control-label(for='inputEmail') Email
-								.col-lg-10
-									input#inputEmail.form-control(type='text', name="email", value=email, placeholder='Email')
-							.form-group
-								label.col-lg-2.control-label(for='inputPassword') Password
-								.col-lg-10
-									input#inputPassword.form-control(type='password', name="password", placeholder='Password')
-							.form-group
-								.col-lg-10.col-lg-offset-2
-									button.btn.btn-primary(type='submit') Submit
+	h1 Login to Buy Tickets
+	.well
+		form.form-horizontal(method="POST")
+			fieldset
+				if error
+					div.alert.alert-dismissable.alert-danger
+						strong Error: 
+						!= error
+				legend Login with a ticketing account.
+					br
+					| If you are a current student, you should 
+					a(href="/login/raven") log in with Raven
+					|  instead.
+					br
+					| If you do not have a ticketing account, 
+					a(href="/register") click here to register
+					| .
+				.form-group
+					label.col-lg-2.control-label(for='inputEmail') Email
+					.col-lg-10
+						input#inputEmail.form-control(type='text', name="email", value=email, placeholder='Email')
+				.form-group
+					label.col-lg-2.control-label(for='inputPassword') Password
+					.col-lg-10
+						input#inputPassword.form-control(type='password', name="password", placeholder='Password')
+				.form-group
+					.col-lg-10.col-lg-offset-2
+						button.btn.btn-primary(type='submit') Submit

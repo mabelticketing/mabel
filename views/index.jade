@@ -4,34 +4,26 @@
 
 extends ./main.jade
 
-block scripts
-	script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
-	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
-	meta(name="blitz" content="mu-b71b91c7-69521387-684f86b3-c1bbca15")
-	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
-	link(rel="stylesheet", type="text/css", href="/css/main.css")
+append scripts
+	//- script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
+	//- meta(name="blitz" content="mu-b71b91c7-69521387-684f86b3-c1bbca15")
+	//- link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 
 block title
-	title Ticketing home
+	title Ticketing Home
 
 block content
-	.container
-		.col-md-12
-			h1(style="padding-bottom:10px;") Emmanuel College May Ball - Tickets
-			p(style="padding-bottom:10px;") 
+	h1 Mabel Ticketing
+	p
+		| If you are a current student, please log in with Raven. If
+		| not (e.g. Alumni of Emmanuel College), please login
+		| with/register for a Ticketing Account.
 
-				| If you are a current student, please log in with Raven. If
-				| not (e.g. Alumni of Emmanuel College), please login
-				| with/register for a Ticketing Account.
-
-		.col-md-3
-		.col-md-2(style="text-align:center;")
-			a(href="/login/raven", class="btn btn-info", style="width:100%;") Login with #[br] Raven &raquo;
-		.col-md-2(style="text-align:center;")
-			a(href="/register", class="btn btn-primary", style="width:100%;") Ticketing #[br] Registration &raquo;
-		.col-md-2(style="text-align:center;")
-			a(href="/login/mabel", class="btn btn-primary", style="width:100%;") Ticketing #[br] Login &raquo;
-		.col-md-3
-		.col-md-12
-			hr
-
+	.row
+		.col-xs-12.col-md-4(style="text-align: center;")
+			a.btn.btn-primary(href="/login/raven") Login with #[br] Raven &raquo;
+		.col-xs-12.col-md-4(style="text-align: center;")
+			a.btn.btn-default(href="/register") Ticketing #[br] Registration &raquo;
+		.col-xs-12.col-md-4(style="text-align: center;")
+			a.btn.btn-default(href="/login/mabel") Ticketing #[br] Login &raquo;

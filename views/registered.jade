@@ -6,8 +6,8 @@ extends ./main.jade
 
 block scripts
 	// angular
-	script(type="text/javascript", src="/components/angular/angular.js")
-	script(type="text/javascript" src="/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/lib/components/angular/angular.js")
+	script(type="text/javascript" src="/lib/components/angular-cookies/angular-cookies.js")
 	// bootstrapping
 	script(type="text/javascript" src="/js/mabel.js")
 
@@ -16,20 +16,17 @@ block scripts
 	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
 	
 	// bootstrap
-	script(type="text/javascript", src="/components/angular-bootstrap/ui-bootstrap.min.js")
-	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
+	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
 	title Mabel Ticketing | Registration Complete
 
 block content
-	div.slide
-			section.slide-content
-				h1 Registration Complete
-				.well
-					h3 
-					| Thank you, #{name}. We have sent a verification email to
-					| #{email}. Please click on the link contained to verify
-					| your account. You will need to verify your account
-					| before you can purchase tickets.
+	h1 Registration Complete
+	.well
+		h3 
+		| Thank you, #{name}. We have sent a verification email to
+		| #{email}. Please click on the link contained to verify
+		| your account. You will need to verify your account
+		| before you can purchase tickets.
