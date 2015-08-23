@@ -8,7 +8,8 @@ var connection = require("./connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	get: get
+	get: get,
+	summary: summary
 };
 
 function get(user_id) {
@@ -19,4 +20,11 @@ function get(user_id) {
 			JOIN payment_method ON waiting_list.payment_method_id=payment_method.id \
 			WHERE waiting_list.user_id=?";
 	return runSql(sql, [user_id]);
+}
+
+// TODO: this might have to be in a collection
+function summary(opts) {
+	var sql = connection.getFilteredSQL("waiting_list_summary", opts);
+
+	return runSql(sql);
 }
