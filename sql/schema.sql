@@ -24,14 +24,14 @@
 
 ### EVENTS ###
 
-create table if not exists event (
-	id int auto_increment not null,
-	name varchar(100) not null,
-	launch_time int not null,
-	close_time int not null,
-	group_assignment_url varchar(300),
-	primary key (id)
-);
+-- create table if not exists event (
+-- 	id int auto_increment not null,
+-- 	name varchar(100) not null,
+-- 	launch_time int not null,
+-- 	close_time int not null,
+-- 	group_assignment_url varchar(300),
+-- 	primary key (id)
+-- );
 
 ### TICKET TYPES ###
 
@@ -40,9 +40,9 @@ create table if not exists ticket_type (
 	name varchar(100) not null,
 	price DECIMAL(5,2) not null,
 	ticket_limit int not null,
-	event_id int not null,
-	primary key (id),
-	FOREIGN KEY (event_id) REFERENCES event(id)
+	-- event_id int not null,
+	primary key (id)
+	-- FOREIGN KEY (event_id) REFERENCES event(id)
 );
 
 ### TICKET STATUSES ###
@@ -109,11 +109,13 @@ create table if not exists payment_method (
 	id int auto_increment not null,
 	name varchar(100) not null,
 	description varchar(128),
-	event_id int not null,
+	-- event_id int not null,
 	ticket_limit int not null,
-	primary key (id),
-	FOREIGN KEY (event_id) REFERENCES event(id)
+	primary key (id)
+	-- FOREIGN KEY (event_id) REFERENCES event(id)
 );
+
+### PAYMENT METHODS ACCESS ###
 
 create table if not exists group_payment_method_access (
 	id int auto_increment not null,
