@@ -5,13 +5,17 @@
  */
 
 module.exports = {
-	event          : require("./impl/event.js"),
-	user           : require("./impl/user.js"),
-	ticket         : require("./impl/ticket.js"),
-	ticket_type    : require("./impl/ticket_type.js"),
-	payment_method : require("./impl/payment_method.js"),
-	booking        : require("./impl/booking.js"),
-	transaction    : require("./impl/transaction.js"),
-	waitingList	   : require("./impl/waiting_list.js"),
-	schema		   : require("./impl/schema.js")
+	booking: require('./booking.resource.js'),
+	group: require('./group.resource.js'),
+	groups: require('./group.collection.js'),
+	payment_method: require('./payment-method.resource.js'),
+	payment_methods: require('./payment-method.collection.js'),
+	ticket: require('./ticket.resource.js'),
+	tickets: require('./ticket.collection.js'),
+	transaction: require('./transaction.resource.js'),
+	transactions: require('./transaction.collection.js'),
+	type: require('./type.resource.js'),
+	types: require('./type.collection.js'),
+	user: require('./user.resource.js'),
+	users: require('./user.collection.js')
 };
