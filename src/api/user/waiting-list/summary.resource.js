@@ -8,16 +8,13 @@ var connection = require("./connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	all: all
+	summary: summary
 };
 
-function all(opts, callback) {
-	var sql = connection.getFilteredSQL("user", opts);
-	runSql(sql).then(
-		function(rows) {
-			callback(null, rows);
-		}, function(err) {
-			callback(err);
-		}
-	);
+// TODO: should this be a resource or a collection?
+
+function summary(opts) {
+	var sql = connection.getFilteredSQL("waiting_list_summary", opts);
+
+	return runSql(sql);
 }
