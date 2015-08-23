@@ -8,10 +8,10 @@ var connection = require("./connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	all: all
+	get: get
 };
 
-function all(opts, callback) {
+function get(opts, callback) {
 	var sql = connection.getFilteredSQL("user", opts);
 	runSql(sql).then(
 		function(rows) {

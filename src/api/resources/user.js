@@ -12,7 +12,13 @@ module.exports = {
 	get: get,
 	insert: insert,
 	del: del,
-	update: update
+	update: update,
+	allowance: require('./user/collections/allowance.js'),
+	payment_methods: require('./user/collections/payment-method.js'),
+	ticket_types: require('./user/collections/ticket-type.js'),
+	tickets: require('./user/collections/ticket.js'),
+	transactions: require('./user/collections/transaction.js'),
+	wl_tickets: require('./user/collections/wl-ticket.js')
 };
 
 // TODO: make it a promise the router cannot revious
