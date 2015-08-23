@@ -6,7 +6,7 @@
 
 var mysql = require("mysql");
 var Q = require("q");
-var config = require("../../config");
+var config = require("../config");
 
 module.exports = {
 	getConnection: getConnection,

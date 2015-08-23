@@ -18,6 +18,6 @@ module.exports = {
 	transactions: require('./collections/transaction.js'),
 	user: require('./resources/user.js'),
 	users: require('./collections/user.js'),
-	wl_ticket: require('./resources/waiting-list.js'),
-	wl_tickets: require('./collections/waiting-list.js')
+	wl_ticket: require('./resources/wl-ticket.js'),
+	wl_tickets: require('./collections/wl-ticket.js')
 };

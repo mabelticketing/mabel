@@ -31,7 +31,7 @@ app.use(passport.initialize());
 
 // bind routers
 app.use("/", require("./src/app-routes.js"));
-app.use("/api", require("./src/api/routes.js"));
+app.use("/api", require("./src/api/router.js"));
 
 // serve content in public/ from root
 app.use('/', express.static(__dirname + '/public'));

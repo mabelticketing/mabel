@@ -4,9 +4,9 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-var connection = require("./connection.js");
+var connection = require("../../../connection.js");
 var runSql = connection.runSql;
-var config = require("../../config.js");
+var config = require("../../../../config.js");
 
 module.exports = {
 	get: get,

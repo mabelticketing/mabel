@@ -14,7 +14,7 @@ var bodyParser = require('body-parser');
 var api        = require('./api.js');
 var Q          = require("q");
 var moment     = require("moment");
-var emailer    = require("../../emailer.js");
+var emailer    = require("../emailer.js");
 var unidecode  = require('unidecode');
 var _          = require('./api-helpers.js');
 
