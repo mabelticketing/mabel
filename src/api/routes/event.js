@@ -4,6 +4,8 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
+// /event
+
 var express   = require("express");
 var apiRouter = require("../routes.js");
 var api       = require("../api.js");
@@ -19,7 +21,7 @@ router.route("/:id")
 		function(req, res) {
 			api.event.get(req.params.id).then(function(rows) {
 				// TODO: test & fix
-				if (rows.length !== 1) throw new Error("err");
+				if (rows.length !== 1) throw new Error(rows.length + ' events match');
 				res.json(rows[0]);
 			}, function(err) {
 				console.log(err);
@@ -31,7 +33,7 @@ router.route("/:id")
 		apiRouter.checkAdmin(),
 		function(req, res) {
 			api.event.update(req.params.id, req.body).then(function(rows) {
-				if (rows.length !== 1) throw new Error("err");
+				if (rows.length !== 1) throw new Error(rows.length + ' events match');
 				res.json(rows[0]);
 			}, function(err) {
 				console.log(err);

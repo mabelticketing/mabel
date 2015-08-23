@@ -61,7 +61,7 @@ router.route("/:tname/data")
 	.get(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			var opts = {}
+			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
 			apiRouter.marshallPromise(res, api.schema.getDataFromTable(req.params.tname, opts));

@@ -4,6 +4,8 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
+// /booking
+
 // imports
 var express = require("express");
 var apiRouter = require("../routes.js");
@@ -12,9 +14,11 @@ var moment = require("moment");
 var emailer = require("../../emailer.js");
 var unidecode = require('unidecode');
 var Q = require("q");
+
 var router = express.Router({
 	mergeParams: true
 });
+
 module.exports = router;
 
 router.route("/:event_id")

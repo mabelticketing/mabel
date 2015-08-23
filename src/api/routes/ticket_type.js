@@ -47,7 +47,15 @@ router.route("/:event_id/")
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.insert(apiRouter.stripMeta(req.body), req.params.event_id));
+			apiRouter.marshallPromise(
+				res,
+				api.ticket_type.insert(
+					apiRouter.stripMeta(req.body),
+					req.params.event_id
+				).then(function(result) {
+					return api.ticket_type.get(result.insertId);
+				})
+			);
 		}
 	);
 
@@ -67,6 +75,11 @@ router.route("/:event_id/:ticket_type_id")
 	.delete(
 		apiRouter.checkAdmin(),
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.ticket_type.del(req.params.ticket_type_id));
+			apiRouter.marshallPromise(
+				res,
+				api.ticket_type.del(req.params.ticket_type_id).then(function() {
+					return {};
+				})
+			);
 		}
 	);

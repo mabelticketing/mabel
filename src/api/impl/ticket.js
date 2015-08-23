@@ -9,7 +9,7 @@ var runSql = connection.runSql;
 var config = require("../../config.js");
 var Q = require("q");
 
-var api = {
+module.exports = {
 	admit: admit,
 	admitted: admitted,
 	get: get,
@@ -23,7 +23,6 @@ var api = {
 	del: del,
 	update: update
 };
-module.exports = api;
 
 function getDetailed(ticket_id) {
 	var sql = "SELECT a.id, user_id, guest_name as guest_name, user.name AS booking_user_name, ticket_type_id, \
@@ -39,6 +38,7 @@ function getDetailed(ticket_id) {
 }
 
 function admitted() {
+	// TODO: hard coding...
 	return runSql("SELECT COUNT(*) as admitted FROM ticket WHERE status_id=4;")
 		.then(function(result) {
 			return {success:true, result:result[0]};

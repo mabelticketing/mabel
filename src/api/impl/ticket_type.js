@@ -35,11 +35,11 @@ function getForUser(user, event_id) {
 						COUNT(ticket_type_id) sold \
 		 FROM ticket \
 		 GROUP BY ticket_type_id) C ON C.ticket_type_id=id;"; 
+
 	return runSql(sql, [user.id]);
 }
 
 function getAll(opts, event_id) {
-
 	opts.where = "event_id=" + mysql.escape(event_id);
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 	
@@ -49,13 +49,11 @@ function getAll(opts, event_id) {
 function insert(ticket_type, event_id) {
 	ticket_type.event_id = event_id;
 	var sql = "INSERT INTO ticket_type SET ?;";
-	var promise = runSql(sql, [ticket_type]);
 
-	return promise.then(function(result) {
-		return get(result.insertId);
-	});
+	return runSql(sql, [ticket_type]);
 }
 
+// TODO: not sure how to sort this one out. Should be returning promise
 function get(ticket_type_id) {
 	return Q.all([
 		runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [ticket_type_id]), 
@@ -71,13 +69,10 @@ function get(ticket_type_id) {
 }
 
 function del(ticket_type_id) {
-	var sql = "DELETE FROM ticket WHERE ticket_type_id=?; ";
-	sql += "DELETE FROM group_access_right WHERE ticket_type_id = ?; ";
-	sql += "DELETE FROM ticket_type WHERE id=?";
-	var p = runSql(sql, [ticket_type_id,ticket_type_id,ticket_type_id]);
-	return p.then(function() {
-		return {};
-	});
+	var sql = "DELETE FROM ticket WHERE ticket_type_id=?; \
+			DELETE FROM group_access_right WHERE ticket_type_id = ?; \
+			DELETE FROM ticket_type WHERE id=?";
+	return runSql(sql, [ticket_type_id,ticket_type_id,ticket_type_id]);
 }
 
 function setAllowedGroups(ticket_type_id, groups) {
@@ -96,6 +91,10 @@ function setAllowedGroups(ticket_type_id, groups) {
 	return runSql(sql, data);
 }
 
+// TODO: wasn't sure how to get the get(ticket_type.id) out of the function
+// because don't know how to pass down ticket_type.id. Want to do this because
+// API functions should do one thing. Joining of multiple queries should happen
+// in the API router.
 function update(ticket_type_id, ticket_type) {
 	var allowedGroups;
 	if (ticket_type.groups !== undefined) {

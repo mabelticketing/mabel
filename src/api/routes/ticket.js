@@ -4,17 +4,17 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-var express = require("express");
+var express   = require("express");
 var apiRouter = require("../routes.js");
-var api = require("../api.js");
-var Q = require("q");
-var config = require("../../config.js");
-var moment = require("moment");
+var api       = require("../api.js");
+var Q         = require("q");
+var moment    = require("moment");
+var unidecode = require("unidecode");
+var emailer   = require("../../emailer.js");
+
 var router = express.Router({
 	mergeParams: true
 });
-var unidecode = require("unidecode");
-var emailer = require("../../emailer.js");
 
 module.exports = router;
 
@@ -37,7 +37,7 @@ router.route("/")
 
 			apiRouter.marshallPromise(res, api.ticket.getAll(opts));
 		}
-)
+	)
 	.post(
 		apiRouter.checkAdmin(),
 		function(req, res) {
@@ -349,7 +349,7 @@ router.route("/:id")
 		function(req, res) {
 			apiRouter.marshallPromise(res, api.ticket.get(req.params.id));
 		}
-)
+	)
 	.post(
 		checkTicketAccess,
 		function(req, res) {
@@ -368,7 +368,7 @@ router.route("/:id")
 			}
 			apiRouter.marshallPromise(res, api.ticket.update(t));
 		}
-)
+	)
 	.delete(
 		checkTicketAccess,
 		function(req, res) {
@@ -387,7 +387,7 @@ router.route("/:id")
 				})
 			);
 		}
-);
+	);
 
 router.route("/getByUser/:id")
 	.get(
