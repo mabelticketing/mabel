@@ -4,15 +4,7 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-insert into event (id, name, launch_time, close_time, group_assignment_url) VALUES (
-	1,
-	'Emmanuel May Ball 2015', 
-	UNIX_TIMESTAMP('2014-12-13 00:00:00'),
-	UNIX_TIMESTAMP('2015-02-25 00:00:00'),
-	'http://www.emmamayball.com/mabel_groups/index.php?key=8jKiATo6kN787QF604EUaIL93R4W1Qjg&c={!crsid!}&e={!email!}'
-);
-
-insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	1,
 	'Standard',
 	135.00,
@@ -20,7 +12,7 @@ insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
 	1
 );
 
-insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	2,
 	'Queue Jump',
 	145.00,
@@ -28,32 +20,27 @@ insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
 	1
 );
 
-insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	3,
 	'Dining',
 	165.00,
 	100,
 	1
 );
-insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	4,
 	'Performer Discounted Ticket',
 	68.00,
 	100,
 	1
 );
-insert into ticket_type (id, name, price, ticket_limit, event_id) VALUES (
+insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	5,
 	'Donation',
 	2.00,
 	3000,
 	1
 );
-
-insert into ticket_status (name) VALUES ('Pending');
-insert into ticket_status (name) VALUES ('Confirmed');
-insert into ticket_status (name) VALUES ('Cancelled');
-insert into ticket_status (name) VALUES ('Admitted');
 
 insert into user (id, name, email, crsid, registration_time, is_verified) VALUES (
 	1,
@@ -137,28 +124,28 @@ insert into group_access_right (group_id, ticket_type_id) VALUES (4,2);
 insert into group_access_right (group_id, ticket_type_id) VALUES (4,3);
 insert into group_access_right (group_id, ticket_type_id) VALUES (6,4);
 
-insert into payment_method (id, name, description, event_id, ticket_limit) VALUES (
+insert into payment_method (id, name, description, ticket_limit) VALUES (
 	1,
 	'College Bill',
 	'Payment will be added to the end of term college bill',
 	1,
 	1
 );
-insert into payment_method (id, name, description, event_id, ticket_limit) VALUES (
+insert into payment_method (id, name, description, ticket_limit) VALUES (
 	2,
 	'Cheque',
 	'Cheque made payable to "Emmanuel Colege May Ball"',
 	1,
 	2000
 );
-insert into payment_method (id, name, description, event_id, ticket_limit) VALUES (
+insert into payment_method (id, name, description, ticket_limit) VALUES (
 	3,
 	'Bank Transfer',
 	'Pay by Bank Transfer',
 	1,
 	2000
 );
-insert into payment_method (id, name, description, event_id, ticket_limit) VALUES (
+insert into payment_method (id, name, description, ticket_limit) VALUES (
 	4,
 	'PayPal',
 	'Pay online immediately with PayPal',
