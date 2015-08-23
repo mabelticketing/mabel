@@ -8,50 +8,55 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	all: all,
-	insert: insert,
-	get: get,
-	del: del,
-	update: update
+	// main methods
+	post: post,
+
+	// subpaths (is that what they're called?)
+	id: _id
 };
 
-function all(opts) {
-	// TODO: visibility of groups for admins of different events?
-	var sql = connection.getFilteredSQL("user_group", opts);
-
-	return runSql(sql);
-}
-
-function insert(group) {
-	var sql = "INSERT INTO user_group SET ?;";
-	var promise = runSql(sql, [group]);
+function post(group) {
+	var promise = runSql("INSERT INTO user_group SET ?;", [group]);
 
 	return promise.then(function(result) {
-		return get(result.insertId);
+		// retrieve the actual group from the mysql result
+		return _id(result.insertId).get();
 	});
 }
 
-function get(group_id) {
-	var promise = runSql("SELECT * FROM user_group WHERE id=? LIMIT 1;", [group_id]);
-	return promise.then(function(value) {
-		return value[0];
-	});
-}
+function _id(id) {
+	return {
+		// main methods
+		get: get, 
+		put: put,
+		del: del
+	};
 
-function del(group_id) {
-	var sql = "DELETE FROM user_group_membership WHERE group_id=?; ";
-	sql += "DELETE FROM group_access_right WHERE group_id = ?; ";
-	sql += "DELETE FROM user_group WHERE id = ?; ";
-	return runSql(sql, [group_id, group_id, group_id]).then(function() {
-		return {};
-	});
-}
+	function get() {
+		var promise = runSql("SELECT * FROM user_group WHERE id=? LIMIT 1;", [id]);
+		return promise.then(function(value) {
+			if (value.length !== 1) throw new Error("Expected one group but got " + value.length);
+			return value[0];
+		});
+	}
 
-function update(group_id, group) {
-	var sql = "UPDATE user_group SET ? WHERE id=?;";
-	var promise = runSql(sql, [group, group_id]);
+	function put(group) {
+		var sql = "UPDATE user_group SET ? WHERE id=?;";
+		var promise = runSql(sql, [group, id]);
 
-	return promise.then(function() {
-		return get(group.id);
-	});
+		return promise.then(function() {
+			// retrieve the updated group
+			return get(group.id);
+		});
+	}
+
+	function del() {
+		var sql = "DELETE FROM user_group_membership WHERE group_id=?; ";
+		sql += "DELETE FROM group_access_right WHERE group_id = ?; ";
+		sql += "DELETE FROM user_group WHERE id = ?; ";
+		return runSql(sql, [id, id, id]).then(function() {
+			// TODO: is there anything more useful we could return after successful deletions?
+			return {};
+		});
+	}
 }

@@ -8,11 +8,11 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	all: all
+	// main methods
+	get: get
 };
 
-function all(opts) {
-	// TODO: visibility of groups for admins of different events?
+function get(opts) {
 	var sql = connection.getFilteredSQL("user_group", opts);
 
 	return runSql(sql);

@@ -23,8 +23,11 @@ var router = express.Router();
 module.exports = router;
 
 
-// all API routes should be authenticated with an access_token
+ /****************************
+ * Auth                      *
+ ****************************/
 
+// all API routes should be authenticated with an access_token
 router
 	.use(
 		passport.authenticate('bearer', {
@@ -35,6 +38,11 @@ router
 		bodyParser.json()
 	);
 
+
+/****************************
+* Booking                   *
+****************************/
+ 
 router.route('/booking')
 	.post(
 		// TODO: this looks like api stuff. need to just do auth and error handling really
@@ -255,6 +263,11 @@ router.route('/booking')
 		}
 	);
 
+
+/****************************
+* Groups                    *
+****************************/
+ 
 router.route('/groups')
 	.get(
 		function(req, res) {
@@ -265,35 +278,42 @@ router.route('/groups')
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			_.marshallPromise(res, api.groups(opts));
+			_.marshallPromise(res, api.groups.get(opts));
 		}
-	)
+	);
+ 
+router.route('/group')
 	.post(
 		_.checkAdmin(),
 		function(req, res) {
-			_.marshallPromise(res, api.group.insert(_.stripMeta(req.body)));
+			_.marshallPromise(res, api.group.post(_.stripMeta(req.body)) );
 		}
 	);
 
-router.route('/group')
+router.route('/group/:id')
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.group.get(req.params.id));
+			_.marshallPromise(res, api.group.id(req.params.id).get() );
 		}
 	)
 	.put(
 		_.checkAdmin(),
 		function(req, res) {
-			_.marshallPromise(res, api.group.update(req.params.id, _.stripMeta(req.body)));
+			_.marshallPromise(res, api.group.id(req.params.id).put(_.stripMeta(req.body)) );
 		}
 	)
 	.delete(
 		_.checkAdmin(),
 		function(req, res) {
-			_.marshallPromise(res, api.group.del(req.params.id));
+			_.marshallPromise(res, api.group.id(req.params.id).del() );
 		}
 	);
 
+
+/****************************
+* Payment Method            *
+****************************/
+ 
 router.route("/payment_method/:id")
 	.get(
 		_.checkAdmin(),
@@ -317,7 +337,7 @@ router.route("/payment_method")
 		}
 	);
 
-TODO: do this schema stuff
+// TODO@Chris: do this schema stuff
 
 router.route("/schema/data")
 	.get(
