@@ -44,17 +44,34 @@ function get(user_id, callback) {
 
 //TODO: so many callbacks
 function update(user, callback) {
+	// update groups separately from the rest of the users' properties
 	var userGroups;
 	if (user.groups !== undefined) {
 		userGroups = user.groups;
 		delete user.groups;
 	}
 
+	// update normal properties
 	var sql = "UPDATE user SET ? WHERE id=?;";
 	var promise = runSql(sql, [user, user.id]);
 
+	// update groups
 	if (userGroups !== undefined) {
-		var groupPromise = api.group.setGroups(user, userGroups);
+		var grpsql = "DELETE FROM user_group_membership WHERE user_id=?;";
+		var data = [user.id];
+		var insql = "INSERT INTO user_group_membership SET ?;";
+
+		// prepare a statement for each group membership
+		for (var i = 0; i < userGroups.length; i++) {
+			grpsql += insql;
+			data.push({
+				user_id: user.id,
+				group_id: parseInt(userGroups[i])
+			});
+		}
+
+		var groupPromise = runSql(grpsql, data);
+
 		// only resolve once the group has been updated too
 		promise = Q.all([promise, groupPromise]);
 	}

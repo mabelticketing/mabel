@@ -5,19 +5,12 @@
  */
 
 module.exports = {
-	booking: require('./resources/booking.js'),
-	group: require('./resources/group.js'),
-	groups: require('./collections/group.js'),
-	payment_method: require('./resources/payment-method.js'),
-	payment_methods: require('./collections/payment-method.js'),
-	ticket: require('./resources/ticket.js'),
-	ticket_type: require('./resources/ticket-type.js'),
-	ticket_types: require('./collections/ticket-type.js'),
-	tickets: require('./collections/ticket.js'),
-	transaction: require('./resources/transaction.js'),
-	transactions: require('./collections/transaction.js'),
-	user: require('./resources/user.js'),
-	users: require('./collections/user.js'),
-	wl_ticket: require('./resources/wl-ticket.js'),
-	wl_tickets: require('./collections/wl-ticket.js')
+	booking: require('./resources/booking.js')
 };
+
+var resources = ['group', 'payment_method', 'ticket', 'ticket_type', 'transaction', 'user', 'wl_ticket'];
+
+for (var i=0; i<resources.length; i++) {
+	module.exports[resources[i]] = require('./resources/' + resources[i] + '.js');
+	module.exports[resources[i] + 's'] = require('./collections/' + resources[i] + '.js');
+}
