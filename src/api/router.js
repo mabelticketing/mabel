@@ -16,7 +16,7 @@ var Q          = require("q");
 var moment     = require("moment");
 var emailer    = require("../emailer.js");
 var unidecode  = require('unidecode');
-var _          = require('./api-helpers.js');
+var _          = require('./api-helpers.js'); // TODO: perhaps confusing if we are using underscore/lodash
 
 var router = express.Router();
 
@@ -318,22 +318,14 @@ router.route("/payment_method/:id")
 	.get(
 		_.checkAdmin(),
 		function(req, res) {
-			api.payment_method.get(req.params.id).then(
-				function(rows) {
-					if (rows.length !== 1) throw new Error(rows.length + ' payment methods match');
-					return rows[0];
-				}, function(err) {
-					console.log(err);
-					res.status(500).send(err);
-				}
-			);
+			_.marshallPromise(res, api.payment_method.id(req.params.id).get());
 		}
 	);
 
 router.route("/payment_method")
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.user.payment_methods.get(req.user.id));
+			_.marshallPromise(res, api.user.id(req.user.id).payment_methods.get());
 		}
 	);
 
