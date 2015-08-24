@@ -74,7 +74,7 @@ function ticket(user_id) {
             return Q.all([_groups].concat(_types))
                 .then(function(results) {
 
-                    var groups = _(results.shift()).pluck('id'); // I only care about the group ids
+                    var groups = _.pluck(results.shift(), 'id'); // I only care about the group ids
 
                     return _(results)
                         .groupBy('ticket_type_id') // gather up rights by type
@@ -144,7 +144,7 @@ function ticket(user_id) {
 							WHERE B.cap>A.sold;";
                     var promises = [];
 
-                    _(ts).each(function(t) {
+                    _.each(ts, function(t) {
                         promises.push(
                             runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method, t.transaction_value,
                                 t.ticket_type_id, t.ticket_type_id
@@ -174,7 +174,8 @@ function ticket(user_id) {
                     // split successful and failed inserts
                     return _(results)
                         .flatten()
-                        .groupBy('status');
+                        .groupBy('status')
+                        .value();
                 });
         }
     }

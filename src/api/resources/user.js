@@ -7,7 +7,7 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 var Q = require("q");
-var _ = require("underscore");
+var _ = require("lodash");
 
 module.exports = {
 	// main methods
