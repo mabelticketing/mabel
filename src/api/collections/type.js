@@ -8,10 +8,11 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	getAll: getAll
+	// main methods
+	get: get
 };
 
-function getAll(opts) {
+function get(opts) {
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 	
 	return runSql(sql);

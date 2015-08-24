@@ -9,20 +9,12 @@ var runSql     = connection.runSql;
 var Q 		   = require("q");
 
 module.exports = {
-	getAll: getAll,
-	insertMulti: insertTransactions
+	// main methods
+	get: get
 };
 
-function getAll(opts) {
+function get(opts) {
 	var sql = connection.getFilteredSQL("transaction", opts);
 
 	return runSql(sql);
-}
-
-function insertTransactions(txs) {
-	var promises = [];
-	for (var i=0; i<txs.length; i++) {
-		promises.push(runSql("INSERT INTO transaction SET ?, transaction_time=UNIX_TIMESTAMP()",[txs[0]]));
-	} 
-	return Q.all(promises);
 }

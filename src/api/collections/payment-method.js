@@ -8,10 +8,10 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	all: all
+	// main methods
+	get: get
 };
 
-function all() {
-	var sql = "SELECT id, name, description, ticket_limit FROM payment_method";
-	return runSql(sql);
+function get() {
+	return runSql("SELECT id, name, description, ticket_limit FROM payment_method");
 }
