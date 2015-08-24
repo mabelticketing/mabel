@@ -9,78 +9,98 @@ var runSql = connection.runSql;
 var Q = require("q");
 
 module.exports = {
-	insert: insert,
-	get: get,
-	del: del,
-	update: update
+	// main methods
+	post: post,
+
+	// subpaths
+	id: _id
 };
 
-function insert(ticket_type, event_id) {
-	ticket_type.event_id = event_id;
+function post(ticket_type) {
 	var sql = "INSERT INTO ticket_type SET ?;";
 
-	return runSql(sql, [ticket_type]);
+	return runSql(sql, [ticket_type]).then(function(result) {
+		return _id(result.inserId).get();
+	});
 }
 
-// TODO: not sure how to sort this one out. Should be returning promise
-function get(ticket_type_id) {
-	return Q.all([
-		runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [ticket_type_id]), 
-		runSql("SELECT * FROM group_access_right WHERE ticket_type_id=?;", [ticket_type_id])
-	]).then(function(values) {
-		var type = values[0][0];
-		type.groups = [];
-		for (var i =0; i<values[1].length; i++ ) {
-			type.groups.push(values[1][i].group_id);
+function _id(id) {
+	return {
+		get: get,
+		put: put,
+		del: del
+	};
+
+	function get() {
+		// This returns a group access rights with the result
+		// for your convenience.
+		return Q.all([
+			runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [id]), 
+			runSql("SELECT * FROM group_access_right WHERE ticket_type_id=?;", [id])
+		]).then(function(values) {
+			var type = values[0][0];
+			type.groups = [];
+			for (var i =0; i<values[1].length; i++ ) {
+				type.groups.push(values[1][i].group_id);
+			}
+			return type;
+		});
+	}
+
+	function put(ticket_type) {
+
+		var allowedGroups;
+		if (ticket_type.groups !== undefined) {
+			allowedGroups = ticket_type.groups;
 		}
-		return type;
-	});
-}
 
-function del(ticket_type_id) {
-	var sql = "DELETE FROM ticket WHERE ticket_type_id=?; \
-			DELETE FROM group_access_right WHERE ticket_type_id = ?; \
-			DELETE FROM ticket_type WHERE id=?";
-	return runSql(sql, [ticket_type_id,ticket_type_id,ticket_type_id]);
-}
+		var sql = "UPDATE ticket_type SET ? WHERE id=?;";
+		var promise = runSql(sql, [ticket_type, id]);
 
-function setAllowedGroups(ticket_type_id, groups) {
-	// we expect this to be a full specification of user groups
-	// i.e. any groups not mentioned should be removed
-	var sql = "DELETE FROM group_access_right WHERE ticket_type_id=?;";
-	var data = [ticket_type_id];
-	var insql = "INSERT INTO group_access_right SET ?;";
+		if (allowedGroups !== undefined) {
+			var groupPromise = setAllowedGroups(id, allowedGroups);
+			promise = Q.all([promise, groupPromise]);
+		}
 
-	// prepare a statement for each group membership
-	for (var i=0; i<groups.length; i++) {
-		sql += insql;
-		data.push({ticket_type_id:ticket_type_id, group_id: parseInt(groups[i])});
-	}
-	// make sure to enable multi-statement
-	return runSql(sql, data);
-}
-
-// TODO: wasn't sure how to get the get(ticket_type.id) out of the function
-// because don't know how to pass down ticket_type.id. Want to do this because
-// API functions should do one thing. Joining of multiple queries should happen
-// in the API router.
-function update(ticket_type_id, ticket_type) {
-	var allowedGroups;
-	if (ticket_type.groups !== undefined) {
-		allowedGroups = ticket_type.groups;
-		delete ticket_type.groups;
+		return promise.then(function() {
+			return get();
+		});
 	}
 
-	var sql = "UPDATE ticket_type SET ? WHERE id=?;";
-	var promise = runSql(sql, [ticket_type, ticket_type_id]);
+	function del() {
+		// TODO: put checks on ticket status in this query - if it is only cancelled tickets, probably fine.
+		// TODO: deal with the error somewhere
+		var promise = runSql("SELECT COUNT(*) FROM ticket WHERE ticket_type_id=?;", [id]);
 
-	if (allowedGroups !== undefined) {
-		var groupPromise = setAllowedGroups(ticket_type_id, allowedGroups);
-		// only resolve once the group has been updated too
-		promise = Q.all([promise, groupPromise]);
+		return promise.then(function(rows) {
+			if (rows[0]) throw new Error('You cannot delete a ticket type if there are tickets that exist with that ticket type.');
+			return runSql("DELETE FROM ticket WHERE ticket_type_id=?;", [id]);
+		}).then(function() {
+			return runSql("DELETE FROM group_access_right WHERE ticket_type_id = ?;", [id]);
+		}).then(function() {
+			return runSql("DELETE FROM ticket_type WHERE id=?;", [id]);
+		});
 	}
 
-	return promise.then(function() {
-		return get(ticket_type.id);
-	});
+	// HELPERS (not exposed)
+
+	function setAllowedGroups(groups) {
+		// we expect this to be a full specification of user groups
+		// i.e. any groups not mentioned should be removed
+		var delSql = "DELETE FROM group_access_right WHERE ticket_type_id=?;";
+
+		return runSql(delSql, [id]).then(function() {
+			var promises = [];
+			var insSql = "INSERT INTO group_access_right SET ?;";
+
+			// prepare statement for each group membership
+			for (var i=0; i<groups.length; i++) {
+				promises.push(runSql(insSql, [{
+					ticket_type_id: id,
+					group_id: parseInt(groups[i])
+				}]));
+			}
+			return Q.all(promises);
+		});
+	}
 }
