@@ -323,14 +323,6 @@ router.route("/payment_method/:id")
 		}
 	);
 
-router.route("/user/:id/payment_methods")
-	.get(
-		// get payment methods available to user
-		function(req, res) {
-			_.marshallPromise(res, api.user.id(req.params.id).payment_methods.get());
-		}
-	);
-
 // TODO@Chris: do this schema stuff
 
 router.route("/schema/data")
@@ -855,20 +847,32 @@ router.route("/type/:id")
 		}
 	);
 
+
+/****************************
+* Users                     *
+****************************/
+
 router.route("/user")
 	.get(
 		function(req, res) {
-			api.user.get(req.user.id, _.marshallResult(res));
+			_.marshallPromise(res, api.user.id(req.user.id).get());
 		}
 	);
 
-router.route("/user/:id/allowance")
+router.route("/user/:id/allowance") // TODO: fix
 	.get(
 		function(req, res) {
 			_.marshallPromise(res, api.user.getAllowance(req.user.id));
 		}
 	);
 
+router.route("/user/:id/payment_methods")
+	.get(
+		// get payment methods available to user
+		function(req, res) {
+			_.marshallPromise(res, api.user.id(req.params.id).payment_methods.get());
+		}
+	);
 
 router.route("/user/:id")
 	.get(
@@ -882,10 +886,10 @@ router.route("/user/:id")
 			} 
 		},
 		function(req, res) {
-			api.user.get(req.params.id, _.marshallResult(res));
+			_.marshallPromise(res, api.user.id(req.params.id).get());
 		}
 	)
-	.post(
+	.put(
 		function(req, res, next) {
 			if (parseInt(req.params.id) === req.user.id) {
 				// authorised because I can update my own details
@@ -896,14 +900,21 @@ router.route("/user/:id")
 			} 
 		},
 		function(req, res) {
-			api.user.update(req.body, _.marshallResult(res));
+			// TODO: might need sanitisation
+			_.marshallPromise(res, api.user.id(req.params.id).put(req.body));
 		}
 	)
 	.delete(
 		// only admins can delete (can't delete self)
 		_.checkAdmin(),
 		function(req, res) {
-			api.user.del(req.params.id, _.marshallResult(res));
+			// TODO: is this right?
+			if (req.user.id === parseInt(req.params.id)) {
+				_.marshallPromise(res, api.user.id(req.params.id).del());
+			} else {
+				// TODO: better response
+				res.status(500).send({});
+			}
 		}
 	);
 
@@ -911,19 +922,22 @@ router.route("/users")
 	.get(
 		_.checkAdmin(),
 		function(req, res) {
+			
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
-		
-			api.user.getAll(opts, _.marshallResult(res));
+			
+			_.marshallPromise(res, api.users.get(opts));
 		}
-	)
-	.post(
+	);
+
+router.route("/user")
+	.post( // TODO: do we need to be admin?
 		_.checkAdmin(),
 		function(req, res) {
-			api.user.insert(req.body, _.marshallResult(res));
+			_.marshallPromise(res, api.user.post(req.body));
 		}
 	);
 
