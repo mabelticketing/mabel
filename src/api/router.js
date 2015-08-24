@@ -316,16 +316,18 @@ router.route('/group/:id')
  
 router.route("/payment_method/:id")
 	.get(
+		// get all payment method (admin)
 		_.checkAdmin(),
 		function(req, res) {
 			_.marshallPromise(res, api.payment_method.id(req.params.id).get());
 		}
 	);
 
-router.route("/payment_method")
+router.route("/user/:id/payment_methods")
 	.get(
+		// get payment methods available to user
 		function(req, res) {
-			_.marshallPromise(res, api.user.id(req.user.id).payment_methods.get());
+			_.marshallPromise(res, api.user.id(req.params.id).payment_methods.get());
 		}
 	);
 
