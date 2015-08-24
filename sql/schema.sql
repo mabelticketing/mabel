@@ -113,6 +113,8 @@ create table if not exists ticket (
 	payment_method_id int not null,
 	book_time int,
 	donation boolean not null DEFAULT 0,
+	transaction_value DECIMAL(6,2) not null,
+	notes text,
 	# PENDING       means that the ticket has been requested but not paid for/approved by thte committee
 	# CONFIRMED     means that the ticket is valid, and the guest may come to the ball
 	# CANCELLED     means the ticket is not available to be reclaimed via the waiting list
@@ -120,7 +122,7 @@ create table if not exists ticket (
 	# ADMITTED      means that the guest has entered the ball - so shouldn't be allowed in again
 	# PENDING_WL    means that the ticket is on the waiting list, and is ready to be transferred
 	# CANCELLED_WL  means that the ticket was on the waiting list, but has since been cancelled
-	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'REALLOCATED', 'ADMITTED') not null,
+	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'REALLOCATED', 'ADMITTED', 'PENDING_WL', 'CANCELLED_WL') not null,
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
@@ -132,10 +134,7 @@ create table if not exists ticket (
 create table if not exists transaction (
 	id int auto_increment not null,
 	user_id int not null,
-	value DECIMAL(6,2) not null,
-	payment_method_id int not null,
 	transaction_time int not null,
-	notes text,
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)

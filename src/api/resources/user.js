@@ -44,11 +44,7 @@ function _id(id) {
 		del: del,
 
 		// subpaths
-		tickets: {
-			get: tickets_get, // TODO: split into own file
-			post: tickets_post // TODO: split into own file
-		},
-		ticket: _ticket
+		tickets: require("./user/collections/ticket.js")(id),
 	};
 
 	function get() {
@@ -112,93 +108,4 @@ function _id(id) {
 		return runSql(sql, [id, id, id, id]);
 	}
 
-
-	////////////////////////
-	// TICKET ROUTE STUFF //
-	////////////////////////
-	// TODO: this should probably go in another file but I haven't figured out how to best get user's id there
-	
-	function tickets_post() {
-
-		// .....
-
-		// Helper function to determine if booking is available for all tickets in an array
-		// TODO: It would be nice to give more feedback than simply true/false for each ticket.
-		// Trouble with that is what do you say if you have multiple sets of rights? e.g. you're too late
-		// for the student early booking, but too early for the general public booking.
-		function canBook(tickets) {
-			// Note that we could do this by generating all the (type, group) pairs
-			// and querying each but I want to minimise # of queries
-			 
-			// allow calling with a single ticket (might be useful?)
-			if (tickets.constructor !== Array) tickets = [tickets];
-
-			var _types = _(tickets)
-				.groupBy('type') // gather up tickets by type id
-				.keys() // only actually care about the type id
-				.map(function(type) { // get all relevant access rights
-					return runSql("SELECT * FROM group_access_right WHERE ticket_type_id=?", [type]);
-				}).value();
-
-			// get all my groups
-			var _groups = runSql("SELECT * FROM user_group_membership WHERE user_id=?", [id]);
-
-			var now = new Date().getTime()/1000;
-
-			// wait for all my queries to be made
-			return Q.all([_groups].concat(_types))
-				.then(function(results) {
-
-					var groups = _(results.shift()).pluck('id'); // I only care about the group ids
-
-					return _(results)
-						.groupBy('type_id') // gather up rights by type
-						.mapObject(function (type_rights) { // for each type, see if I have access
-							return _(type_rights)
-								.groupBy('group_id') // gather up rights by group
-								.pick(groups) // only look at rights for my groups
-								.some(function(right) { // check if any rights are currently valid
-									return right.open_time < now && right.close_time > now;
-								}).value();
-						}).value();
-				})
-				.then(function (typeAccess) {
-					// at this point we should have an object with the relevant ticket
-					// types as keys, and boolean values indicating if I have access.
-					
-					// TODO: I can't decide if canBook should return an array of bools, or
-					// augment the given ticket objects
-					
-					// OPTION A
-					// return _(tickets).map(function(t) {
-					// 	return typeAccess[t.type]
-					// }).value();
-
-					// OPTION B 
-					return _(tickets).each(function(t) {
-						t.bookable = typeAccess[t.type]
-					}).value();
-				});
-			
-		}
-
-		// helper function to carefully book tickets (avoiding races and such)
-		function book(tickets) {
-			// TODO: fill in, inspired by booking.js, wherever that is
-		}
-	}
-
-	function tickets_get() {
-
-	}
-
-	function _ticket(ticket) {
-
-		return {
-			// main methods
-			// get: get, 
-			// put: put,
-			// del: del
-		}
-	}
 }
