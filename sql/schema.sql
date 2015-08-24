@@ -10,7 +10,6 @@
 drop table if exists email_destination;
 drop table if exists email;
 drop table if exists transaction;
-drop table if exists wl_ticket;
 drop table if exists ticket;
 drop table if exists group_payment_method_access;
 drop table if exists payment_method;
@@ -75,10 +74,11 @@ create table if not exists group_access_right (
 	id int auto_increment not null,
 	group_id int not null,
 	ticket_type_id int not null,
+	open_time int,
+	close_time int,
 	primary key (id),
 	FOREIGN KEY (group_id) REFERENCES user_group(id),
-	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
-	unique(group_id, ticket_type_id)
+	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
 );
 
 ### PAYMENT METHODS ###
@@ -112,26 +112,19 @@ create table if not exists ticket (
 	guest_name varchar(128),
 	payment_method_id int not null,
 	book_time int,
+	donation boolean not null DEFAULT 0,
+	# PENDING       means that the ticket has been requested but not paid for/approved by thte committee
+	# CONFIRMED     means that the ticket is valid, and the guest may come to the ball
+	# CANCELLED     means the ticket is not available to be reclaimed via the waiting list
+	# REALLOCATED   means that the ticket is available for someone else to take
+	# ADMITTED      means that the guest has entered the ball - so shouldn't be allowed in again
+	# PENDING_WL    means that the ticket is on the waiting list, and is ready to be transferred
+	# CANCELLED_WL  means that the ticket was on the waiting list, but has since been cancelled
 	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'REALLOCATED', 'ADMITTED') not null,
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
-);
-
-### WAITING LIST TICKETS ###
-
-create table if not exists wl_ticket (
-	id int auto_increment not null,
-	user_id int not null,
-	ticket_type_id int not null,
-	payment_method_id int not null,
-	book_time int,
-	has_donation boolean not null DEFAULT 0,
-	primary key (id),
-	FOREIGN KEY (user_id) REFERENCES user(id),
-	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id),
-	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
 );
 
 ### TRANSACTIONS ###
