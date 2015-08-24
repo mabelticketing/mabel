@@ -19,6 +19,9 @@ function _id(id) {
 
 	function get() {
 		var sql = "SELECT * FROM payment_method WHERE id=?;";
-		return runSql(sql, [id]);
+		return runSql(sql, [id]).then(function(rows) {
+			if (rows.length !== 1) throw new Error('Expected one payment method but got ' + rows.length);
+			return rows[0];
+		});
 	}	
 }

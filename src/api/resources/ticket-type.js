@@ -38,6 +38,7 @@ function _id(id) {
 			runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [id]), 
 			runSql("SELECT * FROM group_access_right WHERE ticket_type_id=?;", [id])
 		]).then(function(values) {
+			// TODO: error handling?
 			var type = values[0][0];
 			type.groups = [];
 			for (var i =0; i<values[1].length; i++ ) {
