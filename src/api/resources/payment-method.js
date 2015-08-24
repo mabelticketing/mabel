@@ -8,10 +8,20 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 
 module.exports = {
-	get: get
+	// subpaths
+	id: _id
 };
 
-function get(payment_method_id) {
-	var sql = "SELECT * FROM payment_method WHERE id=?;";
-	return runSql(sql, [payment_method_id]);
+function _id(id) {
+	return {
+		get: get
+	};
+
+	function get() {
+		var sql = "SELECT * FROM payment_method WHERE id=?;";
+		return runSql(sql, [id]).then(function(rows) {
+			if (rows.length !== 1) throw new Error('Expected one payment method but got ' + rows.length);
+			return rows[0];
+		});
+	}	
 }

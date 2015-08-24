@@ -6,14 +6,12 @@
 
 var connection = require("../connection.js");
 var runSql = connection.runSql;
-var Q = require("q");
-var _ = require("underscore").chain;
 
 module.exports = {
 	// main methods
 	post: post,
 
-	// subpaths (is that what they're called?)
+	// subpaths
 	id: _id
 };
 
@@ -25,21 +23,23 @@ function post(ticket) {
 	var promise = runSql(sql, [ticket]);
 
 	return promise.then(function(result) {
-		return get(result.insertId);
+		return _id(result.insertId).get();
 	});
 }
 
 function _id(id) {
 	return {
 		// main methods
-		get: get, 
-		put: put,
-		del: del
+		get: get,
+		put: put
 	};
 
 	function get() {
-		return runSql("SELECT * FROM ticket WHERE id=?", [id]).then(function(values) {
-			if (value.length !== 1) throw new Error("Expected one ticket but got " + value.length);
+		var sql = "SELECT * FROM ticket WHERE id=?";
+		var promise = runSql(sql, [id]);
+
+		return promise.then(function(values) {
+			if (values.length !== 1) throw new Error("Expected one ticket but got " + values.length);
 			return values[0];
 		});
 	}
@@ -51,10 +51,5 @@ function _id(id) {
 		return promise.then(function() {
 			return get();
 		});
-	}
-
-
-	function del() {
-		return runSql("DELETE FROM ticket WHERE id = ?;", [id]);
 	}
 }
