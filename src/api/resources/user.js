@@ -14,14 +14,7 @@ module.exports = {
 	post: post,
 
 	// subpaths
-	id: _id,
-
-	// stuff I haven't tidied yet
-	allowance: require('./user/collections/allowance.js'),
-	payment_methods: require('./user/collections/payment-method.js'),
-	ticket_types: require('./user/collections/ticket-type.js'),
-	tickets: require('./user/collections/ticket.js'),
-	transactions: require('./user/collections/transaction.js')
+	id: _id
 };
 
 
@@ -43,7 +36,11 @@ function _id(id) {
 		del: del,
 
 		// subpaths
-		tickets: require("./user/collections/ticket.js")(id),
+		allowance: require('./user/allowances.js')(id),
+		payment_methods: require('./user/payment-methods.js')(id),
+		ticket_types: require('./user/ticket-types.js')(id),
+		ticket: require('./user/ticket.js')(id),
+		tickets: require("./user/tickets.js")(id)
 	};
 
 	function get() {
@@ -53,7 +50,7 @@ function _id(id) {
 				return values[0];
 			});
 
-		// also get the groups for this user (TODO: is this helpful?)
+		// also get the groups for this user
 		var groupPromise = runSql("SELECT * FROM user_group_membership WHERE user_id=?;", [id]);
 		
 		return Q.all([userPromise, groupPromise])
@@ -81,15 +78,13 @@ function _id(id) {
 			var insql = "INSERT INTO user_group_membership SET ?;";
 
 			// prepare a statement for each group membership
-			for (var i = 0; i < userGroups.length; i++) {
-				grpsql += insql;
-				data.push({
+			promises = promises.concat(_.map(userGroups, function(group) {
+				return runSql(insql, {
 					user_id: id,
-					group_id: userGroups[i] // NB there used to be a parseInt here but it shouldn't be api's responsibility
+					group_id: userGroups[i] 
 				});
-			}
-
-			promises.push(runSql(grpsql, data));
+			}));
+			
 		}
 		return Q.all(promises)
 			.then(function(results) {

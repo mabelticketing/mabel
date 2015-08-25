@@ -108,35 +108,10 @@ function getFilteredSQL(table, opts) {
 	return sql;
 }
 
-// runSql(sql, data, callback)
-// runSql(sql, callback)
 // runSql(sql, data)
 // runSql(sql);
-function runSql() {
-	var sql, data = {},
-	callback = callback || function(){};
-	switch(arguments.length) {
-		case 3:
-			data = arguments[1];
-			callback = arguments[2];
-			break;
-		case 2:
-			switch (typeof arguments[1]) {
-				case "function":
-					callback = arguments[1];
-					break;
-				case "object":
-					data = arguments[1];
-					break;
-				default:
-					throw new Error("Invalid usage for runSql", arguments);
-			}
-			break;
-		case 1:
-			break;
-		default:
-			throw new Error("Invalid usage for runSql", arguments);
-	}
+function runSql(sql, data) {
+	if (data === undefined) data = {};
 	sql = mysql.format(arguments[0].replace(/(\t|\n)/g," ").replace(/\s+/g," "), data);
 	var p = doQuery(sql)
 		.then(function (r) {
