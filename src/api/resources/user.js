@@ -36,11 +36,11 @@ function _id(id) {
 		del: del,
 
 		// subpaths
-		allowance: require('./user/collections/allowance.js')(id),
-		payment_methods: require('./user/collections/payment-method.js')(id),
-		ticket_types: require('./user/collections/ticket-type.js')(id),
-		ticket: require('./user/resources/ticket.js')(id),
-		tickets: require("./user/collections/ticket.js")(id)
+		allowance: require('./user/allowances.js')(id),
+		payment_methods: require('./user/payment-methods.js')(id),
+		ticket_types: require('./user/ticket-types.js')(id),
+		ticket: require('./user/ticket.js')(id),
+		tickets: require("./user/tickets.js")(id)
 	};
 
 	function get() {
