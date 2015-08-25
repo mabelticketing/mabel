@@ -7,27 +7,9 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 
-module.exports = {
-	// main methods
-	post: post,
+module.exports = ticket
 
-	// subpaths
-	id: _id
-};
-
-// NB this route is only for admins (no validation)
-function post(ticket) {
-	var sql = "INSERT INTO ticket SET ?";
-	if (ticket.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
-	sql += ";";
-
-	return runSql(sql, [ticket])
-		.then(function(result) {
-			return _id(result.insertId).get();
-		});
-}
-
-function _id(id) {
+function ticket(id) {
 	return {
 		// main methods
 		get: get,
@@ -52,4 +34,16 @@ function _id(id) {
 			return get();
 		});
 	}
+}
+
+// NB this route is only for admins (no validation)
+ticket.post = function post(ticket) {
+	var sql = "INSERT INTO ticket SET ?";
+	if (ticket.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
+	sql += ";";
+
+	return runSql(sql, [ticket])
+		.then(function(result) {
+			return _id(result.insertId).get();
+		});
 }

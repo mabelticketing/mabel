@@ -7,12 +7,9 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 
-module.exports = {
-	// subpaths
-	id: _id
-};
+module.exports = payment_method;
 
-function _id(id) {
+function payment_method(id) {
 	return {
 		get: get
 	};
