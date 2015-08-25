@@ -1031,7 +1031,7 @@ router.route('/user/:id/ticket') // waitinglist: true
 router.route("/getByUser/:id")  // likely a duplicate - remove
 	.get(
 		function(req, res) {
-			apiRouter.marshallPromise(res, api.waitingList.getByUser(req.params.id));
+			_.marshallPromise(res, api.waitingList.getByUser(req.params.id));
 		}
 	);
 
