@@ -25,13 +25,12 @@ module.exports = {
 };
 
 
-function post(user, callback) {
-	// TODO: strip group from user and insert separately
+function post(user) {
 	var sql = "INSERT INTO user SET ?;";
-	runSql(sql, [user], function(err, result) {
-		if (err) return callback(err);
+	runSql(sql, [user])
+		.then(function(result) {
 		
-		get(result.insertId, callback);
+		return _id(result.insertId).get();
 	});
 }
 
@@ -64,7 +63,6 @@ function _id(id) {
 			});
 	}
 
-	//TODO: so many callbacks
 	function put(user) {
 		// update groups separately from the rest of the users' properties
 		var userGroups;
