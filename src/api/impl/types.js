@@ -9,11 +9,21 @@ var runSql = connection.runSql;
 
 module.exports = {
 	// main methods
-	get: get
+	get: get,
+	open: open
 };
 
 function get(opts) {
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 	
 	return runSql(sql);
+}
+
+function open(socket) {
+	function emitOpenTypes() {
+		socket.emit('types', {});
+	}
+
+	// Emit open ticket types at intervals of 5 seconds
+	setInterval(emitOpenTypes, 5000);
 }
