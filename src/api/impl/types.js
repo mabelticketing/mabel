@@ -19,11 +19,6 @@ function get(opts) {
 	return runSql(sql);
 }
 
-function open(socket) {
-	function emitOpenTypes() {
-		socket.emit('types', {});
-	}
-
-	// Emit open ticket types at intervals of 5 seconds
-	setInterval(emitOpenTypes, 5000);
+function open() {
+	// TODO: implement (return promise!)
 }

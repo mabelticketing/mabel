@@ -48,7 +48,16 @@ router
 
 io
 	.of('/types/open')
-	.on('connection', api.types.open);
+	.on('connection', function(socket) {
+		function emitOpenTypes() {
+			api.types.open().then(function(rows) {
+				socket.emit('types', rows);
+			});
+		}
+
+		// Emit open ticket types at intervals of 5 seconds
+		setInterval(emitOpenTypes, 5000);
+	});
 
 
 /****************************
