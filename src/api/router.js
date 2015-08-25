@@ -19,6 +19,7 @@ var unidecode  = require('unidecode');
 /*jshint -W079 */
 var $          = require('./helpers.js'); // TODO: perhaps confusing if we are using underscore/lodash
 var auth       = require('./auth.js');
+var io         = require('../../app.js').io;
 
 var router = express.Router();
 
