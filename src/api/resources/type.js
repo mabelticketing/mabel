@@ -7,6 +7,7 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 var Q = require("q");
+var _ = require("lodash");
 
 module.exports = {
 	// main methods
@@ -19,9 +20,10 @@ module.exports = {
 function post(ticket_type) {
 	var sql = "INSERT INTO ticket_type SET ?;";
 
-	return runSql(sql, [ticket_type]).then(function(result) {
-		return _id(result.inserId).get();
-	});
+	return runSql(sql, [ticket_type])
+		.then(function(result) {
+			return _id(result.insertId).get();
+		});
 }
 
 function _id(id) {
@@ -38,12 +40,11 @@ function _id(id) {
 			runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [id]), 
 			runSql("SELECT * FROM group_access_right WHERE ticket_type_id=?;", [id])
 		]).then(function(values) {
-			// TODO: error handling?
+			if (values[0].length !== 1) throw new Error("Expected one ticket type but got " + values[0].length);
 			var type = values[0][0];
-			type.groups = [];
-			for (var i =0; i<values[1].length; i++ ) {
-				type.groups.push(values[1][i].group_id);
-			}
+			type.groups = _.map(values[1], function (right) {
+				return right.group_id;
+			});
 			return type;
 		});
 	}
@@ -90,18 +91,18 @@ function _id(id) {
 		// i.e. any groups not mentioned should be removed
 		var delSql = "DELETE FROM group_access_right WHERE ticket_type_id=?;";
 
-		return runSql(delSql, [id]).then(function() {
-			var promises = [];
-			var insSql = "INSERT INTO group_access_right SET ?;";
+		return runSql(delSql, [id])
+			.then(function() {
+				var insSql = "INSERT INTO group_access_right SET ?;";
 
-			// prepare statement for each group membership
-			for (var i=0; i<groups.length; i++) {
-				promises.push(runSql(insSql, [{
-					ticket_type_id: id,
-					group_id: parseInt(groups[i])
-				}]));
-			}
-			return Q.all(promises);
-		});
+				// prepare statement for each group membership
+				var promises = _.map(groups, function(group) {
+					return runSql(insSql, [{
+						ticket_type_id: id,
+						group_id: group
+					}]);
+				});
+				return Q.all(promises);
+			});
 	}
 }

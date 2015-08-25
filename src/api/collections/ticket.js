@@ -6,15 +6,26 @@
 
 var connection = require("../connection.js");
 var runSql = connection.runSql;
+var _ = require("lodash");
 
 // api.tickets.get(opts)
 // api.tickets.get.waiting_list(opts);
 module.exports = {
-	get: get
+	get: get,
+	del: del
 };
 
 function get(opts) {
 	var sql = connection.getFilteredSQL("ticket", opts);
 
 	return runSql(sql);
+}
+
+function del(ids) {
+	var sql = "UPDATE ticket SET status='CANCELLED' WHERE id=?";
+	var promises = _.map(ids, function(id) {
+		return runSql(sql, [id]);
+	})
+
+	return Q.all(promises);;
 }

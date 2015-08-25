@@ -6,22 +6,23 @@
 
 var connection = require("../../../connection.js");
 var runSql = connection.runSql;
-var config = require("../../../../config.js");
 
-module.exports = {
-	get: get
-};
+module.exports = allowance
 
-function get(user_id) {
-	// TODO: Parameterise this
-	var donation_ticket_type_id = config.donation_ticket_type_id;
-	return runSql("SELECT a-b AS allowance FROM \
-		(SELECT MAX(ticket_allowance) a \
-			FROM user_group \
-			JOIN user_group_membership \
-				ON user_group.id=user_group_membership.group_id \
-			WHERE user_id=?) A\
-		JOIN (SELECT COUNT(*) b \
-			FROM ticket \
-			WHERE user_id=? AND ticket_type_id<>?) B;", [user_id, user_id, donation_ticket_type_id]);
+function allowance(user_id) {
+	return {
+		get: get
+	};
+
+	function get() {
+		return runSql("SELECT a-b AS allowance FROM \
+			(SELECT MAX(ticket_allowance) a \
+				FROM user_group \
+				JOIN user_group_membership \
+					ON user_group.id=user_group_membership.group_id \
+				WHERE user_id=?) A\
+			JOIN (SELECT COUNT(*) b \
+				FROM ticket \
+				WHERE user_id=? AND (status='CONFIRMED' OR status='PENDING')) B;", [user_id, user_id]);	
+	}
 }

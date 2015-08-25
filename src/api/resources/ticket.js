@@ -20,11 +20,11 @@ function post(ticket) {
 	var sql = "INSERT INTO ticket SET ?";
 	if (ticket.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
 	sql += ";";
-	var promise = runSql(sql, [ticket]);
 
-	return promise.then(function(result) {
-		return _id(result.insertId).get();
-	});
+	return runSql(sql, [ticket])
+		.then(function(result) {
+			return _id(result.insertId).get();
+		});
 }
 
 function _id(id) {
