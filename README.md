@@ -6,12 +6,24 @@ Mabel is a powerful ticketing system. For non-technical information about the sy
 
 We use the GNU General Public License v2.0 - see the [LICENSE](https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt) file for more information.
 
-<!-- ## Setup
+## Contributing
 
+Coming soon...
+
+## Setup
+
+Coming soon...
+<!--
 ### Requirements
 
 ### Installation
+-->
 
-## Development
+## Using Mabel
 
-## Deployment -->
+Coming soon...
+
+## Deployment
+
+Coming soon...
+
