@@ -4,10 +4,7 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-module.exports = {
-	// booking is lonely because it doesn't get a collection route :(
-	booking: require('./impl/booking.js')
-};
+module.exports = {};
 
 // allows us to stay DRY and perhaps enforces good file system structure
 var apiPaths = ['group', 'payment_method', 'ticket', 'type', 'user'];
