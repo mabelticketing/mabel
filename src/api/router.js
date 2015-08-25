@@ -393,6 +393,7 @@ router.route("/schema")
 router.route("/user/:id/tickets")
 	.get(
 		function(req, res, next) {
+			// TODO: fix
 			if (auth.admin(req.user)) {
 				next();
 			} else if (req.params.id === req.user.id) {
@@ -629,6 +630,7 @@ router.route("/multi/:ids")
 
 			// prepare function outside of loop
 			var deleteTicket = function(ticket_id) {
+				// TODO: fix
 				if (auth.admin(req.user)) {
 					// authorised because I am an admin
 					authedIds.push(ticket_id);
@@ -667,6 +669,7 @@ router.route("/multi/")
 
 			// prepare function outside of loop
 			var authTicket = function(ticket) {
+				// TODO: fix
 				if (auth.admin(req.user)) {
 					// authorised because I am an admin
 					authedTickets.push(ticket);
@@ -694,6 +697,7 @@ router.route("/multi/")
 					var t = {};
 					if (ticket.guest_name) t.guest_name = ticket.guest_name;
 					if (ticket.id) t.id = ticket.id;
+					// TODO: fix
 					if (auth.admin(req.user)) {
 						if (ticket.user_id) t.user_id = ticket.user_id;
 						if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
@@ -739,6 +743,7 @@ router.route("/:id")
 			var t = {};
 			if (ticket.guest_name) t.guest_name = ticket.guest_name;
 			if (ticket.id) t.id = ticket.id;
+			// TODO: fix
 			if (auth.admin(req.user)) {
 				if (ticket.user_id) t.user_id = ticket.user_id;
 				if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
@@ -1002,6 +1007,7 @@ router.route("/user/:id/ticket_types")
 router.route("/tickets/waiting_list")
 	.get(
 		function(req, res, next) {
+			// TODO: fix
 			if (auth.admin(req.user)) {
 				next();
 			} else {
