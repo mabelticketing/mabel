@@ -8,32 +8,48 @@ var connection = require("../../connection.js");
 var config = require("../../../config.js");
 var runSql = connection.runSql;
 var _ = require("lodash");
+var api = require("../../api.js");
 
 module.exports = ticket;
 
 // use with e.g. api.user(12).ticket.post({...});
 function ticket(user_id) {
     return {
+        get:get,
         post: post
     };
 
+    function get() {
+        var sql = "SELECT ticket_type.name name, ticket.book_time book_time, ticket.id id, \
+                    ticket_type.id type_id, ticket_type.price price, ticket.guest_name guest_name, \
+                    ticket.status status, ticket.donation donation, payment_method.name payment_method \
+                FROM ticket \
+                JOIN ticket_type ON ticket.ticket_type_id=ticket_type.id \
+                JOIN payment_method ON ticket.payment_method_id=payment_method.id \
+                WHERE ticket.user_id=?";
+        return runSql(sql, [user_id]);
+    }
+    
     function post(tickets) {
 
         // TODO: this doesn't handle per-user or per payment_method ticket limits.
 
-        var not_open;
-        return canBook(tickets)
+        var failed;
+        return is_open(tickets)
             .then(function(tickets) {
-                not_open = _.map(tickets.closed, function(ticket) {
+                failed = _.map(tickets.closed, function(ticket) {
                     ticket.reason = "Booking is not open for this kind of ticket";
                     return ticket;
                 });
                 return book(tickets.open);
             })
             .then(function(tickets) {
+
+            })
+            .then(function(tickets) {
                 return {
                     booked: tickets["PENDING"],
-                    failed: not_open,
+                    failed: failed,
                     waiting_list: tickets["PENDING_WL"];
                 }
             })
@@ -44,12 +60,9 @@ function ticket(user_id) {
     ///////////////////////////
     
     // Helper function to determine if booking is available for all tickets in an array
-    function canBook(ts) {
+    function is_open(ts) {
         // Note that we could do this by generating all the (type, group) pairs
         // and querying each but I want to minimise # of queries
-
-        // allow calling with a single ticket (might be useful?)
-        if (ts.constructor !== Array) ts = [ts];
 
         var _types = _(ts)
             .groupBy('ticket_type_id') // gather up tickets by type id

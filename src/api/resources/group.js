@@ -7,24 +7,9 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 
-module.exports = {
-	// main methods
-	post: post,
+module.exports = group;
 
-	// subpaths (is that what they're called?)
-	id: _id
-};
-
-function post(group) {
-	var promise = runSql("INSERT INTO user_group SET ?;", [group]);
-
-	return promise.then(function(result) {
-		// retrieve the actual group from the mysql result
-		return _id(result.insertId).get();
-	});
-}
-
-function _id(id) {
+function group(id) {
 	return {
 		// main methods
 		get: get, 
@@ -60,3 +45,13 @@ function _id(id) {
 		});
 	}
 }
+
+group.post = function post(group) {
+	var promise = runSql("INSERT INTO user_group SET ?;", [group]);
+
+	return promise.then(function(result) {
+		// retrieve the actual group from the mysql result
+		return _id(result.insertId).get();
+	});
+}
+

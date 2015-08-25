@@ -9,25 +9,9 @@ var runSql = connection.runSql;
 var Q = require("q");
 var _ = require("lodash");
 
-module.exports = {
-	// main methods
-	post: post,
+module.exports = user;
 
-	// subpaths
-	id: _id
-};
-
-
-function post(user) {
-	var sql = "INSERT INTO user SET ?;";
-	runSql(sql, [user])
-		.then(function(result) {
-		
-		return _id(result.insertId).get();
-	});
-}
-
-function _id(id) {
+function user(id) {
 
 	return {
 		// main methods
@@ -38,7 +22,7 @@ function _id(id) {
 		// subpaths
 		allowance: require('./user/allowances.js')(id),
 		payment_methods: require('./user/payment-methods.js')(id),
-		ticket_types: require('./user/ticket-types.js')(id),
+		types: require('./user/types.js')(id),
 		ticket: require('./user/ticket.js')(id),
 		tickets: require("./user/tickets.js")(id)
 	};
@@ -101,4 +85,13 @@ function _id(id) {
 		return runSql(sql, [id, id, id, id]);
 	}
 
+}
+
+user.post = function post(user) {
+	var sql = "INSERT INTO user SET ?;";
+	runSql(sql, [user])
+		.then(function(result) {
+		
+		return _id(result.insertId).get();
+	});
 }

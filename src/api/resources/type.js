@@ -9,24 +9,9 @@ var runSql = connection.runSql;
 var Q = require("q");
 var _ = require("lodash");
 
-module.exports = {
-	// main methods
-	post: post,
+module.exports = type
 
-	// subpaths
-	id: _id
-};
-
-function post(ticket_type) {
-	var sql = "INSERT INTO ticket_type SET ?;";
-
-	return runSql(sql, [ticket_type])
-		.then(function(result) {
-			return _id(result.insertId).get();
-		});
-}
-
-function _id(id) {
+function type(id) {
 	return {
 		get: get,
 		put: put,
@@ -105,4 +90,13 @@ function _id(id) {
 				return Q.all(promises);
 			});
 	}
+}
+
+type.post = function post(ticket_type) {
+	var sql = "INSERT INTO ticket_type SET ?;";
+
+	return runSql(sql, [ticket_type])
+		.then(function(result) {
+			return _id(result.insertId).get();
+		});
 }
