@@ -852,25 +852,20 @@ router.route("/type/:id")
 * Users                     *
 ****************************/
 
+// user.js
+
 router.route("/user")
 	.get(
 		function(req, res) {
 			_.marshallPromise(res, api.user.id(req.user.id).get());
 		}
-	);
-
-router.route("/user/:id/allowance") // TODO: fix
-	.get(
+	)
+	.post(
 		function(req, res) {
-			_.marshallPromise(res, api.user.getAllowance(req.user.id));
-		}
-	);
-
-router.route("/user/:id/payment_methods")
-	.get(
-		// get payment methods available to user
-		function(req, res) {
-			_.marshallPromise(res, api.user.id(req.params.id).payment_methods.get());
+			_.marshallPromise(
+				res,
+				api.user.post(_.stripMeta(req.body))
+			);
 		}
 	);
 
@@ -878,51 +873,54 @@ router.route("/user/:id")
 	.get(
 		function(req, res, next) {
 			if (parseInt(req.params.id) === req.user.id) {
-				// authorised because I can see my own details
+				// Authorised because I can see my own details
 				next();
 			} else {
-				// Requesting someone else's details, so only allowed if I am admin
+				// Requesting someone else's details, so only allowed if admin
 				return (_.checkAdmin())(req, res, next);
 			} 
 		},
 		function(req, res) {
-			_.marshallPromise(res, api.user.id(req.params.id).get());
+			var id = parseInt(req.params.id);
+			_.marshallPromise(res, api.user.id(id).get());
 		}
 	)
 	.put(
 		function(req, res, next) {
 			if (parseInt(req.params.id) === req.user.id) {
-				// authorised because I can update my own details
+				// Authorised because I can update my own details
 				next();
 			} else {
-				// Requesting someone else's details, so only allowed if I am admin
+				// Requesting to update someone else's details, so only allowed if admin
 				return (_.checkAdmin())(req, res, next);
 			} 
 		},
 		function(req, res) {
-			// TODO: might need sanitisation
-			_.marshallPromise(res, api.user.id(req.params.id).put(req.body));
+			var id = parseInt(req.params.id);
+			_.marshallPromise(res, api.user.id(id).put(_.stripMeta(req.body)));
 		}
 	)
 	.delete(
 		// only admins can delete (can't delete self)
 		_.checkAdmin(),
 		function(req, res) {
-			// TODO: is this right?
-			if (req.user.id === parseInt(req.params.id)) {
-				_.marshallPromise(res, api.user.id(req.params.id).del());
+			var id = parseInt(req.params.id);
+			if (req.user.id !== id) {
+				_.marshallPromise(res, api.user.id(id).del());
 			} else {
-				// TODO: better response
-				res.status(500).send({});
+				res.status(500).send({
+					error: 'An admin cannot delete themself.'
+				});
 			}
 		}
 	);
+
+// users.js
 
 router.route("/users")
 	.get(
 		_.checkAdmin(),
 		function(req, res) {
-			
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
@@ -933,14 +931,72 @@ router.route("/users")
 		}
 	);
 
-router.route("/user")
-	.post( // TODO: do we need to be admin?
-		_.checkAdmin(),
+// user/ticket.js
+
+router.route("/user/:id/ticket")
+	.post(
 		function(req, res) {
-			_.marshallPromise(res, api.user.post(req.body));
+			var id = parseInt(req.params.id);
+			_.marshallPromise(
+				res,
+				api.user.id(id).ticket.post(_.stripMeta(req.body))
+			);
 		}
 	);
 
+router.route("/user/:id/ticket")
+	.get(
+		function(req, res) {
+			var id = parseInt(req.params.id);
+			_.marshallPromise(
+				res,
+				api.user.id(id).ticket.get()
+			);
+		}
+	)
+	.put(
+		function(req, res) {
+			var id = parseInt(req.params.id);
+			_.marshallPromise(
+				res,
+				api.user.id(id).ticket.put(_.stripMeta(req.body))
+			);
+		}
+	);
+
+// user/payment-methods.js
+
+router.route("/user/:id/payment_methods")
+	.get(
+		function(req, res) {
+			var id = parseInt(req.params.id);
+			_.marshallPromise(res, api.user.id(id).payment_methods.get());
+		}
+	);
+
+// user/allowance.js
+
+// TODO: fix
+router.route("/user/:id/allowance")
+	.get(
+		function(req, res) {
+			_.marshallPromise(res, api.user.getAllowance(req.user.id));
+		}
+	);
+
+// user/ticket-types.js
+
+// TODO: fix
+router.route("/user/:id/ticket_types")
+	.get(
+		function(req, res) {
+			_.marshallPromise(res, api.user.ticketTypes);
+		}
+	);
+
+// user/tickets.js
+
+// TODO: fix big time
 router.route("/tickets/waiting_list")
 	.get(
 		function(req, res, next) {
@@ -1027,11 +1083,3 @@ router.route('/user/:id/ticket') // waitinglist: true
 			);
 		}
 	);
-
-router.route("/getByUser/:id")  // likely a duplicate - remove
-	.get(
-		function(req, res) {
-			_.marshallPromise(res, api.waitingList.getByUser(req.params.id));
-		}
-	);
-
