@@ -112,7 +112,6 @@ create table if not exists ticket (
 	payment_method_id int not null,
 	book_time int,
 	donation boolean not null DEFAULT 0,
-	transaction_value DECIMAL(6,2) not null,
 	notes text,
 	# PENDING       means that the ticket has been requested but not paid for/approved by thte committee
 	# CONFIRMED     means that the ticket is valid, and the guest may come to the ball
@@ -126,18 +125,6 @@ create table if not exists ticket (
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
 );
-
-### TRANSACTIONS ###
-
-create table if not exists transaction (
-	id int auto_increment not null,
-	user_id int not null,
-	transaction_time int not null,
-	primary key (id),
-	FOREIGN KEY (user_id) REFERENCES user(id),
-	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
-);
-
 
 ### MAIL LOGS ###
 
