@@ -6,15 +6,15 @@
 
 module.exports = {
 	// booking is lonely because it doesn't get a collection route :(
-	booking: require('./resources/booking.js')
+	booking: require('./impl/booking.js')
 };
 
 // allows us to stay DRY and perhaps enforces good file system structure
-var resources = ['group', 'payment_method', 'ticket', 'type', 'user'];
+var apiPaths = ['group', 'payment_method', 'ticket', 'type', 'user'];
 
-for (var i=0; i<resources.length; i++) {
-	module.exports[resources[i]] = require('./resources/' + resources[i] + '.js');
-	module.exports[resources[i] + 's'] = require('./resources/' + resources[i] + 's.js');
+for (var i=0; i<apiPaths.length; i++) {
+	module.exports[apiPaths[i]] = require('./impl/' + apiPaths[i] + '.js');
+	module.exports[apiPaths[i] + 's'] = require('./impl/' + apiPaths[i] + 's.js');
 }
 
 // api structure reminder
@@ -67,3 +67,4 @@ for (var i=0; i<resources.length; i++) {
  * 		users
  * 			.get(opts)
  *
+ */
