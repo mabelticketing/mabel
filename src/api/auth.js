@@ -26,7 +26,7 @@ function admin() {
 				if (rows[i].id === admin_id) isAdmin = true;
 				break;
 			}
-			next(isAdmin ? 'You do not have permission to access this user.' : null);
+			next(isAdmin ? null : 'You do not have permission to access this user.');
 		});
 
 	};
