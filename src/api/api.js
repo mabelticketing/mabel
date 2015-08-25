@@ -67,3 +67,4 @@ for (var i=0; i<resources.length; i++) {
  * 		users
  * 			.get(opts)
  *
+ */
