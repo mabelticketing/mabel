@@ -23,8 +23,8 @@ drop table if exists ticket_type;
 
 create table if not exists ticket_type (
 	id int auto_increment not null,
-	name varchar(100) not null,
-	price DECIMAL(5,2) not null,
+	name varchar(128) not null,
+	price DECIMAL(6,2) not null,
 	ticket_limit int not null,
 	primary key (id)
 );
@@ -33,12 +33,12 @@ create table if not exists ticket_type (
 
 create table if not exists user (
 	id int auto_increment not null,
-	name varchar(100) not null,
-	email varchar(100) not null,
-	crsid varchar(8),
+	name varchar(128) not null,
+	email varchar(128) not null,
+	crsid varchar(16),
 	registration_time int not null,
-	password_md5 varchar(100), # will be null for raven logins
-	verification_code varchar(100), # emailed to new users if registered via mabel
+	password_md5 varchar(128), # will be null for raven logins
+	verification_code varchar(128), # emailed to new users if registered via mabel
 	is_verified boolean not null DEFAULT 0,
 	primary key (id),
 	unique(email),
@@ -112,6 +112,7 @@ create table if not exists ticket (
 	payment_method_id int not null,
 	book_time int,
 	donation boolean not null DEFAULT 0,
+	transaction_value DECIMAL(6,2) not null,
 	notes text,
 	# PENDING       means that the ticket has been requested but not paid for/approved by thte committee
 	# CONFIRMED     means that the ticket is valid, and the guest may come to the ball
@@ -126,11 +127,12 @@ create table if not exists ticket (
 	FOREIGN KEY (payment_method_id) REFERENCES payment_method(id)
 );
 
+
 ### MAIL LOGS ###
 
 create table if not exists email (
 	id int auto_increment not null,
-	from_email varchar(100) not null,
+	from_email varchar(128) not null,
 	send_time int not null,
 	message_content text not null,
 	primary key (id)
@@ -138,7 +140,7 @@ create table if not exists email (
 
 create table if not exists email_destination (
 	id int auto_increment not null,
-	address varchar(100) not null,
+	address varchar(128) not null,
 	user int,
 	email_id int not null,
 	primary key (id),
