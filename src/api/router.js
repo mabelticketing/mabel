@@ -16,7 +16,9 @@ var Q          = require("q");
 var moment     = require("moment");
 var emailer    = require("../emailer.js");
 var unidecode  = require('unidecode');
-var _          = require('./api-helpers.js'); // TODO: perhaps confusing if we are using underscore/lodash
+/*jshint -W079 */
+var $          = require('./helpers.js'); // TODO: perhaps confusing if we are using underscore/lodash
+var auth       = require('./auth.js');
 
 var router = express.Router();
 
@@ -278,34 +280,34 @@ router.route('/groups')
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			_.marshallPromise(res, api.groups.get(opts));
+			$.marshallPromise(res, api.groups.get(opts));
 		}
 	);
  
 router.route('/group')
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.group.post(_.stripMeta(req.body)) );
+			$.marshallPromise(res, api.group.post($.stripMeta(req.body)) );
 		}
 	);
 
 router.route('/group/:id')
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.group.id(req.params.id).get() );
+			$.marshallPromise(res, api.group.id(req.params.id).get() );
 		}
 	)
 	.put(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.group.id(req.params.id).put(_.stripMeta(req.body)) );
+			$.marshallPromise(res, api.group.id(req.params.id).put($.stripMeta(req.body)) );
 		}
 	)
 	.delete(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.group.id(req.params.id).del() );
+			$.marshallPromise(res, api.group.id(req.params.id).del() );
 		}
 	);
 
@@ -317,9 +319,9 @@ router.route('/group/:id')
 router.route("/payment_method/:id")
 	.get(
 		// get all payment method (admin)
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.payment_method.id(req.params.id).get());
+			$.marshallPromise(res, api.payment_method.id(req.params.id).get());
 		}
 	);
 
@@ -391,10 +393,10 @@ router.route("/schema")
 router.route("/user/:id/tickets")
 	.get(
 		function(req, res, next) {
-			if (_.isAdmin(req.user)) {
+			if (auth.admin(req.user)) {
 				next();
 			} else if (req.params.id === req.user.id) {
-				_.marshallPromise(res, api.user.tickets(req.user.id));
+				$.marshallPromise(res, api.user.tickets(req.user.id));
 			} else {
 				// error
 				// TODO: do something
@@ -408,20 +410,20 @@ router.route("/user/:id/tickets")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 
-			_.marshallPromise(res, api.tickets(opts));
+			$.marshallPromise(res, api.tickets(opts));
 		}
 	)
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.ticket.insert(_.stripMeta(req.body)));
+			$.marshallPromise(res, api.ticket.insert($.stripMeta(req.body)));
 		}
 	);
 
 router.route("/tickets")
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.tickets.admitted());
+			$.marshallPromise(res, api.tickets.admitted());
 		}
 	);
 
@@ -429,7 +431,7 @@ router.route("/admit/:id")
 	.post(
 		function(req, res) {
 			console.log("Admitted ticket #" + req.params.id + " @ " + (new Date()).toString());
-			_.marshallPromise(res, api.ticket.admit(req.params.id));
+			$.marshallPromise(res, api.ticket.admit(req.params.id));
 		}
 	);
 
@@ -554,15 +556,15 @@ router.route("/tickets/process_waiting_list/:id")
 	);
 router.route("/getAllDetailed/")
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.ticket.getAllDetailed());
+			$.marshallPromise(res, api.ticket.getAllDetailed());
 		}
 	);
 
 router.route("/process_waiting_list/")
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 			var ticketPromise = api.ticket_type.getAll({}, 1)
 				.then(function(ticket_types) {
@@ -592,7 +594,7 @@ router.route("/process_waiting_list/")
 
 router.route("/summary/")
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
@@ -600,13 +602,13 @@ router.route("/summary/")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 
-			_.marshallPromise(res, api.ticket.summary(opts));
+			$.marshallPromise(res, api.ticket.summary(opts));
 		}
 );
 
 router.route("/summary/byuser")
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
@@ -614,7 +616,7 @@ router.route("/summary/byuser")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 
-			_.marshallPromise(res, api.ticket.summary_byuser(opts));
+			$.marshallPromise(res, api.ticket.summary_byuser(opts));
 		}
 );
 
@@ -627,7 +629,7 @@ router.route("/multi/:ids")
 
 			// prepare function outside of loop
 			var deleteTicket = function(ticket_id) {
-				if (_.isAdmin(req.user)) {
+				if (auth.admin(req.user)) {
 					// authorised because I am an admin
 					authedIds.push(ticket_id);
 				} else {
@@ -646,7 +648,7 @@ router.route("/multi/:ids")
 				deleteTicket(ids[i]);
 			}
 
-			_.marshallPromise(res, Q.all(authPromises).then(function() {
+			$.marshallPromise(res, Q.all(authPromises).then(function() {
 				var promises = [];
 				for (var i = 0; i < authedIds.length; i++) {
 					promises.push(api.ticket.del(authedIds[i]));
@@ -665,7 +667,7 @@ router.route("/multi/")
 
 			// prepare function outside of loop
 			var authTicket = function(ticket) {
-				if (_.isAdmin(req.user)) {
+				if (auth.admin(req.user)) {
 					// authorised because I am an admin
 					authedTickets.push(ticket);
 				} else {
@@ -684,7 +686,7 @@ router.route("/multi/")
 				authTicket(tickets[i]);
 			}
 
-			_.marshallPromise(res, Q.all(authPromises).then(function() {
+			$.marshallPromise(res, Q.all(authPromises).then(function() {
 				var promises = [];
 				for (var i = 0; i < authedTickets.length; i++) {
 
@@ -692,7 +694,7 @@ router.route("/multi/")
 					var t = {};
 					if (ticket.guest_name) t.guest_name = ticket.guest_name;
 					if (ticket.id) t.id = ticket.id;
-					if (_.isAdmin(req.user)) {
+					if (auth.admin(req.user)) {
 						if (ticket.user_id) t.user_id = ticket.user_id;
 						if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
 						if (ticket.status_id) t.status_id = ticket.status_id;
@@ -715,7 +717,7 @@ function checkTicketAccess(req, res, next) {
 				next();
 			} else {
 				// Requesting someone else's details, so only allowed if I am admin
-				return (_.checkAdmin())(req, res, next);
+				return (auth.admin())(req, res, next);
 			}
 		},
 		next);
@@ -725,7 +727,7 @@ router.route("/:id")
 	.get(
 		checkTicketAccess,
 		function(req, res) {
-			_.marshallPromise(res, api.ticket.get(req.params.id));
+			$.marshallPromise(res, api.ticket.get(req.params.id));
 		}
 	)
 	.post(
@@ -733,24 +735,24 @@ router.route("/:id")
 		function(req, res) {
 			// An admin can change anything - but a user can only change guest name
 			// TODO: confirmation email?
-			var ticket = _.stripMeta(req.body);
+			var ticket = $.stripMeta(req.body);
 			var t = {};
 			if (ticket.guest_name) t.guest_name = ticket.guest_name;
 			if (ticket.id) t.id = ticket.id;
-			if (_.isAdmin(req.user)) {
+			if (auth.admin(req.user)) {
 				if (ticket.user_id) t.user_id = ticket.user_id;
 				if (ticket.ticket_type_id) t.ticket_type_id = ticket.ticket_type_id;
 				if (ticket.status_id) t.status_id = ticket.status_id;
 				if (ticket.payment_method_id) t.payment_method_id = ticket.payment_method_id;
 				if (ticket.book_time) t.book_time = ticket.book_time;
 			}
-			_.marshallPromise(res, api.ticket.update(t));
+			$.marshallPromise(res, api.ticket.update(t));
 		}
 	)
 	.delete(
 		checkTicketAccess,
 		function(req, res) {
-			_.marshallPromise(res, api.ticket.del(req.params.id)
+			$.marshallPromise(res, api.ticket.del(req.params.id)
 				.then(function(result) {
 					if (result.affectedRows > 0) {
 						// TODO: confirmation email + notification to admins
@@ -770,7 +772,7 @@ router.route("/:id")
 router.route("/getByUser/:id")
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.ticket.getByUser(req.params.id));
+			$.marshallPromise(res, api.ticket.getByUser(req.params.id));
 		}
 );
 
@@ -789,13 +791,13 @@ router.route("/types") // AVAILIABLE TYPES
 						return results;
 					});
 				});
-			_.marshallPromise(res, promise);
+			$.marshallPromise(res, promise);
 		}
 	);
 
 router.route("/types") // ALL TYPES - merge with above
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 
 			var opts = {};
@@ -804,16 +806,16 @@ router.route("/types") // ALL TYPES - merge with above
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			_.marshallPromise(res, api.ticket_type.getAll(opts, req.params.event_id));
+			$.marshallPromise(res, api.ticket_type.getAll(opts, req.params.event_id));
 		}
 	)
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(
+			$.marshallPromise(
 				res,
 				api.ticket_type.insert(
-					_.stripMeta(req.body),
+					$.stripMeta(req.body),
 					req.params.event_id
 				).then(function(result) {
 					return api.ticket_type.get(result.insertId);
@@ -824,21 +826,21 @@ router.route("/types") // ALL TYPES - merge with above
 
 router.route("/type/:id")
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.ticket_type.get(req.params.ticket_type_id));
+			$.marshallPromise(res, api.ticket_type.get(req.params.ticket_type_id));
 		}
 	)
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.ticket_type.update(req.params.ticket_type_id, _.stripMeta(req.body)));
+			$.marshallPromise(res, api.ticket_type.update(req.params.ticket_type_id, $.stripMeta(req.body)));
 		}
 	)
 	.delete(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(
+			$.marshallPromise(
 				res,
 				api.ticket_type.del(req.params.ticket_type_id).then(function() {
 					return {};
@@ -857,14 +859,14 @@ router.route("/type/:id")
 router.route("/user")
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.user.id(req.user.id).get());
+			$.marshallPromise(res, api.user.id(req.user.id).get());
 		}
 	)
 	.post(
 		function(req, res) {
-			_.marshallPromise(
+			$.marshallPromise(
 				res,
-				api.user.post(_.stripMeta(req.body))
+				api.user.post($.stripMeta(req.body))
 			);
 		}
 	);
@@ -877,12 +879,12 @@ router.route("/user/:id")
 				next();
 			} else {
 				// Requesting someone else's details, so only allowed if admin
-				return (_.checkAdmin())(req, res, next);
+				return (auth.admin())(req, res, next);
 			} 
 		},
 		function(req, res) {
 			var id = parseInt(req.params.id);
-			_.marshallPromise(res, api.user.id(id).get());
+			$.marshallPromise(res, api.user.id(id).get());
 		}
 	)
 	.put(
@@ -892,21 +894,21 @@ router.route("/user/:id")
 				next();
 			} else {
 				// Requesting to update someone else's details, so only allowed if admin
-				return (_.checkAdmin())(req, res, next);
+				return (auth.admin())(req, res, next);
 			} 
 		},
 		function(req, res) {
 			var id = parseInt(req.params.id);
-			_.marshallPromise(res, api.user.id(id).put(_.stripMeta(req.body)));
+			$.marshallPromise(res, api.user.id(id).put($.stripMeta(req.body)));
 		}
 	)
 	.delete(
 		// only admins can delete (can't delete self)
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 			var id = parseInt(req.params.id);
 			if (req.user.id !== id) {
-				_.marshallPromise(res, api.user.id(id).del());
+				$.marshallPromise(res, api.user.id(id).del());
 			} else {
 				res.status(500).send({
 					error: 'An admin cannot delete themself.'
@@ -919,7 +921,7 @@ router.route("/user/:id")
 
 router.route("/users")
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
@@ -927,7 +929,7 @@ router.route("/users")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 			
-			_.marshallPromise(res, api.users.get(opts));
+			$.marshallPromise(res, api.users.get(opts));
 		}
 	);
 
@@ -937,9 +939,9 @@ router.route("/user/:id/ticket")
 	.post(
 		function(req, res) {
 			var id = parseInt(req.params.id);
-			_.marshallPromise(
+			$.marshallPromise(
 				res,
-				api.user.id(id).ticket.post(_.stripMeta(req.body))
+				api.user.id(id).ticket.post($.stripMeta(req.body))
 			);
 		}
 	);
@@ -948,7 +950,7 @@ router.route("/user/:id/ticket")
 	.get(
 		function(req, res) {
 			var id = parseInt(req.params.id);
-			_.marshallPromise(
+			$.marshallPromise(
 				res,
 				api.user.id(id).ticket.get()
 			);
@@ -957,9 +959,9 @@ router.route("/user/:id/ticket")
 	.put(
 		function(req, res) {
 			var id = parseInt(req.params.id);
-			_.marshallPromise(
+			$.marshallPromise(
 				res,
-				api.user.id(id).ticket.put(_.stripMeta(req.body))
+				api.user.id(id).ticket.put($.stripMeta(req.body))
 			);
 		}
 	);
@@ -970,7 +972,7 @@ router.route("/user/:id/payment_methods")
 	.get(
 		function(req, res) {
 			var id = parseInt(req.params.id);
-			_.marshallPromise(res, api.user.id(id).payment_methods.get());
+			$.marshallPromise(res, api.user.id(id).payment_methods.get());
 		}
 	);
 
@@ -980,7 +982,7 @@ router.route("/user/:id/payment_methods")
 router.route("/user/:id/allowance")
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.user.getAllowance(req.user.id));
+			$.marshallPromise(res, api.user.getAllowance(req.user.id));
 		}
 	);
 
@@ -990,7 +992,7 @@ router.route("/user/:id/allowance")
 router.route("/user/:id/ticket_types")
 	.get(
 		function(req, res) {
-			_.marshallPromise(res, api.user.ticketTypes);
+			$.marshallPromise(res, api.user.ticketTypes);
 		}
 	);
 
@@ -1000,10 +1002,10 @@ router.route("/user/:id/ticket_types")
 router.route("/tickets/waiting_list")
 	.get(
 		function(req, res, next) {
-			if (_.isAdmin(req.user)) {
+			if (auth.admin(req.user)) {
 				next();
 			} else {
-				_.marshallPromise(res, api.waitingList.getByUser(req.user.id));
+				$.marshallPromise(res, api.waitingList.getByUser(req.user.id));
 			}
 		},
 		function(req, res) {
@@ -1014,15 +1016,15 @@ router.route("/tickets/waiting_list")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			_.marshallPromise(res, api.waitingList.getAll(opts));
+			$.marshallPromise(res, api.waitingList.getAll(opts));
 		}
 	);
 
 router.route('/ticket') // waitinglist: true or something
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.waitingList.insert(_.stripMeta(req.body)));
+			$.marshallPromise(res, api.waitingList.insert($.stripMeta(req.body)));
 		}
 	);
 
@@ -1034,14 +1036,14 @@ function checkTicketAccess(req, res, next) {
 				next();
 			} else {
 				// Requesting someone else's details, so only allowed if I am admin
-				return (_.checkAdmin())(req, res, next);
+				return (auth.admin())(req, res, next);
 			} 
 		});
 }
 
 router.route("/tickets/summary")
 	.get(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
 			var opts = {};
 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
@@ -1049,7 +1051,7 @@ router.route("/tickets/summary")
 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
 		
-			_.marshallPromise(res, api.waitingList.summary(opts));
+			$.marshallPromise(res, api.waitingList.summary(opts));
 		}
 	);
 
@@ -1057,21 +1059,21 @@ router.route("/user/:id/tickets") // waitinglist: true
 	.get(
 		checkTicketAccess,
 		function(req, res) {
-			_.marshallPromise(res, api.waitingList.get(req.params.id));
+			$.marshallPromise(res, api.waitingList.get(req.params.id));
 		}
 	);
 
 router.route('/user/:id/ticket') // waitinglist: true
 	.post(
-		_.checkAdmin(),
+		auth.admin(),
 		function(req, res) {
-			_.marshallPromise(res, api.waitingList.update(req.body));
+			$.marshallPromise(res, api.waitingList.update(req.body));
 		}
 	)
 	.delete(
 		checkTicketAccess,
 		function(req, res) {
-			_.marshallPromise(res, api.waitingList.del(req.params.id)
+			$.marshallPromise(res, api.waitingList.del(req.params.id)
 				.then(function(result) {
 					if (result.affectedRows > 0) {
 						// TODO: confirmation email (+ notification to admins)?
