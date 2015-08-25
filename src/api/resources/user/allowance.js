@@ -16,7 +16,7 @@ function allowance(user_id) {
 
 	function get() {
 		return runSql("SELECT a-b AS allowance FROM \
-			(SELECT MAX(ticket_allowance) a \
+			(SELECT MAX(ticket_limit) a \
 				FROM user_group \
 				JOIN user_group_membership \
 					ON user_group.id=user_group_membership.group_id \

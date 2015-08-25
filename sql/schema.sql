@@ -51,7 +51,7 @@ create table if not exists user_group (
 	id int auto_increment not null,
 	name varchar(128) not null,
 	description varchar(256),
-	ticket_allowance int not null,
+	ticket_limit int not null,
 	primary key (id)
 );
 

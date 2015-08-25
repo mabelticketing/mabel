@@ -67,37 +67,37 @@ insert into user (id, name, email, password_md5, registration_time, is_verified)
 	1
 );
 
-insert into user_group (id, name, description, ticket_allowance) VALUES (
+insert into user_group (id, name, description, ticket_limit) VALUES (
 	1,
 	'admins',
 	'Administrators',
 	2000
 );
-insert into user_group (id, name, description, ticket_allowance) VALUES (
+insert into user_group (id, name, description, ticket_limit) VALUES (
 	2,
 	'emma_students',
 	'Current Students of Emmanuel College',
 	8
 );
-insert into user_group (id, name, description, ticket_allowance) VALUES (
+insert into user_group (id, name, description, ticket_limit) VALUES (
 	3,
 	'cam_students',
 	'Current Students of the University of Cambridge',
 	0
 );
-insert into user_group (id, name, description, ticket_allowance) VALUES (
+insert into user_group (id, name, description, ticket_limit) VALUES (
 	4,
 	'emma_alum',
 	'Alumni of Emmanuel College',
 	2
 );
-insert into user_group (id, name, description, ticket_allowance) VALUES (
+insert into user_group (id, name, description, ticket_limit) VALUES (
 	5,
 	'cam_alum',
 	'Alumni of the University of Cambridge',
 	0
 );
-insert into user_group (id, name, description, ticket_allowance) VALUES (
+insert into user_group (id, name, description, ticket_limit) VALUES (
 	6,
 	'event_performers',
 	'Performers at the ball',

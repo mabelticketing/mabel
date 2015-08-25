@@ -7,15 +7,17 @@
 var connection = require("../../connection.js");
 var runSql = connection.runSql;
 
-module.exports = type;
+module.exports = types;
 
-function type(user_id) {
+function types(user_id) {
 
     return {
         get: get
     };
 
-    // gets the ticket types available to the user, along with how many have been sold of each (open/close time portion untested)
+    // gets the ticket types available to the user, with ticket limit adjusted
+    // to account for already bought tickets (open/close time portion
+    // untested)
     function get() {
         var sql =
             "SELECT id, name, price, ticket_limit - IFNULL(C.sold,0) ticket_limit \
