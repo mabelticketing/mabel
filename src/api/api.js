@@ -61,8 +61,8 @@ for (var i=0; i<apiPaths.length; i++) {
  * 				.types
  * 					.get()
  * 				.tickets
- * 					.post([{...}])
  * 					.get()
+ * 					.post([{...}])
  * 			.post({...})
  * 		users
  * 			.get(opts)
