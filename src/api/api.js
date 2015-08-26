@@ -7,15 +7,17 @@
 module.exports = {};
 
 // allows us to stay DRY and perhaps enforces good file system structure
-var apiPaths = ['group', 'payment_method', 'ticket', 'type', 'user'];
+var apiPaths = ['group', 'payment-method', 'ticket', 'type', 'user'];
 
 for (var i=0; i<apiPaths.length; i++) {
 	module.exports[apiPaths[i]] = require('./impl/' + apiPaths[i] + '.js');
 	module.exports[apiPaths[i] + 's'] = require('./impl/' + apiPaths[i] + 's.js');
 }
 
-// api structure reminder
-/********************************************************
+/**
+ * API structure reminder
+ * ----------------------
+ *
  * api
  * 		group
  * 			(id)
