@@ -26,7 +26,7 @@ module.exports = router;
 
 
 // TODO: be consistent with where you parseInt accross the file
-
+// TODO: check auth in correct places
 
 /****************************
 * Authentication            *
@@ -90,6 +90,7 @@ router.route('/groups')
 		}
 	);
 
+
 /****************************
 * Payment methods           *
 ****************************/
@@ -111,9 +112,138 @@ router.route("/payment_methods")
 	);
 
 
+/****************************
+* Tickets                   *
+****************************/
+
+router.route("/ticket/:id")
+	.get(
+		auth.admin(),
+		function(req, res) {
+			$.marshallPromise(res, api.ticket.id(req.params.id).get());
+		}
+	)
+	.put(
+		auth.admin(),
+		function(req, res) {
+			$.marshallPromise(res, api.ticket.id(req.params.id).put($.stripMeta(req.body)));
+		}
+	);
+
+router.route("/ticket")
+	.post(
+		function(req, res) {
+			$.marshallPromise(res, api.ticket.post($.stripMeta(req.body)));
+		}
+	);
+
+router.route('/tickets')
+	.get(
+		auth.admin(),
+		function(req, res) {
+
+			var opts = {};
+			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
+			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
+			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
+			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
+		
+			$.marshallPromise(res, api.tickets.get(opts));
+		}
+	)
+	.delete(
+		auth.admin(),
+		function(req, res) {
+			$.marshallPromise(res, api.tickets.del($.stripMeta(req.body)));
+		}
+	);
+
+
+/****************************
+* Types                     *
+****************************/
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// router.route('/ticket')
+// 	.post(
+// 		function(req, res) {
+// 			$.marshallPromise(res, api.ticket.insert($.stripMeta(req.body)));
+// 		}
+// 	);
+
+// router.route("/tickets/process_waiting_list/:id")
+// 	.post(
+// 		apiRouter.checkAdmin(),
+// 		function(req, res) {
+
+// 			var ticketPromise = api.ticket.processWaitingList(req.params.id);
+// 			generateConfirmationsForWaitingList(ticketPromise)
+// 				.then(function(result) {
+// 					// output result to admin panel
+// 					res.json(result);
+// 				}, function(err) {
+// 					res.status(500).send(err);
+// 				});
+// 		}
+// 	);
+
+// // TODO: fix big time
+// router.route("/tickets/waiting_list")
+// 	.get(
+// 		function(req, res, next) {
+// 			// TODO: fix
+// 			if (auth.admin(req.user)) {
+// 				next();
+// 			} else {
+// 				$.marshallPromise(res, api.waitingList.getByUser(req.user.id));
+// 			}
+// 		},
+// 		function(req, res) {
+// 			// this only gets called for admins
+// 			var opts = {};
+// 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
+// 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
+// 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
+// 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
+		
+// 			$.marshallPromise(res, api.waitingList.getAll(opts));
+// 		}
+// 	);
+
+
+
+// router.route("/tickets/summary")
+// 	.get(
+// 		auth.admin(),
+// 		function(req, res) {
+// 			var opts = {};
+// 			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
+// 			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
+// 			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
+// 			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
+		
+// 			$.marshallPromise(res, api.waitingList.summary(opts));
+// 		}
+// 	);
 
 // TODO@Chris: do this schema stuff
 
@@ -211,12 +341,7 @@ router.route("/user/:id/tickets")
 		}
 	);
 
-router.route("/tickets")
-	.get(
-		function(req, res) {
-			$.marshallPromise(res, api.tickets.admitted());
-		}
-	);
+
 
 router.route("/admit/:id")
 	.post(
@@ -330,21 +455,7 @@ function generateConfirmationsForWaitingList(ticketPromise) {
 	return confirmationPromise;
 }
 
-router.route("/tickets/process_waiting_list/:id")
-	.post(
-		apiRouter.checkAdmin(),
-		function(req, res) {
 
-			var ticketPromise = api.ticket.processWaitingList(req.params.id);
-			generateConfirmationsForWaitingList(ticketPromise)
-				.then(function(result) {
-					// output result to admin panel
-					res.json(result);
-				}, function(err) {
-					res.status(500).send(err);
-				});
-		}
-	);
 router.route("/getAllDetailed/")
 	.get(
 		auth.admin(),
@@ -793,36 +904,7 @@ router.route("/user/:id/ticket_types")
 
 // user/tickets.js
 
-// TODO: fix big time
-router.route("/tickets/waiting_list")
-	.get(
-		function(req, res, next) {
-			// TODO: fix
-			if (auth.admin(req.user)) {
-				next();
-			} else {
-				$.marshallPromise(res, api.waitingList.getByUser(req.user.id));
-			}
-		},
-		function(req, res) {
-			// this only gets called for admins
-			var opts = {};
-			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
-			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
-			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
-			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
-		
-			$.marshallPromise(res, api.waitingList.getAll(opts));
-		}
-	);
 
-router.route('/ticket') // waitinglist: true or something
-	.post(
-		auth.admin(),
-		function(req, res) {
-			$.marshallPromise(res, api.waitingList.insert($.stripMeta(req.body)));
-		}
-	);
 
 function checkTicketAccess(req, res, next) {
 	api.waitingList.get(req.params.id)
@@ -837,19 +919,6 @@ function checkTicketAccess(req, res, next) {
 		});
 }
 
-router.route("/tickets/summary")
-	.get(
-		auth.admin(),
-		function(req, res) {
-			var opts = {};
-			if (req.query.from !== undefined) opts.from = parseInt(req.query.from);
-			if (req.query.size !== undefined) opts.size = parseInt(req.query.size);
-			if (req.query.order !== undefined) opts.order = JSON.parse(req.query.order);
-			if (req.query.filter !== undefined) opts.filter = JSON.parse(req.query.filter);
-		
-			$.marshallPromise(res, api.waitingList.summary(opts));
-		}
-	);
 
 router.route("/user/:id/tickets") // waitinglist: true
 	.get(
