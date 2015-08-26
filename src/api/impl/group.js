@@ -40,7 +40,6 @@ function group(id) {
 		sql += "DELETE FROM group_access_right WHERE group_id = ?; ";
 		sql += "DELETE FROM user_group WHERE id = ?; ";
 		return runSql(sql, [id, id, id]).then(function() {
-			// TODO: is there anything more useful we could return after successful deletions?
 			return {};
 		});
 	}

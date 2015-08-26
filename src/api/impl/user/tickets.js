@@ -9,8 +9,13 @@ var config = require("../../../config.js");
 var runSql = connection.runSql;
 var _ = require("lodash");
 var api = require("../../api.js");
+var Q = require("q");
+var moment = require("moment");
 
 module.exports = ticket;
+
+
+
 
 // use with e.g. api.user(12).ticket.post({...});
 function ticket(user_id) {
@@ -20,9 +25,10 @@ function ticket(user_id) {
 	};
 
 	function get() {
-		var sql = "SELECT ticket_type.name name, ticket.book_time book_time, ticket.id id, \
-					ticket_type.id type_id, ticket_type.price price, ticket.guest_name guest_name, \
-					ticket.status status, ticket.donation donation, payment_method.name payment_method \
+		var sql = "SELECT ticket.book_time book_time, ticket.id id, ticket.transaction_value, \
+					 ticket.guest_name guest_name, ticket.status status, ticket.donation donation, \
+					ticket_type.name name, ticket_type.id type_id, \
+					payment_method.name payment_method \
 				FROM ticket \
 				JOIN ticket_type ON ticket.ticket_type_id=ticket_type.id \
 				JOIN payment_method ON ticket.payment_method_id=payment_method.id \
@@ -32,31 +38,39 @@ function ticket(user_id) {
 	
 	function post(tickets) {
 
-		var failed = [];
 		return check_types(tickets)
-			.then(function(tickets) {
-				failed = failed.concat(tickets.failures);	
+			.spread(function(booked, failed) {
 
-				return check_payments(tickets.successes);
+				return [check_payments(booked), failed];
 			})
-			.then(function(tickets) {
-				failed = failed.concat(tickets.failures);
+			.spread(function(results, failed) {
 
-				return check_allowance(tickets.successes);
+				return [check_allowance(results[0]), failed.concat(results[1])];
 			})
-			.then(function(tickets) {
-				failed = failed.concat(tickets.failures);
+			.spread(function(results, failed) {
+				
+				return [book(results[0]), failed.concat(results[1])];
+			})
+			.spread(function(results, failed) {
+				// collect final data
+				var booked = results.PENDING, waiting_list =results.PENDING_WL;
+				
 
-				return book(tickets.successes);
+				return [api.user(user_id).get(), booked, failed, waiting_list];
 			})
-			.then(function(tickets) {
-				// TODO send confirmation email
-				return {
-					booked: tickets["PENDING"],
-					failed: failed,
-					waiting_list: tickets["PENDING_WL"];
-				}
-			})
+			.spread(function(user, booked, failed, waiting_list) {
+				// log and send confirmation email
+				// prepare data for email
+				var data = {
+					booked:booked, waiting_list:waiting_list,
+					totalPrice: _.sum(booked, "transaction_value"),
+					payment_deadline: moment().add(14,'d').format("dddd, MMMM Do YYYY"),
+					sampleID: booked.length>0?booked[0].id:123
+				};
+				console.log(user.name + " just made a booking - " + booked.length + " tickets" + 
+					(waiting_list.length>0?" (and" + waiting_list.length + " waiting list)":"") +
+					"(£" + data.totalPrice + ")");
+			});
 	}
 
 	///////////////////////////
@@ -66,76 +80,54 @@ function ticket(user_id) {
 	// Helper function to determine if booking is available for all tickets in an array
 	function check_types(ts) {
 
-		var failures = [];
 		// get the types which are available to me
 		return api.user(user_id).types.get()
 			.then(function(types) {
 				types = _.indexBy(types, 'id');
-				var successes = _(ts)
-					.filter(function(ticket) {
-						if (ticket.ticket_type_id in types)  return true;
-						ticket.reason = "You don't have access to this kind of ticket right now.";
-						failures.push(ticket);
-						return false;
-					})
-					// this commented out code stops you from purchasing more tickets than the type's limit
-					// But I think it's not necessary because of the SQL code later, which will cause
-					// the extra tickets to go to the waiting list instead.
-					// 
-					// .groupBy('ticket_type_id')
-					// 	.map(function(grouped_tickets, id) {
-					// 		var l = types[id].ticket_limit
 
-					// 		var r = _.partition(grouped_tickets, function(t, i) {
-					// 			if (i < l) return true;
-					// 			ticket.reason = "You may only book " + l + " tickets of this type."
-					// 			return false;
-					// 		})
-					// 		failures = failures.concat(r[1]);
-					// 		return r[0];
-					// 	})
-					// .values().flatten() // ungroup
-					.value();
-				return {
-					successes: successes,
-					failures: failures
-				}
+				return _.partition(ts, function(ticket) {
+						if (ticket.ticket_type_id in types) {
+
+							// jot down the type while we have it
+							ticket.ticket_type = types[ticket.payment_method_id];
+							return true;	
+						} 
+						ticket.reason = "You don't have access to this kind of ticket right now.";
+					});
 			});
 	}
   
 	// Helper function to determine if payment method is available for all tickets in an array
 	function check_payments(ts) {
 
-		var failures = [];
 		// get the payment methods which are available to me
 		return api.user(user_id).payment_methods.get()
 			.then(function(payment_methods) {
 				payment_methods = _.indexBy(payment_methods, 'id');
-				var successes = _(ts)
-					.filter(function(ticket) {
-						if (ticket.payment_method_id in payment_methods) return true;
+
+				var results = 
+					_.partition(ts, function(ticket) {
+						if (ticket.payment_method_id in payment_methods) {
+							// jot down the payment method while we have it
+							ticket.payment_method= payment_methods[ticket.payment_method_id];
+							return true;
+						}
 						ticket.reason = "You don't have access to this payment method.";
-						failures.push(ticket);
-						return false;
-					})
+					});
+				results[0] = _(results[0])
 					.groupBy('payment_method_id')
 						.map(function(grouped_tickets, id) {
-							var l = payment_method[id].ticket_limit
+							var l = payment_methods[id].ticket_limit;
 							
-							var r = _.partition(grouped_tickets, function(t, i) {
+							return _.partition(grouped_tickets, function(t, i) {
 								if (i < l) return true;
-								ticket.reason = "You may only book " + l + " tickets using this payment method."
-								return false;
-							})
-							failures = failures.concat(r[1]);
-							return r[0];
+								ticket.reason = "You may only book " + l + " tickets using this payment method.";
+								results[1].push(ticket);
+							});
 						})
 					.values().flatten() // ungroup
 					.value();
-				return {
-					successes: successes,
-					failures: failures
-				}
+				return results;
 			});
 	}
 
@@ -147,23 +139,12 @@ function ticket(user_id) {
 				var r = _.partition(ts, function(t, i) {
 					if (i < allowance) return true;
 					t.reason = "You may only book " + allowance + " tickets.";
-					return false;
-				})
-				return {
-					successes: r[0],
-					failures: r[1]
-				};
-			})
+				});
+				return r;
+			});
 	}
 
 
-
-
-
-	// helper function for speedy access to ticket types
-	var getType = _.memoize(function(ticket_type_id) {
-		return runSql("SELECT * FROM ticket_type WHERE id=?", ticket_type_id);
-	});
 
 
 
@@ -175,60 +156,44 @@ function ticket(user_id) {
 		// This is technically redundant in the DB but Chris is paranoid
 		_.each(ts, function(t) {
 			promises.push(
-				getType(t.ticket_type_id)
-				.then(function(type) {
-					t.transaction_value = type.price;
-					t.transaction_value += t.donation ? config.donation_value : 0;
-				})
+				api.type(t.ticket_type_id).get()
+					.then(function(type) {
+						t.transaction_value = type.price;
+						t.transaction_value += t.donation ? config.donation_value : 0;
+					})
 			);
 		});
 
 		// now actually insert
 		Q.all(promises)
 			.then(function() {
-				// we are going to insert tickets one at a time to make sure we don't go over. 
-				// This is a magic SQL query which will only insert if there is space. 
-				/*
-						It works by selecting our set of values once for each row in the inner SELECT'd table.
-						This table will either have one row, if COUNT(*) <= ticket_limit and COUNT(waiting_list_tickets) < 1,
-						(and so we insert the new ticket once), or no rows, in which case
-						we insert no tickets.
-						It is possible we could be even cleverer here and ensure the inner 
-						SELECT has the same number of rows as tickets we want to book of this 
-						type, then we would just need one query per ticket type.
-					*/
-				var sql = "INSERT INTO ticket \
-							(user_id, ticket_type_id, guest_name, donation, transaction_value, payment_method_id, status, book_time) \
-						SELECT ?, ?, ?, ?, ?, ?, 'PENDING', UNIX_TIMESTAMP() \
-						FROM \
-							(SELECT COUNT(*) sold FROM ticket WHERE ticket_type_id=? AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
-							JOIN \
-							(SELECT ticket_limit cap FROM ticket_type WHERE id=?) B \
-							JOIN \
-							(SELECT COUNT(*) AS wl FROM ticket WHERE ticket_type_id=? AND status='PENDING_WL') C \
-							WHERE B.cap>A.sold AND C.wl<1;";
+
+				var sql = "CALL safe_add_ticket(?, ?, ?, ?, ?, ?);";
 				var promises = [];
 
 				_.each(ts, function(t) {
 					promises.push(
-						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method, t.transaction_value,
-							t.ticket_type_id, t.ticket_type_id, t.ticket_type_id
-						])
-						.then(function(result) {
+						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method_id, t.transaction_value])
+							.then(function(result) {
 
-							if (result.affectedRows <= 0) {
-								// insert failed - waiting list
-								t.status = "PENDING_WL";
-								return runSql("INSERT INTO ticket SET ?, book_time=UNIX_TIMESTAMP()", [t]);
-							} else {
-								return result;
-							}
-						})
-						.then(function(result) {
-							// we've just inserted either a real ticket or a waiting list ticket.
-							// Get the actual inserted item for display:
-							return runSql("SELECT * FROM ticket WHERE id=? LIMIT 1", [result.insertId]);
-						});
+								if (result.affectedRows <= 0) {
+									// insert failed - waiting list
+									t.status = "PENDING_WL";
+									return runSql("INSERT INTO ticket SET ?, book_time=UNIX_TIMESTAMP()", [t]);
+								} else {
+									return result;
+								}
+							})
+							.then(function(result) {
+								// we've just inserted either a real ticket or a waiting list ticket.
+								// Get the actual inserted item for display:
+								return api.ticket(result.insertId).get();
+							})
+							.then(function(ticket) {
+								// add back the ticket type and payment_method that we jotted down earlier
+								ticket.ticket_type = t.ticket_type;
+								ticket.payment_method = t.payment_method;
+							})
 					);
 
 				});

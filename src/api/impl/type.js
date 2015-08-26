@@ -55,9 +55,7 @@ function type(id) {
 	}
 
 	function del() {
-		// TODO: put checks on ticket status in this query - if it is only cancelled tickets, probably fine.
-		// TODO: deal with the error somewhere
-		var promise = runSql("SELECT COUNT(*) FROM ticket WHERE ticket_type_id=?;", [id]);
+		var promise = runSql("SELECT COUNT(*) FROM ticket WHERE ticket_type_id=? AND status<>'CANCELLED' AND status<>'CANCELLED_WL';", [id]);
 
 		return promise.then(function(rows) {
 			if (rows[0]) throw new Error('You cannot delete a ticket type if there are tickets that exist with that ticket type.');

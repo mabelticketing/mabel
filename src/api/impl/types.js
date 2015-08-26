@@ -20,5 +20,7 @@ function get(opts) {
 }
 
 function open() {
-	// TODO: implement (return promise!)
+	// "distinct" is in there just in case there are multiple ways a particular group could have access right now.
+	var sql = "SELECT DISTINCT group_id, ticket_type_id FROM group_access_right WHERE open_time<UNIX_TIMESTAMP() AND close_time>UNIX_TIMESTAMP();"
+	return runSql(sql);
 }

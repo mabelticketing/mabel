@@ -21,7 +21,6 @@ var pool  = mysql.createPool({
   user            : config.db_user,
   password        : config.db_password,
   database        : config.db_db,
-	// TODO: Don't enable this. Ideally write code that only makes one statement query at a time.
   multipleStatements: true
 });
 

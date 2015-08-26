@@ -93,4 +93,39 @@ BEGIN
 	ON C.ticket_type_id=id;
 END//
 
+/* insert tickets one at a time to make sure we don't go over. 
+It works by selecting our set of values once for each row in the inner SELECT'd table. */
+DROP PROCEDURE IF EXISTS safe_add_ticket//
+CREATE PROCEDURE safe_add_ticket (IN _user_id int, IN _ticket_type_id int, IN _guest_name varchar(128), IN _donation boolean, IN _payment_method_id int, IN _transaction_value DECIMAL(6,2))
+
+BEGIN
+	INSERT INTO ticket \
+		(user_id, ticket_type_id, guest_name, donation, transaction_value, payment_method_id, status, book_time) \
+	
+	# prepare the row of data we'd like to insert. "SELECT" will pull out a
+	# row of values once for each row in a given table. Here we're hacking this
+	# slightly by providine a row of constant values to use, and it will
+	# repeat it once for each row in the inner table. We make the inner table
+	# have either 1 or 0 rows.
+	SELECT _user_id, _ticket_type_id, _guest_name, _donation, _transaction_value, _payment_method_id, 'PENDING', UNIX_TIMESTAMP() \
+	FROM \
+		# this table will have 1 row, containing 1 value - the number of tickets sold
+		(SELECT COUNT(*) sold 
+			FROM ticket 
+			WHERE ticket_type_id=_ticket_type_id AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
+		JOIN \
+		# this table will have 1 row, containing 1 value - the limit for this ticket type
+		(SELECT ticket_limit cap FROM ticket_type WHERE id=_ticket_type_id) B \
+		JOIN \
+		# this table will have 1 row, containing 1 value - the number of people in the waiting list
+		(SELECT COUNT(*) AS wl FROM ticket WHERE ticket_type_id=_ticket_type_id AND status='PENDING_WL') C \
+		# if we've sold up to the limit or there are people waiting, then this
+		# condition is false, and we select 0 rows instead of 1 as planned.	
+		# Nothing gets inserted.
+		WHERE B.cap>A.sold AND C.wl<1;
+END//
+
+
+
+
 DELIMITER ;
