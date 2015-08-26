@@ -7,6 +7,7 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 var _ = require("lodash");
+var Q = require("q");
 
 // api.tickets.get(opts)
 // api.tickets.get.waiting_list(opts);
@@ -25,7 +26,7 @@ function del(ids) {
 	var sql = "UPDATE ticket SET status='CANCELLED' WHERE id=?";
 	var promises = _.map(ids, function(id) {
 		return runSql(sql, [id]);
-	})
+	});
 
-	return Q.all(promises);;
+	return Q.all(promises);
 }
