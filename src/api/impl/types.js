@@ -9,11 +9,16 @@ var runSql = connection.runSql;
 
 module.exports = {
 	// main methods
-	get: get
+	get: get,
+	open: open
 };
 
 function get(opts) {
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 	
 	return runSql(sql);
+}
+
+function open() {
+	// TODO: implement (return promise!)
 }

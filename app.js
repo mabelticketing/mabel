@@ -9,6 +9,8 @@ var express   = require("express");
 var app       = express();
 var passport  = require("passport");
 var config    = require('./src/config.js');
+var server    = require('http').Server(app);
+var io        = require('socket.io')(server);
 
 // bail if it doesn't look like we've got a real config
 if (!config.port) throw new Error("I don't think you've initialised the config.");
@@ -18,6 +20,7 @@ require("./src/passport-config.js");
 // make visible outside module
 module.exports.express = express;
 module.exports.app     = app;
+module.exports.io      = io;
 
 // set the default directory for templated pages
 app.set("views", __dirname + "/views");
@@ -56,4 +59,4 @@ app.use('/', express.static(__dirname + '/public'));
  * This is the regular (non-clustered) option
  *********************************************/
 
-app.listen(config.port || 2000);
+server.listen(config.port || 2000);

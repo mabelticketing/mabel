@@ -15,6 +15,7 @@ var api        = require('./api.js');
 /*jshint -W079 */
 var $          = require('./helpers.js');
 var auth       = require('./auth.js');
+var io         = require('../../app.js').io;
 
 var router = express.Router();
 
@@ -217,6 +218,18 @@ router.route("/types")
 			$.marshallPromise(res, api.types.get(opts));
 		}
 	);
+
+io.of('/types/open')
+	.on('connection', function(socket) {
+		function emitOpenTypes() {
+			api.types.open().then(function(rows) {
+				socket.emit('types', rows);
+			});
+		}
+
+		// Emit open ticket types at intervals of 5 seconds
+		setInterval(emitOpenTypes, 5000);
+	});
 
 
 /****************************
