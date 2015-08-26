@@ -50,6 +50,7 @@ function ticket(user_id) {
 				return book(tickets.successes);
 			})
 			.then(function(tickets) {
+				// TODO send confirmation email
 				return {
 					booked: tickets["PENDING"],
 					failed: failed,
@@ -77,19 +78,23 @@ function ticket(user_id) {
 						failures.push(ticket);
 						return false;
 					})
-					.groupBy('ticket_type_id')
-						.map(function(grouped_tickets, id) {
-							var l = types[id].ticket_limit
+					// this commented out code stops you from purchasing more tickets than the type's limit
+					// But I think it's not necessary because of the SQL code later, which will cause
+					// the extra tickets to go to the waiting list instead.
+					// 
+					// .groupBy('ticket_type_id')
+					// 	.map(function(grouped_tickets, id) {
+					// 		var l = types[id].ticket_limit
 
-							var r = _.partition(grouped_tickets, function(t, i) {
-								if (i < l) return true;
-								ticket.reason = "You may only book " + l + " tickets of this type."
-								return false;
-							})
-							failures = failures.concat(r[1]);
-							return r[0];
-						})
-					.values().flatten() // ungroup
+					// 		var r = _.partition(grouped_tickets, function(t, i) {
+					// 			if (i < l) return true;
+					// 			ticket.reason = "You may only book " + l + " tickets of this type."
+					// 			return false;
+					// 		})
+					// 		failures = failures.concat(r[1]);
+					// 		return r[0];
+					// 	})
+					// .values().flatten() // ungroup
 					.value();
 				return {
 					successes: successes,
@@ -160,11 +165,14 @@ function ticket(user_id) {
 		return runSql("SELECT * FROM ticket_type WHERE id=?", ticket_type_id);
 	});
 
+
+
 	// helper function to carefully book tickets (avoiding races and such)
 	function book(ts) {
 
 		var promises = [];
 		// add transaction value to each ticket
+		// This is technically redundant in the DB but Chris is paranoid
 		_.each(ts, function(t) {
 			promises.push(
 				getType(t.ticket_type_id)
@@ -182,7 +190,7 @@ function ticket(user_id) {
 				// This is a magic SQL query which will only insert if there is space. 
 				/*
 						It works by selecting our set of values once for each row in the inner SELECT'd table.
-						This table will either have one row, if COUNT(*) <= ticket_limit,
+						This table will either have one row, if COUNT(*) <= ticket_limit and COUNT(waiting_list_tickets) < 1,
 						(and so we insert the new ticket once), or no rows, in which case
 						we insert no tickets.
 						It is possible we could be even cleverer here and ensure the inner 
@@ -193,16 +201,18 @@ function ticket(user_id) {
 							(user_id, ticket_type_id, guest_name, donation, transaction_value, payment_method_id, status, book_time) \
 						SELECT ?, ?, ?, ?, ?, ?, 'PENDING', UNIX_TIMESTAMP() \
 						FROM \
-							(SELECT COUNT(*) sold FROM ticket WHERE ticket_type_id=? AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED' OR status='CANCELLED') A \
+							(SELECT COUNT(*) sold FROM ticket WHERE ticket_type_id=? AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
 							JOIN \
 							(SELECT ticket_limit cap FROM ticket_type WHERE id=?) B \
-							WHERE B.cap>A.sold;";
+							JOIN \
+							(SELECT COUNT(*) AS wl FROM ticket WHERE ticket_type_id=? AND status='PENDING_WL') C \
+							WHERE B.cap>A.sold AND C.wl<1;";
 				var promises = [];
 
 				_.each(ts, function(t) {
 					promises.push(
 						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method, t.transaction_value,
-							t.ticket_type_id, t.ticket_type_id
+							t.ticket_type_id, t.ticket_type_id, t.ticket_type_id
 						])
 						.then(function(result) {
 

@@ -4,47 +4,93 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-### Useful Views ###
-CREATE  OR REPLACE VIEW ticket_summary AS 
-	SELECT 
-		ticket_type.id id, 
-		ticket_type.name name, 
-		COUNT(ticket.id) sold, 
-		ticket_type.ticket_limit ticket_limit, 
-		ticket_type.ticket_limit-COUNT(ticket.id) available 
-	FROM 
-		ticket 
-		RIGHT JOIN 
-			ticket_type 
-		ON 
-			ticket.ticket_type_id=ticket_type.id 
-	GROUP BY ticket_type.id;
+/* Get total amounts in each status for each ticket type.
+Example output:
++----------------+---------+-----------+-----------+----------+------------+--------------+
+| ticket_type_id | PENDING | CONFIRMED | CANCELLED | ADMITTED | PENDING_WL | CANCELLED_WL |
++----------------+---------+-----------+-----------+----------+------------+--------------+
+|              1 |       5 |        70 |         0 |     1024 |         99 |            0 |
+|              2 |       0 |        10 |         0 |       94 |         98 |            0 |
 
-CREATE OR REPLACE VIEW waiting_list_summary AS 
-	SELECT 
-		ticket_type.id id, 
-		ticket_type.name name, 
-		COUNT(waiting_list.id) sold
-	FROM 
-		waiting_list 
-		RIGHT JOIN 
-			ticket_type 
-		ON 
-			waiting_list.ticket_type_id=ticket_type.id 
-	GROUP BY ticket_type.id;
+*/
+CREATE OR REPLACE VIEW ticket_status_count AS
+SELECT ticket_type_id,
+       SUM(IF(status='PENDING', 1, 0)) PENDING,
+       SUM(IF(status='CONFIRMED', 1, 0)) CONFIRMED,
+       SUM(IF(status='CANCELLED', 1, 0)) CANCELLED,
+       SUM(IF(status='ADMITTED', 1, 0)) ADMITTED,
+       SUM(IF(status='PENDING_WL', 1, 0)) PENDING_WL,
+       SUM(IF(status='CANCELLED_WL', 1, 0)) CANCELLED_WL
+FROM ticket
+GROUP BY ticket_type_id;
 
-CREATE OR REPLACE VIEW tickets_grouped_by_user AS 
-	SELECT MIN(ticket.id) id, user_id, user.name name, GROUP_CONCAT(ticket.id ORDER BY ticket.id ASC SEPARATOR ', ') tickets
-		FROM ticket
-	JOIN user 
-		ON user.id=user_id
-		GROUP BY user_id; 
 
-CREATE OR REPLACE VIEW transaction_with_tickets AS
-	SELECT transaction.id id, value, payment_method.name payment_method, notes, tickets, transaction_time
-	FROM transaction
-	JOIN payment_method
-		ON payment_method.id = payment_method_id
+/* PROCEDURES
+
+	Note that procedures are annoying because we can't include them as part of
+	a bigger result. What they do allow us to do is cut down the search space
+	deep inside the query so that the tables being  manupulated are not too
+	large. I think it will siginificantly help performance but I haven't
+	tested.
+
+	For example, in get_accessible_types the alternative to using a procedure
+	would be to create a view accessible_types which would calculate
+	accessible types for every single user, and then we'd have to select *
+	from it where user_id=?.
+
+ */
+
+DELIMITER //
+
+/* Get the ticket types available for the given user id to book. 
+The ticket limit takes into account the amount of tickets sold and the waiting
+list rule (if there are others in the waiting list, you can't book any). It 
+doesn't take into account overall group ticket limits, nor payment method limits.
+
+Example output:
+
++----+------------+--------+--------------+
+| id | name       | price  | ticket_limit |
++----+------------+--------+--------------+
+|  2 | Queue Jump | 145.00 |            0 |
+|  3 | Dining     | 165.00 |            2 |
+|  1 | Standard   | 135.00 |            0 |
++----+------------+--------+--------------+
+*/
+DROP PROCEDURE IF EXISTS get_accessible_types//
+CREATE PROCEDURE get_accessible_types (IN inputid int)
+
+BEGIN
+	SELECT id,
+		name,
+		price,
+		IF(C.wl>0, 0, # if the waiting list is not empty, say the limit is 0
+			ticket_limit - IFNULL(C.sold,0) # otherwise the limit is reduced by however many we've sold
+			) ticket_limit
+	FROM ticket_type
+	# get access rights information
 	JOIN 
-		tickets_grouped_by_user
-		ON tickets_grouped_by_user.user_id = transaction.user_id;
+		(SELECT DISTINCT(ticket_type_id)
+		FROM
+			# find the groups we have access to
+			(SELECT *
+				FROM user_group_membership
+				WHERE user_id=inputid) A
+		# find what ticket types that gives us access to
+		JOIN group_access_right 
+		ON A.group_id=group_access_right.group_id
+		# only count access rights which are currently open
+		WHERE open_time<UNIX_TIMESTAMP()
+		AND close_time>UNIX_TIMESTAMP()) B 
+	ON B.ticket_type_id=ticket_type.id
+	# get availability information
+	LEFT JOIN # left join so that tickets we've got no entries for still show up
+		# get the number sold/in the waiting list for each ticket type
+		(SELECT ticket_type_id,
+			PENDING_WL wl,
+			PENDING + CONFIRMED + CANCELLED + ADMITTED sold 
+		FROM ticket_status_count) C 
+	ON C.ticket_type_id=id;
+END//
+
+DELIMITER ;

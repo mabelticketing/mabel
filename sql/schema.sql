@@ -120,7 +120,7 @@ create table if not exists ticket (
 	# ADMITTED      means that the guest has entered the ball - so shouldn't be allowed in again
 	# PENDING_WL    means that the ticket is on the waiting list, and is ready to be transferred
 	# CANCELLED_WL  means that the ticket was on the waiting list, but has since been cancelled
-	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'ADMITTED', 'PENDING_WL', 'CANCELLED_WL') not null,
+	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'ADMITTED', 'PENDING_WL', 'CANCELLED_WL', 'INVALID') not null default 'INVALID',
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),
