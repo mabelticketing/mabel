@@ -4,14 +4,67 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-module.exports = {
-	event          : require("./impl/event.js"),
-	user           : require("./impl/user.js"),
-	ticket         : require("./impl/ticket.js"),
-	ticket_type    : require("./impl/ticket_type.js"),
-	payment_method : require("./impl/payment_method.js"),
-	booking        : require("./impl/booking.js"),
-	transaction    : require("./impl/transaction.js"),
-	waitingList	   : require("./impl/waiting_list.js"),
-	schema		   : require("./impl/schema.js")
-};
+module.exports = {};
+
+// allows us to stay DRY and perhaps enforces good file system structure
+var apiPaths = ['group', 'payment-method', 'ticket', 'type', 'user'];
+
+for (var i=0; i<apiPaths.length; i++) {
+	module.exports[apiPaths[i]] = require('./impl/' + apiPaths[i] + '.js');
+	module.exports[apiPaths[i] + 's'] = require('./impl/' + apiPaths[i] + 's.js');
+}
+
+/**
+ * API structure reminder
+ * ----------------------
+ *
+ * api
+ * 		group
+ * 			(id)
+ * 				.get()
+ *     			.put({...})
+ * 	   			.del()
+ * 			.post({...})
+ * 		groups
+ * 			.get(opts)
+ * 		payment_method
+ * 			(id)
+ * 				.get()
+ * 		payment_methods
+ * 			.get()
+ * 		ticket
+ *   		(id)
+ *   			.get()
+ *   			.put({...})
+ *   		.post({...}) // skip validation - for admins
+ * 		tickets
+ * 			.get(opts)
+ * 			.del(ids) // bulk delete
+ * 		type
+ * 			(id)
+ * 				.get()
+ * 				.put({...})
+ * 				.del()
+ * 			.post({...})
+ * 		types
+ * 			.get(opts)
+ * 		user
+ * 			(id)
+ * 				.get()
+ * 				.put({...})
+ * 				.del()
+ * 				.allowance
+ * 					.get()
+ * 				.payment_methods
+ * 					.get()
+ * 				.types
+ * 					.get()
+ * 				.tickets
+ * 					.get()
+ * 					.post([{...}])
+ * 			.post({...})
+ * 		users
+ * 			.get(opts)
+ *
+ */
+ 
