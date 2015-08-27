@@ -31,14 +31,16 @@ function userResource($resource) {
 	// I think I'm chris
 	var subpaths = ['allowance', 'payment_methods', 'types'];
 	var subpath_fn = function(path) {
-		return $resource('/api/user/:id/' + path, { id: this.id }, {
-			'get': {
-				method: 'GET',
-				isArray: true
-			}
-		});
+		return function() {
+			return $resource('/api/user/:id/' + path, { id: this.id }, {
+				'get': {
+					method: 'GET',
+					isArray: true
+				}
+			});
+		}
 	};
-	
+
 	for (var i=0; i<subpaths.length; i++) {
 		User.prototype[subpaths[i]] = subpath_fn(subpaths[i]);
 	}
