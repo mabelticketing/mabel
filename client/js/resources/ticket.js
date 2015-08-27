@@ -5,10 +5,10 @@
  */
 
 /* globals app */
-app.factory('Group', groupResource);
+app.factory('Ticket', ticketResource);
 
-function groupResource($resource) {
-	return $resource('/api/group/:id', {}, {
+function ticketResource($resource) {
+	return $resource('/api/ticket/:id', {}, {
 		'get': {
 			method: 'GET'
 		},
@@ -16,13 +16,17 @@ function groupResource($resource) {
 			method: 'POST'
 		},
 		'query': {
-			url: '/api/groups',
+			url: '/api/tickets',
 			method: 'GET',
+			isArray: true
+		},
+		'exterminate': {
+			url: '/api/tickets',
+			method: 'DELETE',
 			isArray: true
 		},
 		'update': {
 			method: 'PUT'
-		},
-		'delete': { method: 'DELETE' }
+		}
 	});
 }

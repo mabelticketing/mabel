@@ -5,10 +5,10 @@
  */
 
 /* globals app */
-app.factory('Group', groupResource);
+app.factory('Type', typeResource);
 
-function groupResource($resource) {
-	return $resource('/api/group/:id', {}, {
+function typeResource($resource) {
+	return $resource('/api/type/:id', {}, {
 		'get': {
 			method: 'GET'
 		},
@@ -16,7 +16,7 @@ function groupResource($resource) {
 			method: 'POST'
 		},
 		'query': {
-			url: '/api/groups',
+			url: '/api/types',
 			method: 'GET',
 			isArray: true
 		},

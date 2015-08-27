@@ -5,24 +5,17 @@
  */
 
 /* globals app */
-app.factory('Group', groupResource);
+app.factory('PaymentMethod', paymentMethodResource);
 
-function groupResource($resource) {
-	return $resource('/api/group/:id', {}, {
+function paymentMethodResource($resource) {
+	return $resource('/api/payment_method/:id', {}, {
 		'get': {
 			method: 'GET'
 		},
-		'save': {
-			method: 'POST'
-		},
 		'query': {
-			url: '/api/groups',
+			url: '/api/payment_method',
 			method: 'GET',
 			isArray: true
 		},
-		'update': {
-			method: 'PUT'
-		},
-		'delete': { method: 'DELETE' }
 	});
 }
