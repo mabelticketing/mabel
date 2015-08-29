@@ -7,7 +7,7 @@
 var connection = require("../connection.js");
 var runSql = connection.runSql;
 
-module.exports = ticket
+module.exports = ticket;
 
 function ticket(id) {
 	return {
@@ -46,4 +46,4 @@ ticket.post = function post(ticket) {
 		.then(function(result) {
 			return _id(result.insertId).get();
 		});
-}
+};

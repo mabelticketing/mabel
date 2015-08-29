@@ -13,7 +13,7 @@ angular.module('mabel.booking')
 function BookingController($scope, APICaller, User, $interval) {
 	var vm = this;
 
-	e = vm;
+	e = vm; // TODO: get rid
 
 	/*** DECLARATION ***/
 	// initialise scope vars 

@@ -29,9 +29,9 @@ function user(id) {
 
 	function get() {
 		var userPromise = runSql("SELECT * FROM user WHERE id=?;", [id])
-			.then(function(values) {
-				if (value.length !== 1) throw new Error("Expected one user but got " + value.length);
-				return values[0];
+			.then(function(rows) {
+				if (rows.length !== 1) throw new Error("Expected one user but got " + rows.length);
+				return rows[0];
 			});
 
 		// also get the groups for this user
@@ -65,7 +65,7 @@ function user(id) {
 			promises = promises.concat(_.map(userGroups, function(group) {
 				return runSql(insql, {
 					user_id: id,
-					group_id: userGroups[i] 
+					group_id: userGroups[i]
 				});
 			}));
 			
@@ -73,7 +73,7 @@ function user(id) {
 		return Q.all(promises)
 			.then(function(results) {
 				return get();
-			})
+			});
 	}
 
 
@@ -94,4 +94,4 @@ user.post = function post(user) {
 		
 		return _id(result.insertId).get();
 	});
-}
+};

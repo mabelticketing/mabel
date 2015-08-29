@@ -50,6 +50,7 @@ insert into user (id, name, email, crsid, registration_time, is_verified) VALUES
 	UNIX_TIMESTAMP(),
 	1
 );
+
 insert into user (id, name, email, crsid, registration_time, is_verified) VALUES (
 	2,
 	'Thomas Le Feuvre',
@@ -58,6 +59,7 @@ insert into user (id, name, email, crsid, registration_time, is_verified) VALUES
 	UNIX_TIMESTAMP(),
 	1
 );
+
 insert into user (id, name, email, password_md5, registration_time, is_verified) VALUES (
 	3,
 	'Andrew Hardwurk',

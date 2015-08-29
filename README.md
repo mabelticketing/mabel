@@ -1,5 +1,4 @@
 # mabel
-=======
 
 Mabel is a powerful ticketing system. For non-technical information about the system, please visit our [website](http://mabelticketing.co.uk).
 
@@ -27,4 +26,3 @@ Coming soon...
 ## Deployment
 
 Coming soon...
-
