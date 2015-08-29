@@ -8,31 +8,30 @@ var connection = require("./connection.js");
 var runSql = connection.runSql;
 var mysql = require("mysql");
 
-var api = {
+module.exports = {
 	getNames: getNames,
 	getSchema: getSchema,
 	getSize: getSize,
 	getDataFromTable: getDataFromTable,
 	getData: getData
 };
-module.exports = api;
 
 function getNames() {
 	var sql = "SHOW TABLES";
 	return runSql(sql).then(function(values) {
 		return values.map(function(r) {
 			// the results are currently in the form [{"Tables_in_[DBNAME]": "email"}] which is rubbish
-			for (i in r) {
+			for (var i in r) {
 				return r[i];
 			}
-		})
+		});
 	});
 }
 
 function getSize(table_name) {
 	var sql = "SELECT COUNT(*) AS c FROM ??";
 	return runSql(sql, [table_name]).then(function(values) {
-		return values[0].c
+		return values[0].c;
 	});
 }
 
@@ -42,22 +41,20 @@ function getSchema(table_name) {
 }
 
 function getDataFromTable(table_name, opts) {
-	opts.tables = [table_name]
+	opts.tables = [table_name];
 	return runSql(getDataSql(opts));
 }
 
 function getData(opts, join) {
-	var sql = getDataSql(opts)
+	var sql = getDataSql(opts);
 	console.log(sql);
-	var opts = {
-		sql: sql,
-		nestTables: (join?".":false)
-	}
+	opts.sql = sql;
+	opts.nestTables = join ? '.' : false;
 	return connection.doQuery(opts);
 }
 
 function getDataSql(opts) {
-	var sql = "SELECT "
+	var sql = "SELECT ";
 
 	// columns
 	if (opts.columns !== undefined && opts.columns.length > 0) {
@@ -68,14 +65,13 @@ function getDataSql(opts) {
 			sql += mysql.escapeId(opts.columns);
 		} 
 	} else {
-		sql += "*"
+		sql += "*";
 	}
 
 	// table
 	sql += " from " + mysql.escapeId(opts.tables);
 
 	// prepare where clause
-	var whereClause = "";
 	var wheres = opts.wheres || [];
 
 	// 'join' wheres

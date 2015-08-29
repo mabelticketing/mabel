@@ -79,7 +79,7 @@ function BookingController($scope, APICaller, User, $interval) {
 				if (err) return console.log(err);
 
 				// get the user's ticket allowance
-				APICaller.get("user/ticket_allowance", function(err, data) {
+				APICaller.get("user/ticket_limit", function(err, data) {
 					if (err) return console.log(err);
 					if (data[0].allowance < 1) return;
 

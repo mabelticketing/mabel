@@ -7,12 +7,11 @@
 // imports
 var config = require('./config.js');
 var passport = require('passport');
-var connection = require("./api/impl/connection.js");
+var connection = require("./api/connection.js");
 var LocalStrategy = require('passport-local').Strategy;
 var RavenStrategy = require('passport-raven').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var jwt = require("jwt-simple");
-var __ = require("./strings.js");
 var Q = require('q');
 var http = require('http');
 var crypto = require('crypto');
@@ -38,8 +37,8 @@ passport.use(new LocalStrategy({
 passport.use(new RavenStrategy({
     // NB I don't know what audience is actually for. It seems to just work like a base url
     audience: config.base_url,
-    desc: __('Emmanuel May Ball Ticketing System'), // TODO: Parameterise this
-    msg: __('Emmanuel May Ball needs to check you are a current member of the university'),
+    desc: 'Mabel Ticketing System', // TODO: Parameterise this
+    msg: 'Mabel Ticketing System needs to check you are a current member of the university',
     // use demonstration raven server in development
     debug: false
 }, RavenStrategyCallback));

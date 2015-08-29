@@ -3,7 +3,7 @@
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
 h1 Booking Successful
-p Thank you for booking tickets to Emmanuel College May Ball 2015. A summary of your booking is below.
+p Thank you for booking tickets to Emmanuel College May Ball 2016. A summary of your booking is below.
 table.emailTable
 	thead
 		tr
@@ -13,29 +13,27 @@ table.emailTable
 			th Price
 			th Status
 	tbody
-		each ticket in tickets.ticketsAllocated 
+		each ticket in booked 
 			tr
-				td # #{ ticket.rowId }
-				td #{ ticket.request.ticket_type.name }
-				td #{ ticket.request.payment_method.name }
-				td &pound;#{ ticket.request.ticket_type.price }
+				td # #{ ticket.id }
+				td #{ ticket.ticket_type.name }
+				td #{ ticket.payment_method.name }
+				if (ticket.donation > 0) 
+					td &pound;#{ ticket.transaction_value } (inc. donation)
+				else 
+					td &pound;#{ ticket.transaction_value }
 				td
 					span.label.label-info Booked
-		each ticket in tickets.ticketsRejected
+		if (waiting_list.length > 0)
+			tr We weren't able to book all of the tickets you requested, so these tickets have been added to the waiting list. You will be contacted if these tickets become available.
+		each ticket in waiting_list
 			tr
 				td -
-				td #{ ticket.request.ticket_type.name }
-				td #{ ticket.request.payment_method.name }
+				td #{ ticket.ticket_type.name }
+				td #{ ticket.payment_method.name }
 				td -
 				td
 					span.label.label-warning Waiting list
-		if (donationPrice > 0)
-			tr
-				th Donations
-				td
-				td 
-				td &pound;#{donationPrice}
-				td
 	tfoot
 		tr
 			th Total Due
@@ -44,8 +42,6 @@ table.emailTable
 			td &pound;#{totalPrice}
 			td
 
-if (tickets.ticketsRejected.length > 0)
-	p We weren't able to book all of the tickets you requested, so these tickets have been added to the waiting list. You will be contacted if these tickets become available.
 
 if (totalPrice > 0)
 	h2 Payment Information
