@@ -94,6 +94,9 @@ function ticket(user_id) {
 						} 
 						ticket.reason = "You don't have access to this kind of ticket right now.";
 					});
+				// note that we are not causing a failure if the limit is 0.
+				// That's because in this case we should join the waiting list, and 
+				// that's handled by "book".
 			});
 	}
   

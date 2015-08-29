@@ -65,13 +65,13 @@ function user(id) {
 			promises = promises.concat(_.map(userGroups, function(group) {
 				return runSql(insql, {
 					user_id: id,
-					group_id: userGroups[i]
+					group_id: group
 				});
 			}));
 			
 		}
 		return Q.all(promises)
-			.then(function(results) {
+			.then(function() {
 				return get();
 			});
 	}
@@ -92,6 +92,6 @@ user.post = function post(user) {
 	runSql(sql, [user])
 		.then(function(result) {
 		
-		return _id(result.insertId).get();
+		return user(result.insertId).get();
 	});
 };

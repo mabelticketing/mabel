@@ -44,6 +44,6 @@ ticket.post = function post(ticket) {
 
 	return runSql(sql, [ticket])
 		.then(function(result) {
-			return _id(result.insertId).get();
+			return ticket(result.insertId).get();
 		});
 };

@@ -118,11 +118,6 @@ function runSql(sql, data) {
 			r.querySql = sql;
 			return r;
 		});
-	p.then(function(value) {
-			callback(null, value);
-		}, function(err) {
-			callback(err);
-		});
 	return p;
 }
 
