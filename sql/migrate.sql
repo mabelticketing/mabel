@@ -1,4 +1,4 @@
-insert into ticket_type select id, name, price, ticket_limit from mabel.ticket_type;
+insert into ticket_type select id, name, price, ticket_limit, NULL as per_user_limit from mabel.ticket_type;
 insert into user select * from mabel.user;
 insert into user_group select * from mabel.user_group;
 insert into user_group_membership select * from mabel.user_group_membership;

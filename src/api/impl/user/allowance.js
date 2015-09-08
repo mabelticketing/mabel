@@ -14,10 +14,7 @@ function allowance(user_id) {
 		get: get
 	};
 
-	function get(ticket_id) {
-		if (ticket_id === undefined) {
-			// called without arguments - get global/group allowance
-		return runSql("", [user_id, user_id]);	
-		}
+	function get() {
+		return runSql("SELECT * FROM user_group_allowance WHERE user_id=?", [user_id]);
 	}
 }

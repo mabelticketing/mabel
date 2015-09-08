@@ -24,12 +24,56 @@ SELECT ticket_type_id,
 FROM ticket
 GROUP BY ticket_type_id;
 
+/*
+Get the number of tickets of each type bought by a particular user
+ */
+CREATE OR REPLACE VIEW user_bought_by_type AS
+SELECT user_id,
+		ticket_type_id,
+		COUNT(*) bought
+	FROM ticket
+	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ATTENDING'OR status='PENDING_WL')
+	GROUP BY user_id, ticket_type_id;
+
+/* 
+Get the number of tickets bought by a particular user overall 
+*/
+CREATE OR REPLACE VIEW user_bought AS 
+SELECT user_id, SUM(bought) bought
+   FROM user_bought_by_type
+   GROUP BY user_id;
+
+/* 
+Get the user's remaining allowance -- i.e. the number of tickets that this user is allowed to buy overall,
+given the groups he is a member of and the tickets he has already bought.
+Example output:
++---------+-----------+
+| user_id | allowance |
++---------+-----------+
+|     298 |         5 |
+|     301 |         7 |
+*/
+CREATE OR REPLACE VIEW user_group_allowance AS
+SELECT user_group_limit.user_id,
+	   l - IFNULL(bought, 0) AS allowance
+FROM user_group_limit
+LEFT JOIN user_bought
+ON user_group_limit.user_id=user_bought.user_id;
+
+/*
+Get the largest limit for a user, given all the groups he is a member of
+ */
+CREATE OR REPLACE VIEW user_group_limit AS 
+SELECT user_id, MAX(ticket_limit) l
+   FROM user_group
+   JOIN user_group_membership ON user_group.id=user_group_membership.group_id
+   GROUP BY user_id;
 
 /* PROCEDURES
 
 	Note that procedures are annoying because we can't include them as part of
 	a bigger result. What they do allow us to do is cut down the search space
-	deep inside the query so that the tables being  manupulated are not too
+	deep inside the query so that the tables being manipulated are not too
 	large. I think it will siginificantly help performance but I haven't
 	tested.
 
@@ -46,6 +90,7 @@ DELIMITER //
 The ticket limit takes into account the amount of tickets sold and the waiting
 list rule (if there are others in the waiting list, you can't book any). It 
 doesn't take into account overall group ticket limits, nor payment method limits.
+It also returns per-user and group ticket limits, considering how many tickets have been bought already.
 
 Example output:
 
@@ -66,7 +111,10 @@ BEGIN
 		price,
 		IF(C.wl>0, 0, # if the waiting list is not empty, say the limit is 0
 			ticket_limit - IFNULL(C.sold,0) # otherwise the limit is reduced by however many we've sold
-			) ticket_limit
+			) available,
+		GREATEST(
+			per_user_limit - IFNULL(user_bought_by_type.bought, 0),
+			user_group_allowance.allowance) allowance
 	FROM ticket_type
 	# get access rights information
 	JOIN 
@@ -88,9 +136,14 @@ BEGIN
 		# get the number sold/in the waiting list for each ticket type
 		(SELECT ticket_type_id,
 			PENDING_WL wl,
-			PENDING + CONFIRMED + CANCELLED + ADMITTED sold 
+			PENDING + CONFIRMED + ADMITTED sold 
 		FROM ticket_status_count) C 
-	ON C.ticket_type_id=id;
+	ON C.ticket_type_id=id
+	# get the number of tickets bought so far of this type
+	LEFT JOIN user_bought_by_type
+	ON user_bought_by_type.user_id=inputid AND user_bought_by_type.ticket_type_id=ticket_type.id
+	# get group limits too
+	LEFT JOIN user_group_allowance ON user_group_allowance.user_id=inputid;
 END//
 
 /* insert tickets one at a time to make sure we don't go over. 

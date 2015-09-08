@@ -53,8 +53,8 @@ function ticket(user_id) {
 			})
 			.spread(function(results, failed) {
 				// collect final data
-				var booked = results.PENDING, waiting_list =results.PENDING_WL;
-				
+				var booked = results.PENDING, 
+					waiting_list = results.PENDING_WL;
 
 				return [api.user(user_id).get(), booked, failed, waiting_list];
 			})
@@ -85,6 +85,7 @@ function ticket(user_id) {
 			.then(function(types) {
 				types = _.indexBy(types, 'id');
 
+				// TODO: Limit -- either here or in check_allowance -- to only types.allowance tickets per type.
 				return _.partition(ts, function(ticket) {
 						if (ticket.ticket_type_id in types) {
 
@@ -94,9 +95,9 @@ function ticket(user_id) {
 						} 
 						ticket.reason = "You don't have access to this kind of ticket right now.";
 					});
-				// note that we are not causing a failure if the limit is 0.
-				// That's because in this case we should join the waiting list, and 
-				// that's handled by "book".
+				// note that we do not really look at available. That's
+				// because if there are no tickets available we shouold still
+				// join the waiting list, and that's handled by "book".
 			});
 	}
   

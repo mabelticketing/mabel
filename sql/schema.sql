@@ -26,6 +26,7 @@ create table if not exists ticket_type (
 	name varchar(128) not null,
 	price DECIMAL(6,2) not null,
 	ticket_limit int not null,
+	per_user_limit int null,
 	primary key (id)
 );
 
