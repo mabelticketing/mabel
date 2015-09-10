@@ -85,12 +85,11 @@ function ticket(user_id) {
 			.then(function(types) {
 				types = _.indexBy(types, 'id');
 
-				// TODO: Limit -- either here or in check_allowance -- to only types.allowance tickets per type.
-				return _.partition(ts, function(ticket) {
+				ts = _.partition(ts, function(ticket) {
 						if (ticket.ticket_type_id in types) {
 
 							// jot down the type while we have it
-							ticket.ticket_type = types[ticket.payment_method_id];
+							ticket.ticket_type = types[ticket.ticket_type_id];
 							return true;	
 						} 
 						ticket.reason = "You don't have access to this kind of ticket right now.";
@@ -98,6 +97,34 @@ function ticket(user_id) {
 				// note that we do not really look at available. That's
 				// because if there are no tickets available we shouold still
 				// join the waiting list, and that's handled by "book".
+			
+				// ts[0] = [{TICKET}, ...]
+				return _.chain(ts[0])
+					.groupBy('ticket_type_id')
+					// { ticket_type_id: [{TICKET}, ...], ...}
+					.values()
+					// [ [{TICKET}, ...], ...]
+					.map(function(tickets) {
+						// tickets = [{TICKET}, ...]
+						return _.partition(tickets, function(t, i) {
+							if (i < t.ticket_type.allowance) return true;
+							t.reason = "You may only book " + t.ticket_type.allowance + " " + t.ticket_type.name + " tickets.";
+						});
+						// returns [[{TICKET_S}, ...], [{TICKET_F}, ...]]
+					})
+					// [ [ [{TICKET_S}, ...], [{TICKET_F}, ...] ], ...]
+					.thru(function(ts) {
+						return _.zip.apply(null, ts);
+					})
+					// [ [[{TICKET_S}, ...], ...], [[{TICKET_F}, ...], ...] ]
+					.map(_.flatten)
+					// [ [{TICKET_S}, ...], [{TICKET_F}, ...] ]
+					// add on the original failures (no change in structure)
+					.tap(function(result) {
+						result[1] = result[1].concat(ts[1]);
+					})
+					.value();
+
 			});
 	}
   
