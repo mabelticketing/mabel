@@ -20,17 +20,22 @@ function user(id) {
 		del: del,
 
 		// subpaths
-		allowance: require('./user/allowances.js')(id),
+		allowance: require('./user/allowance.js')(id),
 		payment_methods: require('./user/payment-methods.js')(id),
 		types: require('./user/types.js')(id),
-		ticket: require('./user/ticket.js')(id),
 		tickets: require("./user/tickets.js")(id)
 	};
 
 	function get() {
 		var userPromise = runSql("SELECT * FROM user WHERE id=?;", [id])
 			.then(function(rows) {
-				if (rows.length !== 1) throw new Error("Expected one user but got " + rows.length);
+				if (rows.length < 1) {
+					var err = new Error("User does not exist");
+					err.code = 404; 
+					throw err;
+				} else if (rows.length > 1) {
+					throw new Error("More than one user exists with that ID. How?!");
+				}
 				return rows[0];
 			});
 

@@ -71,7 +71,7 @@ function BearerStrategyCallback(token, done) {
         }
     } catch (e) {
         var err = new Error("Invalid token");
-        err.code = "AUTH";
+        err.code = 401;
         return done(err);
     }
 }

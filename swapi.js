@@ -1,6 +1,8 @@
 var config = require("./src/config.js");
 var passport = require('passport');
 var express = require('express');
+var _ = require("lodash");
+var api = require("./src/api/api.js");
 // var serveStatic = require('serve-static');
 
 module.exports = function(app, done) {
@@ -22,7 +24,7 @@ module.exports = function(app, done) {
 				var e;
 				if (token===null || token===undefined || token.trim().length<1) {
 					e = new Error("No access_token provided.");
-					e.code = "AUTH";
+					e.code = 401;
 					return next(e);	
 				}
 				passport.authenticate('bearer', function(err, user, info) {
@@ -32,7 +34,7 @@ module.exports = function(app, done) {
 					if (!user) {
 						e = new Error("Unauthorised token.");
 						console.log(info);
-						e.code = "AUTH";
+						e.code = 401;
 						return next(e);
 					}
 					req.user = user;
@@ -48,7 +50,39 @@ module.exports = function(app, done) {
 		// Route validated requests to appropriate controller
 		app.use(middleware.swaggerRouter({
 			useStubs: true,
-			controllers: 'src/api/impl'
+			controllers: {
+				user_myget: function(req, res, next) {
+					// NB this might be kind of fragile, I don't know what operationPath is actually used for...
+					var resource = req.swagger.operationPath[1].split("/");
+					var meth = _.reduce(resource,
+						function(meth, pathElm) {
+							if (pathElm.length<1) return api;
+							if (pathElm[0] === "{") {
+								// this is a URL parameter 
+								var paramName = "{id}".replace(/[{}]/g, '');
+								var paramValue = req.swagger.params[paramName].value;
+								// let's hope the current method is a function!
+								return meth(paramValue);
+							}
+							// otherwise just a regular resource path component
+							return meth[pathElm];
+						}, null);
+
+					// Call the final method with all the data we have (they're free to ignore it!)
+					var data = _.mapValues(req.swagger.params, function(o) {return o.value;});
+
+					// finally, this should be the right method to call.
+					var promise = meth[req.swagger.operationPath[2]](data);
+					promise.then(function(result) {
+						// if success return result else empty object
+						res.json(result || {});
+					}, function(err) {
+						// log & send error
+						console.log(err);
+						next(err);
+					});
+				}
+			}
 		}));
 
 		// over-ride a few paths that swagger ui is serving so that we can make customisations
@@ -59,19 +93,13 @@ module.exports = function(app, done) {
 
 		// finally wrap all error responses for consistency
 		app.use(function(err, req, res, next) {
+			
 			console.error(err);
-			switch(err.code) {
-				case "AUTH":
-					res.status(401);
-					break;
-				case "INVALID_TYPE":
-					res.status(400);
-					break;
-				default:
-					res.status(500);
-					break;
-			}
 
+			if (typeof err.code === "number") res.status(err.code);
+			else if (err.failedValidation) res.status(400);
+			else res.status(520);
+			
 			res.json({success:false, error: err, message: err.message});
 			next();
 		});

@@ -21,7 +21,9 @@ security:
 
 paths:
   '/user/{id}':
+    x-swagger-router-controller: user
     get:
+      operationId: myget
       summary: "Get a user's details"
       description: "Get a user's details. Normal users can only get themselves, admins can get anyone."
       consumes: []
@@ -30,6 +32,7 @@ paths:
       parameters:
         - name: id
           in: path
+          minimum: 1
           description: The user ID to retrieve
           required: true
           type: integer
@@ -41,10 +44,12 @@ paths:
             $ref: '#/definitions/User'
         '401':
           description: 'Returned if an access token is not provided, or if it is invalid.'
-        '500':
-          description: 'All other errors currently trigger a 500, I believe.'
-          schema:
-            $ref: '#/definitions/Error'
+        '400':
+          description: 'Returned if the data provided is not valid.'
+        '404':
+          description: 'Returned if the requested user does not exist.'
+        '520':
+          description: 'Some sort of internal error. Probably not your fault.'
 
 
 
@@ -55,8 +60,14 @@ definitions:
     properties:
       message:
         type: string
+      success:
+        type: boolean
+      error:
+        type: object
     required:
       - message
+      - success
+      - error
 
   User:
     required:
