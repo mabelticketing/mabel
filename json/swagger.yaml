@@ -1,0 +1,104 @@
+swagger: '2.0'
+info:
+  description: API used to interact with the Mabel ticketing system
+  version: 1.0.0
+  title: Mabel API
+  contact: {}
+  license:
+    name: GPLv2
+    url: 'http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1'
+host: 'localhost:3008'
+basePath: /sapi
+schemes:
+  - http
+
+
+paths:
+  '/user/{id}':
+    get:
+      summary: "Get a user's details"
+      description: "Get a user's details. Normal users can only get themselves, admins can get anyone."
+      consumes: []
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: The user ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: 'Returned if an access token is not provided, or if it is invalid.'
+        '500':
+          description: 'All other errors currently trigger a 500, I believe.'
+          schema:
+            $ref: '#/definitions/Error'
+
+
+securityDefinitions:
+  token:
+    type: apiKey
+    name: access_token
+    in: query
+security:
+  [{token: []}]
+
+
+
+definitions:
+  Error:
+    properties:
+      message:
+        type: string
+    required:
+      - message
+
+  User:
+    required:
+      - email
+      - id
+      - is_verified
+      - name
+      - registration_time
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: '1'
+        description: Mabel user identifier
+      name:
+        type: string
+        example: Mabel User
+        description: "User's name"
+      email:
+        type: string
+        example: mabel@mabelticketing.co.uk
+        description: "User's email address"
+      crsid:
+        type: string
+        example: ab123
+        description: "User's CRSiD if they are a current student"
+      registration_time:
+        type: integer
+        format: int32
+        example: 14419663721
+        description: 'Date the user registered (or first logged in via Raven, which counts as registration) - seconds since unix epoch.'
+      password_md5:
+        type: string
+        example: 5F4DCC3B5AA765D61D8327DEB882CF99
+        description: "The MD5 hash of the user's password (will be null for raven users)"
+      verification_code:
+        type: string
+        example: cJrE0uc4PzddPmr8AS6MBdKoQUdqYi9D
+        description: The code emailed to new users when they register via mabel. They have to verify their email by returning the code to us (clicking the link in the email).
+      is_verified:
+        type: boolean
+        example: false
+        description: Whether the user is verified (i.e. allowed to buy tickets).
+    description: ''
