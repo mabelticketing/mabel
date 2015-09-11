@@ -58,15 +58,21 @@ passport.serializeUser(function(user, done) {
 });
 
 function BearerStrategyCallback(token, done) {
-    var decoded = jwt.decode(token, secret);
-    if (decoded.authenticated === true) {
-        return done(null, {
-            id: decoded.id,
-            groups: decoded.groups,
-            token: token
-        }, null);
-    } else {
-        return done(null, false);
+    try {
+        var decoded = jwt.decode(token, secret);
+        if (decoded.authenticated === true) {
+            return done(null, {
+                id: decoded.id,
+                groups: decoded.groups,
+                token: token
+            }, null);
+        } else {
+            return done(null, false);
+        }
+    } catch (e) {
+        var err = new Error("Invalid token");
+        err.code = "AUTH";
+        return done(err);
     }
 }
 

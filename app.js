@@ -30,57 +30,40 @@ app.locals.pretty = true;
 app.engine('jade', require('jade').__express);
 
 // initialise passportjs
-app.use(passport.initialize());
+app.use(passport.initialize()); // TODO: Not sure if we want this
 
 // bind routers
 app.use("/", require("./src/app-routes.js"));
-app.use("/api", require("./src/api/router.js"));
 
-// try to use swagger on the temp /sapi route
-var swaggerTools = require('swagger-tools');
-var YAML = require('yamljs');
-// The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
-var swaggerDoc = YAML.load('json/swagger.yaml');
+// serve content in public/ from root
+app.use('/', express.static(__dirname + '/public'));
+
+// initalise swagger api
+var swapi = require("./swapi.js");
+swapi(app, listen);
+
+function listen() {
 
 
-swaggerTools.initializeMiddleware(swaggerDoc, function(middleware) {
-	// Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
-	app.use(middleware.swaggerMetadata());
+	/****************************************************************************** 
+	 * If you want to use clustering (run as many instances as you have processors
+	 * and share the load between them), uncomment the following chunk. You'll
+	 * need to install cluster2 though -- which I had difficulty with on some
+	 * machines.
+	 *******************************************************************************/
 
-	// Validate Swagger requests
-	app.use(middleware.swaggerValidator());
-
-	// Route validated requests to appropriate controller
-	app.use(middleware.swaggerRouter({
-		useStubs: true,
-		controllers: 'src/api/impl'
-	}));
-
-	// Serve the Swagger documents and Swagger UI
-	app.use(middleware.swaggerUi());
+	// var Cluster   = require('cluster2');
+	// var c = new Cluster({
+	// port: config.port || 2000
+	// });
+	// c.listen(function(cb) {
+	// cb(app);
+	// });
 
 	/*********************************************
 	 * This is the regular (non-clustered) option
 	 *********************************************/
 
 	server.listen(config.port || 2000);
-	console.log("running");
-});
-
-// serve content in public/ from root
-app.use('/', express.static(__dirname + '/public'));
-
-/****************************************************************************** 
- * If you want to use clustering (run as many instances as you have processors
- * and share the load between them), uncomment the following chunk. You'll
- * need to install cluster2 though -- which I had difficulty with on some
- * machines.
- *******************************************************************************/
-
-// var Cluster   = require('cluster2');
-// var c = new Cluster({
-// port: config.port || 2000
-// });
-// c.listen(function(cb) {
-// cb(app);
-// });
+	console.log("running");	
+}

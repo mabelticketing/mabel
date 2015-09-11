@@ -8,10 +8,9 @@ module.exports = {
     port        : 3008,
     base_url    : "http://localhost:3008",
     db_host     : "localhost",
-    db_password : "MABEkalamos17",
+    db_password : "LockDown1",
     db_user     : "mabel",
-    db_db       : "mabel",
+    db_db       : "mabel_test",
     jwt_secret  : "jwt-pass",
-    mailgun_api_key: "",
-    donation_ticket_type_id: 5 // TODO: this is messy, do something different
+    mailgun_api_key: ""
 };
