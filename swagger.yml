@@ -20,10 +20,36 @@ security:
   [{token: []}]
 
 paths:
-  '/user/{id}':
-    x-swagger-router-controller: user
+  '/group/{id}':
     get:
-      operationId: myget
+      summary: Get group details
+      description: Get group details. Probably only accessible to admins?
+      consumes: []
+      produces: 
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The group ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Group'
+        '401':
+          description: 'Returned if an access token is not provided, or if it is invalid.'
+        '400':
+          description: 'Returned if the data provided is not valid.'
+        '404':
+          description: 'Returned if the requested group does not exist.'
+        '520':
+          description: 'Some sort of internal error. Probably not your fault.'
+  '/user/{id}':
+    get:
       summary: "Get a user's details"
       description: "Get a user's details. Normal users can only get themselves, admins can get anyone."
       consumes: []
@@ -69,18 +95,54 @@ definitions:
       - success
       - error
 
+  TicketType:
+    properties:
+      id: 
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Ticket type identifier
+      name:
+        type: string
+        example: Standard
+        description: Name of the ticket type
+      price: 
+        type: number
+        format: float
+        example: 130.00
+        minimum: 0
+        description: The price per unit for a ticket of this type
+      ticket_limit: 
+        type: integer
+        format: int32
+        example: 1
+        minimum: 0
+        description: The total number of tickets of this type which may be sold
+      per_user_limit: 
+        type: integer
+        format: int32
+        example: 1
+        minimum: 0
+        description: The number of tickets of this type that a single user may hold (may be null)
+    required: 
+      - id
+      - name
+      - price
+      - ticket_limit
+
+
   User:
     required:
       - email
       - id
-      - is_verified
       - name
-      - registration_time
     properties:
       id:
         type: integer
         format: int32
-        example: '1'
+        example: 1
+        minimum: 1
         description: Mabel user identifier
       name:
         type: string
@@ -98,7 +160,7 @@ definitions:
         type: integer
         format: int32
         example: 14419663721
-        description: 'Date the user registered (or first logged in via Raven, which counts as registration) - seconds since unix epoch.'
+        description: 'Date the user registered (or first logged in via Raven, which counts as registration) - seconds since unix epoch'
       password_md5:
         type: string
         example: 5F4DCC3B5AA765D61D8327DEB882CF99
@@ -106,9 +168,138 @@ definitions:
       verification_code:
         type: string
         example: cJrE0uc4PzddPmr8AS6MBdKoQUdqYi9D
-        description: The code emailed to new users when they register via mabel. They have to verify their email by returning the code to us (clicking the link in the email).
+        description: The code emailed to new users when they register via mabel. They have to verify their email by returning the code to us (clicking the link in the email)
       is_verified:
         type: boolean
         example: false
-        description: Whether the user is verified (i.e. allowed to buy tickets).
+        description: Whether the user is verified (i.e. allowed to buy tickets)
     description: ''
+
+  Group:
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Group identifier
+      name:
+        type: string
+        example: Emmanuel Students
+        description: Group name
+      description:
+        type: string
+        example: Members who are currently students at Emmanuel College
+        description: Group description
+      ticket_limit:
+        type: integer
+        format: int32
+        example: 8
+        minimum: 0
+        description: The number of tickets a member of this group may buy in total
+    required:
+      - id
+      - name
+      - description
+      - ticket_limit
+
+  PaymentMethod:
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Payment method identifier
+      name:
+        type: string
+        example: College Bill
+        description: Payment method name
+      description:
+        type: string
+        example: Pay for tickets by adding the price to your end of term college bill
+        description: Payment method description
+      ticket_limit:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 0
+        description: The number of tickets which may be paid for using this payment method
+    required:
+      - id
+      - name
+      - description
+      - ticket_limit
+
+  Ticket:
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Ticket identifier
+      user_id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: User identifier for the ticket booker
+      ticket_type_id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Ticket type identifier for this ticket
+      guest_name:
+        type: string
+        example: Christopher Little
+        default: 'Mabel Guest'
+        description: The name which should be printed on this ticket
+      payment_method_id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Payment method identifier for this ticket
+      registration_time:
+        type: integer
+        format: int32
+        example: 14419663721
+        description: Date the ticket was booked (seconds since unix epoch)
+      donation:
+        type: boolean
+        example: true
+        default: false
+        description: Whether the booker chose to make a donation which this ticket
+      transaction_value:
+        type: number
+        format: float
+        example: 130.00
+        minimum: 0
+        description: Redundant field indicating how much this ticket cost to book
+      notes:
+        type: string
+        example: Half of this payment has been received by cheque
+        default: ""
+        description: Arbitrary notes field for admins to keep track of ticket perculiarities
+      status:
+        type: string
+        example: PENDING
+        description: "An indication of the ticket's status"
+        default: PENDING
+        enum: 
+          - PENDING
+          - CONFIRMED
+          - CANCELLED
+          - ADMITTED
+          - PENDING_WL
+          - CANCELLED_WL
+    required:
+      - id
+      - user_id
+      - ticket_type_id
+      - guest_name
+      - payment_method_id
+      - transaction_value
+      - status

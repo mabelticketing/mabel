@@ -14,6 +14,15 @@ module.exports = function(app, done) {
 	// strip protocol (e.g. http://), but otherwise use the config url
 	swaggerDoc.host = config.base_url.replace(/^.*:\/\//, '');
 
+	// add a shared x-swagger-router-controller to all operations because we're going to use
+	// the actual path to dispatch methods (see respond) and I cba to annotate my doc
+	swaggerDoc.paths = _.mapValues(swaggerDoc.paths, function(p) {
+		return _.mapValues(p, function(op) {
+			op["x-swagger-router-controller"] = "respond";
+			return op;
+		});
+	});
+
 	swaggerTools.initializeMiddleware(swaggerDoc, function(middleware) {
 		// Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
 		app.use(middleware.swaggerMetadata());
@@ -49,39 +58,13 @@ module.exports = function(app, done) {
 
 		// Route validated requests to appropriate controller
 		app.use(middleware.swaggerRouter({
-			useStubs: true,
 			controllers: {
-				user_myget: function(req, res, next) {
-					// NB this might be kind of fragile, I don't know what operationPath is actually used for...
-					var resource = req.swagger.operationPath[1].split("/");
-					var meth = _.reduce(resource,
-						function(meth, pathElm) {
-							if (pathElm.length<1) return api;
-							if (pathElm[0] === "{") {
-								// this is a URL parameter 
-								var paramName = "{id}".replace(/[{}]/g, '');
-								var paramValue = req.swagger.params[paramName].value;
-								// let's hope the current method is a function!
-								return meth(paramValue);
-							}
-							// otherwise just a regular resource path component
-							return meth[pathElm];
-						}, null);
-
-					// Call the final method with all the data we have (they're free to ignore it!)
-					var data = _.mapValues(req.swagger.params, function(o) {return o.value;});
-
-					// finally, this should be the right method to call.
-					var promise = meth[req.swagger.operationPath[2]](data);
-					promise.then(function(result) {
-						// if success return result else empty object
-						res.json(result || {});
-					}, function(err) {
-						// log & send error
-						console.log(err);
-						next(err);
-					});
-				}
+				respond_get: respond,
+				respond_post: respond,
+				respond_put: respond,
+				respond_delete: respond,
+				respone_patch: respond,
+				respond_options: respond
 			}
 		}));
 
@@ -105,4 +88,36 @@ module.exports = function(app, done) {
 		});
 	});
 	return done();
+};
+
+function respond(req, res, next) {
+	// NB this might be kind of fragile, I don't know what operationPath is actually used for...
+	var resource = req.swagger.operationPath[1].split("/");
+	var meth = _.reduce(resource,
+		function(meth, pathElm) {
+			if (pathElm.length<1) return api;
+			if (pathElm[0] === "{") {
+				// this is a URL parameter 
+				var paramName = "{id}".replace(/[{}]/g, '');
+				var paramValue = req.swagger.params[paramName].value;
+				// let's hope the current method is a function!
+				return meth(paramValue);
+			}
+			// otherwise just a regular resource path component
+			return meth[pathElm];
+		}, null);
+
+	// Call the final method with all the data we have (they're free to ignore it!)
+	var data = _.mapValues(req.swagger.params, function(o) {return o.value;});
+
+	// finally, this should be the right method to call.
+	var promise = meth[req.swagger.operationPath[2]](data);
+	promise.then(function(result) {
+		// if success return result else empty object
+		res.json(result || {});
+	}, function(err) {
+		// log & send error
+		console.log(err);
+		next(err);
+	});
 };
