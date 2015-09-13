@@ -12,5 +12,6 @@ module.exports = {
     db_user     : "mabel",
     db_db       : "mabel_test",
     jwt_secret  : "jwt-pass",
-    mailgun_api_key: ""
+    mailgun_api_key: "",
+  	admin_groups: [1]
 };

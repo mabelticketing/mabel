@@ -9,6 +9,9 @@ info:
     url: 'http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1'
 host: 'PLACEHOLDER'
 basePath: /api
+consumes: []
+produces:
+  - application/json
 schemes:
   - http
 securityDefinitions:
@@ -16,17 +19,61 @@ securityDefinitions:
     type: apiKey
     name: access_token
     in: query
+  mabel:
+    type: basic
+  # raven: # Need to figure out how to implement this (normally raven requires redirect)
+    # type: basic 
+  admin:
+    type: apiKey
+    name: access_token
+    in: query
+  self: # NB Must only be used on operations for which the param {id} is the user id.
+    type: apiKey
+    name: access_token
+    in: query
 security:
-  [{token: []}]
+  - token: []
+
 
 paths:
+  '/token':
+    get:
+      summary: Get an auth token using mabel credentials
+      description: Login using mabel credentials and get an authorization token for use with the rest of the API. Can either use basic authorization or pass in email and password as query parameters (not recommended outside of testbed)
+      security:
+        - mabel: []
+      parameters:
+        - name: email
+          in: query
+          description: The email address of the user trying to log in
+          type: string
+          format: email
+        - name: password
+          in: query
+          description: The password of the user trying to log in
+          type: string
+          format: password
+      responses:
+        '200':
+          description: Success
+          schema:
+            properties:
+              token:
+                type: string
+                example: eyJeXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoZW50aWNhdGVkIjp0cnVlLCJpZCI6MSwiZ3JvdXBzIjpbMSwyXX0.Tv5Qa0VdGZPaJFJTAY8hBPEpo6eGJFD5Yg16KQ9yzoI
+                description: An authorization token for use with the rest of the API
+        '401':
+          description: 'Returned if the given password and email address do not match'
+        '404':
+          description: 'Returned if the email given does not exist'
+        '520':
+          description: 'Some sort of internal error. Probably not your fault.'
   '/group/{id}':
     get:
       summary: Get group details
-      description: Get group details. Probably only accessible to admins?
-      consumes: []
-      produces: 
-        - application/json
+      description: Get group details. Only accessible to admins.
+      security:
+        - admin: []
       parameters:
         - name: id
           in: path
@@ -52,9 +99,9 @@ paths:
     get:
       summary: "Get a user's details"
       description: "Get a user's details. Normal users can only get themselves, admins can get anyone."
-      consumes: []
-      produces:
-        - application/json
+      security:
+        - self: []
+        - admin: []
       parameters:
         - name: id
           in: path
@@ -150,6 +197,7 @@ definitions:
         description: "User's name"
       email:
         type: string
+        format: email
         example: mabel@mabelticketing.co.uk
         description: "User's email address"
       crsid:

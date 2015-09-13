@@ -23,11 +23,11 @@ function user(id) {
 		allowance: require('./user/allowance.js')(id),
 		payment_methods: require('./user/payment-methods.js')(id),
 		types: require('./user/types.js')(id),
-		tickets: require("./user/tickets.js")(id)
+		tickets: require("./user/tickets.js")(id),
 	};
 
 	function get() {
-		var userPromise = runSql("SELECT * FROM user WHERE id=?;", [id])
+		var userPromise = runSql("SELECT * FROM user WHERE id=? LIMIT 1;", [id])
 			.then(function(rows) {
 				if (rows.length < 1) {
 					var err = new Error("User does not exist");
@@ -44,7 +44,7 @@ function user(id) {
 		
 		return Q.all([userPromise, groupPromise])
 			.then(function(results) {
-				results[0].groups = _(results[1]).pluck('group_id');
+				results[0].groups = _.pluck(results[1], 'group_id');
 				return results[0];
 			});
 	}
@@ -92,6 +92,8 @@ function user(id) {
 
 }
 
+// collection methods:
+
 user.post = function post(user) {
 	var sql = "INSERT INTO user SET ?;";
 	runSql(sql, [user])
@@ -99,4 +101,19 @@ user.post = function post(user) {
 		
 		return user(result.insertId).get();
 	});
+};
+
+
+// extra methods - internal use only:
+
+user.get_by_email = function(email) {
+	return runSql("SELECT * FROM user WHERE email=? LIMIT 1;", [email])
+		.then(function(rows) {
+			if (rows.length < 1) {
+				var err = new Error("User does not exist");
+				err.code = 404; 
+				throw err;
+			}
+			return rows[0];
+		});
 };

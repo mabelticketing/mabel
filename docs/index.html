@@ -24,7 +24,7 @@
         window.swaggerUi = new SwaggerUi({
           url: url,
           dom_id: "swagger-ui-container",
-          supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+          supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
           onComplete: function(){
 
             $('pre code').each(function(i, e) {
@@ -46,7 +46,8 @@
           onFailure: function() {
             console.err("Unable to Load SwaggerUI");
           },
-          docExpansion: "none",
+          docExpansion: "list",
+          operationsSorter : "alpha",
           sorter : "alpha"
         });
 
@@ -54,9 +55,13 @@
           var key = encodeURIComponent($('#input_access_token')[0].value);
           if(key && key.trim() !== "") {
               var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("access_token", key, "query");
-              window.swaggerUi.api.clientAuthorizations.add("access_token", apiKeyAuth);
+              window.swaggerUi.api.clientAuthorizations.add("token", apiKeyAuth);
+              window.swaggerUi.api.clientAuthorizations.add("admin", apiKeyAuth);
+              window.swaggerUi.api.clientAuthorizations.add("self", apiKeyAuth);
           } else {
-              window.swaggerUi.api.clientAuthorizations.remove("access_token");
+              window.swaggerUi.api.clientAuthorizations.remove("token");
+              window.swaggerUi.api.clientAuthorizations.remove("admin");
+              window.swaggerUi.api.clientAuthorizations.remove("self");
           }
         }
 

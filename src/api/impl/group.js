@@ -20,7 +20,11 @@ function group(id) {
 	function get() {
 		var promise = runSql("SELECT * FROM user_group WHERE id=? LIMIT 1;", [id]);
 		return promise.then(function(value) {
-			if (value.length !== 1) throw new Error("Expected one group but got " + value.length);
+			if (value.length < 1) {
+				var e = new Error("Group does not exist.");
+				e.code = 404;
+				throw e;
+			}
 			return value[0];
 		});
 	}

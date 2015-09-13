@@ -243,28 +243,3 @@ function getUser(userId) {
             return results[0];
         });
 }
-
-// the token contains the user ID and also the groups which the user is a member of
-function getToken(userId) {
-
-    // try to find user in db with crsid
-    var sql = "SELECT user_group.id AS group_id FROM user_group \
-		JOIN user_group_membership \
-		ON (user_group.id=user_group_membership.group_id) \
-		WHERE user_id=?";
-    return connection.runSql(sql, [userId]).then(
-        function(rows) {
-            var groups = [];
-            for (var i = 0; i < rows.length; i++) {
-                groups.push(rows[i].group_id);
-            }
-            // TODO: compress this somewhat?
-            var tokenObj = {
-                authenticated: true,
-                id: userId,
-                groups: groups
-            };
-            return jwt.encode(tokenObj, secret);
-        }
-    );
-}
