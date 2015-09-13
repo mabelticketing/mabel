@@ -39,14 +39,17 @@ module.exports = function(app, done) {
 			if (typeof token !== "string" && typeof token === "object" && token.length > 0) {
 				token = token[0];
 			}
-			if (typeof token !== "string") throw new Error("Unexpected token datatype");
 
 			var e;
-			if (token === null || token === undefined || token.trim().length < 1) {
+			if (token === null || token === undefined || (typeof token === "string" && token.trim().length < 1)) {
 				e = new Error("No access_token provided.");
 				e.code = 401;
 				next(e);
 			}
+
+			if (typeof token !== "string") 
+				throw new Error("Unexpected token datatype");
+			
 			var dec = helpers.checkToken(token);
 			if (dec.auth) {
 				// this is ripe for performance optimisation - encode the user rather than querying on every request

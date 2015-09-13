@@ -14,7 +14,7 @@ function group(id) {
 		// main methods
 		get: get, 
 		put: put,
-		del: del
+		delete: del
 	};
 
 	function get() {
@@ -29,13 +29,13 @@ function group(id) {
 		});
 	}
 
-	function put(group) {
+	function put(data) {
 		var sql = "UPDATE user_group SET ? WHERE id=?;";
-		var promise = runSql(sql, [group, id]);
+		var promise = runSql(sql, [data.group, id]);
 
 		return promise.then(function() {
 			// retrieve the updated group
-			return get(group.id);
+			return get(id);
 		});
 	}
 
@@ -44,17 +44,17 @@ function group(id) {
 		sql += "DELETE FROM group_access_right WHERE group_id = ?; ";
 		sql += "DELETE FROM user_group WHERE id = ?; ";
 		return runSql(sql, [id, id, id]).then(function() {
-			return {};
+			return {success:true};
 		});
 	}
 }
 
-group.post = function post(group) {
-	var promise = runSql("INSERT INTO user_group SET ?;", [group]);
+group.post = function post(data) {
+	var promise = runSql("INSERT INTO user_group SET ?;", [data.group]);
 
 	return promise.then(function(result) {
 		// retrieve the actual group from the mysql result
-		return _id(result.insertId).get();
+		return group(result.insertId).get();
 	});
-}
+};
 

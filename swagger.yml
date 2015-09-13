@@ -62,12 +62,6 @@ paths:
                 type: string
                 example: eyJeXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoZW50aWNhdGVkIjp0cnVlLCJpZCI6MSwiZ3JvdXBzIjpbMSwyXX0.Tv5Qa0VdGZPaJFJTAY8hBPEpo6eGJFD5Yg16KQ9yzoI
                 description: An authorization token for use with the rest of the API
-        '401':
-          description: 'Returned if the given password and email address do not match'
-        '404':
-          description: 'Returned if the email given does not exist'
-        '520':
-          description: 'Some sort of internal error. Probably not your fault.'
   '/group/{id}':
     get:
       summary: Get group details
@@ -87,14 +81,78 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Group'
-        '401':
-          description: 'Returned if an access token is not provided, or if it is invalid.'
-        '400':
-          description: 'Returned if the data provided is not valid.'
-        '404':
-          description: 'Returned if the requested group does not exist.'
-        '520':
-          description: 'Some sort of internal error. Probably not your fault.'
+    put:
+      summary: Modify a group
+      description: Update the group with the given ID
+      security:
+        - admin: []
+      parameters:
+        - name: group
+          in: body
+          description: A specification of the group to be updated. Ommitted properties will remain unchanged.
+          required: true
+          schema: 
+            $ref: '#/definitions/Group'
+        - name: id
+          in: path
+          minimum: 1
+          description: The group ID to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Group'
+    delete:
+      summary: Delete a group
+      description: Delete the group with the given ID
+      security:
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The group ID to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              success: 
+                type: boolean
+                default: true
+  '/group':
+    post:
+      summary: Create a group
+      description: Create a new group with an automatically selected ID
+      security:
+        - admin: []
+      parameters:
+        - name: group
+          in: body
+          description: "A specification of the group to be created. Note that if id is passed, it will be ignored"
+          required: true
+          schema: 
+            # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
+            allOf:
+              - $ref: '#/definitions/Group'
+              - required:
+                - name
+                - description
+                - ticket_limit
+      responses:
+        '200':
+          description: Success. Returns the new group.
+          schema:
+            $ref: '#/definitions/Group'
   '/user/{id}':
     get:
       summary: "Get a user's details"
@@ -115,14 +173,6 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/User'
-        '401':
-          description: 'Returned if an access token is not provided, or if it is invalid.'
-        '400':
-          description: 'Returned if the data provided is not valid.'
-        '404':
-          description: 'Returned if the requested user does not exist.'
-        '520':
-          description: 'Some sort of internal error. Probably not your fault.'
 
 
 
@@ -245,11 +295,6 @@ definitions:
         example: 8
         minimum: 0
         description: The number of tickets a member of this group may buy in total
-    required:
-      - id
-      - name
-      - description
-      - ticket_limit
 
   PaymentMethod:
     properties:
