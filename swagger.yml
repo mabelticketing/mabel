@@ -21,8 +21,8 @@ securityDefinitions:
     in: query
   mabel:
     type: basic
-  # raven: # Need to figure out how to implement this (normally raven requires redirect)
-    # type: basic 
+  raven: # Need to figure out how to implement this (normally raven requires redirect)
+    type: basic 
   admin:
     type: apiKey
     name: access_token
@@ -31,12 +31,37 @@ securityDefinitions:
     type: apiKey
     name: access_token
     in: query
-security:
+security: # default security is just to have an auth token
   - token: []
 
 
 paths:
   '/token':
+    get:
+      summary: Get a new auth token
+      description: Trade an existing auth token for a newer one which will expire later
+      parameters:
+        - name: access_token
+          in: query
+          description: The old token we want to replace
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Token'
+  '/token/raven':
+    get:
+      summary: Get an auth token using Raven token
+      description: Trade a Raven token for a mabel authorization token for use with the rest of the API. 
+      security:
+        - raven: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Token'
+  '/token/mabel':
     get:
       summary: Get an auth token using mabel credentials
       description: Login using mabel credentials and get an authorization token for use with the rest of the API. Can either use basic authorization or pass in email and password as query parameters (not recommended outside of testbed)
@@ -57,11 +82,7 @@ paths:
         '200':
           description: Success
           schema:
-            properties:
-              token:
-                type: string
-                example: eyJeXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoZW50aWNhdGVkIjp0cnVlLCJpZCI6MSwiZ3JvdXBzIjpbMSwyXX0.Tv5Qa0VdGZPaJFJTAY8hBPEpo6eGJFD5Yg16KQ9yzoI
-                description: An authorization token for use with the rest of the API
+            $ref: '#/definitions/Token'
   '/group/{id}':
     get:
       summary: Get group details
@@ -130,6 +151,19 @@ paths:
                 type: boolean
                 default: true
   '/group':
+    get:
+      summary: Get all groups
+      description: "Get all groups' details"
+      security:
+        - admin: []
+      parameters: [] # TODO: filter parameters?
+      responses: 
+        200: 
+          description: Success. Returns details for all groups
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Group'
     post:
       summary: Create a group
       description: Create a new group with an automatically selected ID
@@ -138,7 +172,7 @@ paths:
       parameters:
         - name: group
           in: body
-          description: "A specification of the group to be created. Note that if id is passed, it will be ignored"
+          description: "A specification of the group to be created."
           required: true
           schema: 
             # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
@@ -173,6 +207,147 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/User'
+  '/payment-method':
+    get:
+      summary: Get all payment method details
+      description: Get details for all payment methods available
+      security:
+        - token: []
+      parameters: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PaymentMethod'
+  '/payment-method/{id}':
+    get:
+      summary: Get payment method details
+      description: Get details for the given payment method
+      security:
+        - token: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The payment method ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/PaymentMethod'
+  '/ticket/{id}':
+    get:
+      summary: Get ticket details
+      description: Retrieve details for the ticket with given ID (for admins)
+      security:
+        - token: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ticket ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
+    put:
+      summary: Modify a ticket
+      description: Update the ticket with the given ID using the details in the body
+      security:
+        - admin: []
+      parameters:
+        - name: ticket
+          in: body
+          description: A specification of the ticket to be updated. Omitted properties will remain unchanged.
+          required: true
+          schema: 
+            $ref: '#/definitions/Ticket'
+        - name: id
+          in: path
+          minimum: 1
+          description: The ticket ID to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
+  '/ticket':
+    get:
+      summary: Get all tickets
+      description: "Get all tickets' details. Warning: likely to be big currently..."
+      security:
+        - admin: []
+      parameters: [] # TODO: filter parameters?
+      responses: 
+        200: 
+          description: Success. Returns details for all tickets
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Ticket'
+    post:
+      summary: Create a ticket
+      description: "Create a new ticket with an automatically allocated ID. This operation is designed for admin usage, and ticket validation is skipped. Users should use the /user/{id}/ticket route instead."
+      security:
+        - admin: []
+      parameters:
+        - name: ticket
+          in: body
+          description: "A specification of the ticket to be created."
+          required: true
+          schema: 
+            # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
+            # TODO: Can we state that certain properties must NOT be present? e.g. for id/registration+time/transaction_value/status
+            allOf:
+              - $ref: '#/definitions/Ticket'
+              - required:
+                - user_id
+                - ticket_type_id
+                - guest_name
+                - payment_method_id
+      responses:
+        '200':
+          description: Success. Returns the nesly created ticket
+          schema:
+            $ref: '#/definitions/Ticket'
+    delete:
+      summary: Cancel ticket
+      description: "Cancel a bunch of tickets at once"
+      security:
+        - admin: []
+      parameters:
+        - name: ids
+          in: query
+          description: "A csv list of ticket IDs for tickets to be deleted."
+          required: true
+          type: array
+          format: csv
+          items:
+            type: number
+            format: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              success: 
+                type: boolean
+                default: true
 
 
 
@@ -191,6 +366,14 @@ definitions:
       - message
       - success
       - error
+
+  Token: 
+    properties:
+      token:
+        type: string
+        # TODO: invalidate this token
+        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoIjp0cnVlLCJpZCI6MX0.lzALTSPB3iAHYBan5oBbJ23rV_NMfXKQpWCFATwaJwU
+        description: An authorization token for use with the rest of the API
 
   TicketType:
     properties:
@@ -222,18 +405,9 @@ definitions:
         example: 1
         minimum: 0
         description: The number of tickets of this type that a single user may hold (may be null)
-    required: 
-      - id
-      - name
-      - price
-      - ticket_limit
 
 
   User:
-    required:
-      - email
-      - id
-      - name
     properties:
       id:
         type: integer
@@ -318,11 +492,7 @@ definitions:
         example: 1
         minimum: 0
         description: The number of tickets which may be paid for using this payment method
-    required:
-      - id
-      - name
-      - description
-      - ticket_limit
+
 
   Ticket:
     properties:
@@ -388,11 +558,3 @@ definitions:
           - ADMITTED
           - PENDING_WL
           - CANCELLED_WL
-    required:
-      - id
-      - user_id
-      - ticket_type_id
-      - guest_name
-      - payment_method_id
-      - transaction_value
-      - status

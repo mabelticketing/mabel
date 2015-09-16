@@ -66,7 +66,10 @@ module.exports = function(app, done) {
 		};
 		app.use(middleware.swaggerSecurity({
 			token: function(req, authOrSecDef, token, next) {
-				checkToken(req, token, next);
+				checkToken(req, token, next)
+					.then(function(user) {
+						next();
+					});
 			},
 			admin: function(req, secDef, token, next) {
 				checkToken(req, token, next)

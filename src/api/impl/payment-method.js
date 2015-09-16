@@ -22,3 +22,9 @@ function payment_method(id) {
 		});
 	}	
 }
+
+payment_method.get = function(opts) {
+	var sql = connection.getFilteredSQL("payment_method", opts);
+
+	return runSql(sql);
+};

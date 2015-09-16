@@ -58,3 +58,8 @@ group.post = function post(data) {
 	});
 };
 
+group.get = function get(opts) {
+	var sql = connection.getFilteredSQL("user_group", opts);
+
+	return runSql(sql);
+};

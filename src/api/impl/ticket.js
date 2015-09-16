@@ -1,11 +1,13 @@
 /**
- * Copyright (C) 2015  Mabel Ticketing 
+ * Copyright (C) 2015  Mabel Ticketing
  * GNU General Public License v2.0
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
 var connection = require("../connection.js");
 var runSql = connection.runSql;
+var _ = require("lodash");
+var Q = require("q");
 
 module.exports = ticket;
 
@@ -26,9 +28,9 @@ function ticket(id) {
 		});
 	}
 
-	function put(ticket) {
+	function put(data) {
 		var sql = "UPDATE ticket SET ? WHERE id=?;";
-		var promise = runSql(sql, [ticket, id]);
+		var promise = runSql(sql, [data.ticket, id]);
 
 		return promise.then(function() {
 			return get();
@@ -37,13 +39,34 @@ function ticket(id) {
 }
 
 // NB this route is only for admins (no validation)
-ticket.post = function post(ticket) {
+ticket.post = function post(data) {
+	var t = data.ticket;
+	// over-ride status whatever the admin says (TODO: is this right?)
+	t.status = 'PENDING';
 	var sql = "INSERT INTO ticket SET ?";
-	if (ticket.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
+	if (t.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
 	sql += ";";
 
-	return runSql(sql, [ticket])
+	return runSql(sql, [t])
 		.then(function(result) {
 			return ticket(result.insertId).get();
 		});
 };
+
+ticket.get =
+	function get(opts) {
+		var sql = connection.getFilteredSQL("ticket", opts);
+
+		return runSql(sql);
+	};
+
+ticket.delete =
+	function del(data) {
+
+		var sql = "UPDATE ticket SET status='CANCELLED' WHERE id=?";
+		var promises = _.map(data.ids, function(id) {
+			return runSql(sql, [id]);
+		});
+
+		return Q.all(promises);
+	};
