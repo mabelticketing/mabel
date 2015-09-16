@@ -110,7 +110,7 @@ paths:
       parameters:
         - name: group
           in: body
-          description: A specification of the group to be updated. Ommitted properties will remain unchanged.
+          description: A specification of the group to be updated. Omitted properties will remain unchanged.
           required: true
           schema: 
             $ref: '#/definitions/Group'
@@ -135,7 +135,7 @@ paths:
         - name: id
           in: path
           minimum: 1
-          description: The group ID to modify
+          description: The group ID to delete
           required: true
           type: integer
           format: int32
@@ -156,7 +156,7 @@ paths:
       description: "Get all groups' details"
       security:
         - admin: []
-      parameters: [] # TODO: filter parameters?
+      parameters: [] # TODO: filter parameters? Do something about $count?
       responses: 
         200: 
           description: Success. Returns details for all groups
@@ -187,6 +187,110 @@ paths:
           description: Success. Returns the new group.
           schema:
             $ref: '#/definitions/Group'
+  '/type/{id}':
+    get: # TODO: this actually returns group access rights too
+      summary: Get ticket type details
+      description: Get ticket type details
+      security:
+        - token: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ticket type ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/TicketType'
+    put:
+      summary: Modify a ticket type
+      description: Update the ticket type with the given ID
+      security:
+        - token: []
+      parameters:
+        - name: ticket_type
+          in: body
+          description: A specification of the ticket type to be updated. Omitted properties will remain unchanged.
+          required: true
+          schema: 
+            $ref: '#/definitions/TicketType' # TODO: This also accepts .groups as an array of group ids
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the ticket type ID to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/TicketType'
+    delete:
+      summary: Delete a ticket type
+      description: Delete the ticket type with the given ID
+      security:
+        - token: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the ticket type to delete
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              success: 
+                type: boolean
+                default: true
+  '/type':
+    get:
+      summary: Get all ticket types
+      description: "Get all ticket types' details"
+      security:
+        - token: []
+      parameters: [] # TODO: filter parameters? Do something about $count?
+      responses: 
+        200: 
+          description: Success. Returns details for all ticket types
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/TicketType'
+    post:
+      summary: Create a ticket type
+      description: Create a new ticket type with an automatically selected ID
+      security:
+        - admin: []
+      parameters:
+        - name: ticket_type
+          in: body
+          description: "A specification of the ticket type to be created."
+          required: true
+          schema: 
+            # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
+            allOf:
+              - $ref: '#/definitions/TicketType'
+              - required:
+                - name
+                - price
+                - ticket_limit
+      responses:
+        '200':
+          description: Success. Returns the new group.
+          schema:
+            $ref: '#/definitions/TicketType'
   '/user/{id}':
     get:
       summary: "Get a user's details"
@@ -289,7 +393,7 @@ paths:
       description: "Get all tickets' details. Warning: likely to be big currently..."
       security:
         - admin: []
-      parameters: [] # TODO: filter parameters?
+      parameters: [] # TODO: filter parameters? Do something about $count?
       responses: 
         200: 
           description: Success. Returns details for all tickets

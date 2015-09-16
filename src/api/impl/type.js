@@ -9,13 +9,13 @@ var runSql = connection.runSql;
 var Q = require("q");
 var _ = require("lodash");
 
-module.exports = type
+module.exports = type;
 
 function type(id) {
 	return {
 		get: get,
 		put: put,
-		del: del
+		delete: del
 	};
 
 	function get() {
@@ -34,15 +34,15 @@ function type(id) {
 		});
 	}
 
-	function put(ticket_type) {
+	function put(data) {
 
 		var allowedGroups;
-		if (ticket_type.groups !== undefined) {
-			allowedGroups = ticket_type.groups;
+		if (data.ticket_type.groups !== undefined) {
+			allowedGroups = data.ticket_type.groups;
 		}
 
 		var sql = "UPDATE ticket_type SET ? WHERE id=?;";
-		var promise = runSql(sql, [ticket_type, id]);
+		var promise = runSql(sql, [data.ticket_type, id]);
 
 		if (allowedGroups !== undefined) {
 			var groupPromise = setAllowedGroups(id, allowedGroups);
@@ -55,10 +55,16 @@ function type(id) {
 	}
 
 	function del() {
-		var promise = runSql("SELECT COUNT(*) FROM ticket WHERE ticket_type_id=? AND status<>'CANCELLED' AND status<>'CANCELLED_WL';", [id]);
+		var promise = runSql("SELECT COUNT(*) AS c FROM ticket WHERE ticket_type_id=? AND status<>'CANCELLED' AND status<>'CANCELLED_WL';", [id]);
 
 		return promise.then(function(rows) {
-			if (rows[0]) throw new Error('You cannot delete a ticket type if there are tickets that exist with that ticket type.');
+			if (rows.length!==1) {
+				throw new Error("Unexpected MySQL Error");
+			} else if (rows[0].c > 0) { 
+				var e = new Error('You cannot delete a ticket type if there are tickets that exist with that ticket type.');
+				e.code = 400;
+				throw e;
+			}
 			return runSql("DELETE FROM ticket WHERE ticket_type_id=?;", [id]);
 		}).then(function() {
 			return runSql("DELETE FROM group_access_right WHERE ticket_type_id = ?;", [id]);
@@ -90,11 +96,17 @@ function type(id) {
 	}
 }
 
-type.post = function post(ticket_type) {
+type.post = function post(data) {
 	var sql = "INSERT INTO ticket_type SET ?;";
 
-	return runSql(sql, [ticket_type])
+	return runSql(sql, [data.ticket_type])
 		.then(function(result) {
-			return _id(result.insertId).get();
+			return type(result.insertId).get();
 		});
-}
+	};
+
+type.get = function get(opts) {
+	var sql = connection.getFilteredSQL("ticket_type", opts);
+
+	return runSql(sql);
+};
