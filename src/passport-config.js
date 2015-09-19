@@ -49,14 +49,6 @@ passport.use(new BearerStrategy(BearerStrategyCallback));
 // I don't know why we need (de)serialization functions but things get unhappy
 // if they don't exist
 
-passport.deserializeUser(function(user, done) {
-    done(null, user);
-});
-
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-
 function BearerStrategyCallback(token, done) {
     try {
         var decoded = jwt.decode(token, secret);
@@ -117,7 +109,7 @@ function LocalStrategyCallback(email, password, done) {
     var count = (email.match(/@/g) || []).length;
     if (count !== 1) {
         return done(null, false, {
-            message: __("Invalid email address")
+            message: "Invalid email address"
         });
     }
     // try to find user in db with crsid
@@ -127,18 +119,18 @@ function LocalStrategyCallback(email, password, done) {
                 // user not registered
                 throw {
                     // deliberately not saying whether it's email or password that was wrong
-                    message: __("Invalid credentials")
+                    message: "Invalid credentials"
                 };
             } else if (values.length > 1) {
                 throw {
-                    message: __("Unexpectedly found many users :(")
+                    message: "Unexpectedly found many users :("
                 };
             } else {
                 var user = values[0];
                 if (user.is_verified === 0) {
                     // user is not verified
                     throw {
-                        message: __("This email address has not been verified. <a href='/confirm/resend/" + user.email + "'>Click here</a> to resend the verification code.")
+                        message: "This email address has not been verified. <a href='/confirm/resend/" + user.email + "'>Click here</a> to resend the verification code."
                     };
                 } else {
                     var hash = crypto.createHash('md5');
@@ -148,17 +140,19 @@ function LocalStrategyCallback(email, password, done) {
                         return getToken(user.id);
                     } else {
                         throw {
-                            message: __("Invalid credentials")
+                            message: "Invalid credentials"
                         };
                     }
                 }
             }
+            console.log(values);
         })
         .then(function(token) {
             return done(null, {
                 token: token,
             });
         }, function(err) {
+            console.log(err);
             return done(null, false, err);
         });
 }
@@ -237,7 +231,7 @@ function getUser(userId) {
         .then(function(results) {
             if (results.length !== 1) {
                 throw {
-                    error: __("Unexpected user length")
+                    error: "Unexpected user length"
                 };
             }
             return results[0];

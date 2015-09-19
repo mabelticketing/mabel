@@ -22,22 +22,75 @@ var router = express.Router();
 module.exports = router;
 
 
+router
+	.use(
+		bodyParser.urlencoded({ extended: true }),
+		bodyParser.json()
+	);
+	
+
 /****************************
 * Authentication            *
 ****************************/
 
-// All API routes should be authenticated with an access_token
+// Auth-related routes should not be authenticated
+// login routes work by redirecting to /
+
+router.route('/auth')
+	.post(
+		function(req, res, next) {
+			// login via mabel account
+			passport.authenticate('local', function(err, user, info) {
+				if (err) {
+					return res.json({
+						error: err.message
+					});
+				}
+				if (!user) {
+					return res.json({
+						error: info.message
+					});
+				}
+				req.user = user;
+				return next();
+			})(req, res);
+		},
+		function(req, res) {
+			// prepare response, and set cookie
+			// NB to view cookies in postman you need to turn "Interceptor" on then check the cookies tab
+			res.cookie('mabelAuthToken',req.user.token, {maxAge: 1 * 24 * 60 * 60 * 1000 , httpOnly: false});
+			res.json({
+				token: req.user.token,
+				success: true
+			});
+
+		});
+
+
+router.route('/confirmation/:conf_id')
+	.get(
+		function(req, res) {
+			// verify email address
+			res.send("verifying");
+		});
+
+
+// All remaining API routes should be authenticated with an access_token
 
 router
 	.use(
 		passport.authenticate('bearer', {
 			session: false
 		})
-	)
-	.use(
-		bodyParser.json()
 	);
 
+router.route('/auth')
+	.get(
+		// test route
+		function (req, res) {
+			res.json(req.user);
+		}	
+	);
 
 /****************************
 * Group                     *
@@ -273,7 +326,7 @@ router.route("/user/:id")
 				$.marshallPromise(res, api.user.id(id).del());
 			} else {
 				res.status(500).send({
-					error: 'An admin cannot delete themself.'
+					error: 'Even an admin cannot delete themself.'
 				});
 			}
 		}

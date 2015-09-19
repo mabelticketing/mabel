@@ -36,7 +36,7 @@ router.route('/login/mabel')
 				res.render("loginForm.jade", data);
 			}
 
-			passport.authenticate('local', function(err, user, info) {
+			passport.authenticate('local', {session: false }, function(err, user, info) {
 				if (err) {
 					return page({
 						email: req.body.email,
