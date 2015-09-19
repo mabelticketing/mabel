@@ -19,17 +19,15 @@ function type(id) {
 	};
 
 	function get() {
-		// This returns a group access rights with the result
-		// for your convenience.
+		// This returns a list of groups which currently have access to this
+		// ticket type for your convenience.
 		return Q.all([
 			runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [id]), 
-			runSql("SELECT * FROM group_access_right WHERE ticket_type_id=?;", [id])
-		]).then(function(values) {
-			if (values[0].length !== 1) throw new Error("Expected one ticket type but got " + values[0].length);
-			var type = values[0][0];
-			type.groups = _.map(values[1], function (right) {
-				return right.group_id;
-			});
+			runSql("SELECT * FROM group_access_right WHERE ticket_type_id=? AND open_time<UNIX_TIMESTAMP() AND close_time>UNIX_TIMESTAMP();", [id])
+		]).spread(function(types, rights) {
+			if (types.length !== 1) throw new Error("Expected one ticket type but got " + types.length);
+			var type = types[0];
+			type.groups = _.pluck(rights, 'group_id');
 			return type;
 		});
 	}
@@ -72,41 +70,62 @@ function type(id) {
 			return runSql("DELETE FROM ticket_type WHERE id=?;", [id]);
 		});
 	}
-
-	// HELPERS (not exposed)
-
-	function setAllowedGroups(groups) {
-		// we expect this to be a full specification of user groups
-		// i.e. any groups not mentioned should be removed
-		var delSql = "DELETE FROM group_access_right WHERE ticket_type_id=?;";
-
-		return runSql(delSql, [id])
-			.then(function() {
-				var insSql = "INSERT INTO group_access_right SET ?;";
-
-				// prepare statement for each group membership
-				var promises = _.map(groups, function(group) {
-					return runSql(insSql, [{
-						ticket_type_id: id,
-						group_id: group
-					}]);
-				});
-				return Q.all(promises);
-			});
-	}
 }
 
 type.post = function post(data) {
-	var sql = "INSERT INTO ticket_type SET ?;";
 
-	return runSql(sql, [data.ticket_type])
+	var allowedGroups;
+	if (data.ticket_type.groups !== undefined) {
+		allowedGroups = data.ticket_type.groups;
+	}
+
+	return runSql("INSERT INTO ticket_type SET ?;", [data.ticket_type])
 		.then(function(result) {
-			return type(result.insertId).get();
+
+			var promise = type(result.insertId).get();
+			if (allowedGroups !== undefined) {
+				var groupPromise = setAllowedGroups(result.insertId, allowedGroups);
+				promise = Q.all([promise, groupPromise]);
+			}
+			return promise;
+		}).spread(function(newType) {
+			return newType;
 		});
-	};
+};
 
 type.get = function get(opts) {
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 
-	return runSql(sql);
+	Q.all(
+		runSql(sql),
+		runSql("SELECT * FROM group_access_right WHERE open_time<UNIX_TIMESTAMP() AND close_time>UNIX_TIMESTAMP();")
+	).spread(function(types, rights) {
+		return _.map(types, function(type) {
+			type.groups = _.pluck(_.filter(rights, {ticket_type_id: type.id}), 'group_id');
+			return type;
+		});
+	});
 };
+
+
+// HELPERS (not exposed)
+
+function setAllowedGroups(id, groups) {
+	// we expect this to be a full specification of user groups
+	// i.e. any groups not mentioned should be removed
+	var delSql = "DELETE FROM group_access_right WHERE ticket_type_id=?;";
+
+	return runSql(delSql, [id])
+		.then(function() {
+			var insSql = "INSERT INTO group_access_right SET ?;";
+
+			// prepare statement for each group membership
+			var promises = _.map(groups, function(group) {
+				return runSql(insSql, [{
+					ticket_type_id: id,
+					group_id: group
+				}]);
+			});
+			return Q.all(promises);
+		});
+}

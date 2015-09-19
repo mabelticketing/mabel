@@ -104,7 +104,7 @@ paths:
             $ref: '#/definitions/Group'
     put:
       summary: Modify a group
-      description: Update the group with the given ID
+      description: "Update the group with the given ID. Note that the ID of the group cannot be changed, and validation will fail if 'id' is present as a property of the body"
       security:
         - admin: []
       parameters:
@@ -113,7 +113,10 @@ paths:
           description: A specification of the group to be updated. Omitted properties will remain unchanged.
           required: true
           schema: 
-            $ref: '#/definitions/Group'
+            allOf:
+              - $ref: '#/definitions/Group'
+              - x-forbid: 
+                - id
         - name: id
           in: path
           minimum: 1
@@ -166,7 +169,7 @@ paths:
               $ref: '#/definitions/Group'
     post:
       summary: Create a group
-      description: Create a new group with an automatically selected ID
+      description: Create a new group with an automatically selected ID. Note that validation will fail if 'id' is provided.
       security:
         - admin: []
       parameters:
@@ -182,13 +185,15 @@ paths:
                 - name
                 - description
                 - ticket_limit
+                x-forbid: 
+                  - id 
       responses:
         '200':
           description: Success. Returns the new group.
           schema:
             $ref: '#/definitions/Group'
   '/type/{id}':
-    get: # TODO: this actually returns group access rights too
+    get:
       summary: Get ticket type details
       description: Get ticket type details
       security:
@@ -214,10 +219,13 @@ paths:
       parameters:
         - name: ticket_type
           in: body
-          description: A specification of the ticket type to be updated. Omitted properties will remain unchanged.
+          description: A specification of the ticket type to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body.
           required: true
           schema: 
-            $ref: '#/definitions/TicketType' # TODO: This also accepts .groups as an array of group ids
+            allOf:
+              - $ref: '#/definitions/TicketType' 
+              - x-forbid: 
+                - id
         - name: id
           in: path
           minimum: 1
@@ -278,17 +286,14 @@ paths:
           in: body
           description: "A specification of the ticket type to be created."
           required: true
-          schema: 
-            # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
+          schema:
             allOf:
               - $ref: '#/definitions/TicketType'
-              - required:
-                - name
-                - price
-                - ticket_limit
+              - x-forbid: 
+                - id
       responses:
         '200':
-          description: Success. Returns the new group.
+          description: Success. Returns the new ticket type.
           schema:
             $ref: '#/definitions/TicketType'
   '/user/{id}':
@@ -373,8 +378,11 @@ paths:
           in: body
           description: A specification of the ticket to be updated. Omitted properties will remain unchanged.
           required: true
-          schema: 
-            $ref: '#/definitions/Ticket'
+          schema:
+            allOf:
+              - $ref: '#/definitions/Ticket'
+              - x-forbid: 
+                - id
         - name: id
           in: path
           minimum: 1
@@ -412,8 +420,6 @@ paths:
           description: "A specification of the ticket to be created."
           required: true
           schema: 
-            # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
-            # TODO: Can we state that certain properties must NOT be present? e.g. for id/registration+time/transaction_value/status
             allOf:
               - $ref: '#/definitions/Ticket'
               - required:
@@ -421,6 +427,10 @@ paths:
                 - ticket_type_id
                 - guest_name
                 - payment_method_id
+                x-forbid: 
+                - id
+                - registration_time
+                - transaction_value
       responses:
         '200':
           description: Success. Returns the nesly created ticket
@@ -446,8 +456,6 @@ paths:
           description: Success
           schema:
             type: object
-            required:
-              - name
             properties:
               success: 
                 type: boolean
@@ -470,7 +478,11 @@ definitions:
       - message
       - success
       - error
-
+  Absent:
+    type: string
+    enum: 
+      - "Value must not be present"
+    maxLength: 0
   Token: 
     properties:
       token:
@@ -487,6 +499,7 @@ definitions:
         example: 1
         minimum: 1
         description: Ticket type identifier
+        readOnly: true
       name:
         type: string
         example: Standard
@@ -509,6 +522,14 @@ definitions:
         example: 1
         minimum: 0
         description: The number of tickets of this type that a single user may hold (may be null)
+      groups:
+        type: array
+        format: csv
+        items:
+          type: number
+          format: integer
+          minimum: 0
+
 
 
   User:
@@ -519,6 +540,7 @@ definitions:
         example: 1
         minimum: 1
         description: Mabel user identifier
+        readOnly: true
       name:
         type: string
         example: Mabel User
@@ -536,6 +558,7 @@ definitions:
         type: integer
         format: int32
         example: 14419663721
+        readOnly: true
         description: 'Date the user registered (or first logged in via Raven, which counts as registration) - seconds since unix epoch'
       password_md5:
         type: string
@@ -544,6 +567,7 @@ definitions:
       verification_code:
         type: string
         example: cJrE0uc4PzddPmr8AS6MBdKoQUdqYi9D
+        readOnly: true
         description: The code emailed to new users when they register via mabel. They have to verify their email by returning the code to us (clicking the link in the email)
       is_verified:
         type: boolean
@@ -558,6 +582,7 @@ definitions:
         format: int32
         example: 1
         minimum: 1
+        readOnly: true
         description: Group identifier
       name:
         type: string
@@ -581,6 +606,7 @@ definitions:
         format: int32
         example: 1
         minimum: 1
+        readOnly: true
         description: Payment method identifier
       name:
         type: string
@@ -605,6 +631,7 @@ definitions:
         format: int32
         example: 1
         minimum: 1
+        readOnly: true
         description: Ticket identifier
       user_id:
         type: integer
@@ -633,6 +660,7 @@ definitions:
         type: integer
         format: int32
         example: 14419663721
+        readOnly: true
         description: Date the ticket was booked (seconds since unix epoch)
       donation:
         type: boolean
@@ -643,6 +671,7 @@ definitions:
         type: number
         format: float
         example: 130.00
+        readOnly: true
         minimum: 0
         description: Redundant field indicating how much this ticket cost to book
       notes:
