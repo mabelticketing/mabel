@@ -8,38 +8,33 @@ insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	1,
 	'Standard',
 	135.00,
-	1000,
-	1
+	1000
 );
 
 insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	2,
 	'Queue Jump',
 	145.00,
-	100,
-	1
+	100
 );
 
 insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	3,
 	'Dining',
 	165.00,
-	100,
-	1
+	100
 );
 insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	4,
 	'Performer Discounted Ticket',
 	68.00,
-	100,
-	1
+	100
 );
 insert into ticket_type (id, name, price, ticket_limit) VALUES (
 	5,
 	'Donation',
 	2.00,
-	3000,
-	1
+	3000
 );
 
 insert into user (id, name, email, crsid, registration_time, is_verified) VALUES (
@@ -130,28 +125,24 @@ insert into payment_method (id, name, description, ticket_limit) VALUES (
 	1,
 	'College Bill',
 	'Payment will be added to the end of term college bill',
-	1,
 	1
 );
 insert into payment_method (id, name, description, ticket_limit) VALUES (
 	2,
 	'Cheque',
 	'Cheque made payable to "Emmanuel Colege May Ball"',
-	1,
 	2000
 );
 insert into payment_method (id, name, description, ticket_limit) VALUES (
 	3,
 	'Bank Transfer',
 	'Pay by Bank Transfer',
-	1,
 	2000
 );
 insert into payment_method (id, name, description, ticket_limit) VALUES (
 	4,
 	'PayPal',
 	'Pay online immediately with PayPal',
-	1,
 	2000
 );
 

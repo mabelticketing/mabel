@@ -382,7 +382,7 @@ paths:
         - name: id
           in: path
           minimum: 1
-          description: The ID of the ticket type ID to modify
+          description: The ID of the ticket type to modify
           required: true
           type: integer
           format: int32
@@ -391,6 +391,40 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/TicketType'
+  /user:
+    get:
+      summary: Get all users
+      description: "Get all users' details"
+      security:
+        - admin: []
+      parameters: []
+      responses:
+        '200':
+          description: Success. Returns details for all users
+          schema:
+            items:
+              $ref: '#/definitions/User'
+            type: array
+    post:
+      summary: Create a new user
+      description: Create a new user with an automatically allocated ID
+      security:
+        - admin: []
+      parameters:
+        - name: user
+          in: body
+          description: A specification of the user to be created.
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/User'
+              - x-forbid:
+                  - id
+      responses:
+        '200':
+          description: Success. Returns the new user.
+          schema:
+            $ref: '#/definitions/User'
   '/user/{id}':
     get:
       summary: "Get a user's details"
@@ -411,6 +445,294 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/User'
+    put:
+      summary: Modify a user
+      description: Update the user with the given ID
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: user
+          in: body
+          description: "A specification of the user to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body."
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/User'
+              - x-forbid:
+                  - id
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+  '/user/{id}/allowance':
+    get: 
+      summary: Get user allowance
+      description: "Get the user's remaining allowance -- i.e. the overall number of tickets that this user is allowed to buy currently, given the groups he is a member of and the tickets he has already bought."
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose allowance we wish to view
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            properties:
+              allowance:
+                type: integer
+                format: int32
+                minimum: 0
+  '/user/{id}/payment-method':
+    get: 
+      summary: Get user payment methods
+      description: "Get the user's available payment methods, taking into account the groups they are a member of. Note that this operation returns personalised ticket_limits -- i.e. taking into account the number of tickets this particular user as already bought using that payment method."
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PaymentMethod'
+  '/user/{id}/type':
+    get:
+      summary: Get available ticket types 
+      description: "gets the ticket types available to the user, with ticket limit adjusted to account for already bought tickets, and also adjusted to return 0 if there's anyone in the waiting list for that ticket type."
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  description: The ticket type id
+                name:
+                  type: string
+                  description: "The name of the ticket type"
+                price:
+                  type: number
+                  format: float 
+                  description: The price of one of these tickets
+                available:
+                  type: integer
+                  format: int32
+                  description: The total number of tickets of this type remaining for sale
+                  minimum: 0
+                allowance: 
+                  type: integer
+                  format: int32
+                  description: The number of tickets of this type which this user may currently purchase
+                  minimum: 0
+  '/user/{id}/ticket':
+    get:
+      summary: "Get user's tickets"
+      description: "Retrieve all tickets associated with the user. This includes cancelled tickets, and waiting list tickets (and cancelled waiting list tickets)"
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TicketFull'
+    post: 
+      summary: "Book tickets"
+      description: "(Attempt to) book a new list of tickets. Response body partitions successful tickets, invalid tickets, and tickets which were added to the waiting list."
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+        - name: tickets
+          in: body
+          description: The list of tickets the user would like to book
+          required: true
+          schema:
+            type: array
+            items: 
+              allOf:
+                - $ref: '#/definitions/Ticket'
+                - x-forbid: 
+                  - id
+                  - status
+                  - registration_time
+                  - transaction_value
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              booked:
+                type: array
+                items:
+                  $ref: '#/definitions/TicketFull'
+              waiting_list:
+                type: array
+                items: 
+                  $ref: '#/definitions/TicketFull'
+              failed:
+                type: array
+                items:
+                  $ref: '#/definitions/Ticket'
+              totalPrice:
+                type: number
+                example: 450.97
+                format: float
+              payment_deadline:
+                example: "Saturday, September 19th 2015"
+                type: string
+  '/user/{id}/ticket/{ticket_id}':
+    delete:
+      summary: "Cancel ticket"
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+        - name: ticket_id
+          in: path
+          minimum: 1
+          description: The ticket ID we're talking about
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            properties:
+              success:
+                default: true
+                type: boolean
+            required:
+              - name
+            type: object
+    get:
+      summary: "Get details for a single ticket"
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+        - name: ticket_id
+          in: path
+          minimum: 1
+          description: The ticket ID we're particularly talking about
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
+    put:
+      summary: "Update ticket details"
+      description: "Note all we can legally change this way is the guest name" # TODO: maybe also payment method?
+      security:
+        - self: []
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the user whose tickets we are interested in
+          required: true
+          type: integer
+          format: int32
+        - name: ticket_id
+          in: path
+          minimum: 1
+          description: The ticket ID we're particularly talking about
+          required: true
+          type: integer
+          format: int32
+        - name: tickets
+          in: body
+          description: The updated ticket details
+          required: true
+          schema:
+            type: array
+            items: 
+              properties:
+                guest_name: 
+                  type: string
+                  example: Christopher Little
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
+
 
   /token:
     get:
@@ -476,19 +798,6 @@ definitions:
       - message
       - success
       - error
-  Absent:
-    type: string
-    enum: 
-      - "Value must not be present"
-    maxLength: 0
-  Token: 
-    properties:
-      token:
-        type: string
-        # TODO: invalidate this token
-        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoIjp0cnVlLCJpZCI6MX0.lzALTSPB3iAHYBan5oBbJ23rV_NMfXKQpWCFATwaJwU
-        description: An authorization token for use with the rest of the API
-
   TicketType:
     properties:
       id: 
@@ -668,7 +977,7 @@ definitions:
       transaction_value:
         type: number
         format: float
-        example: 130.00
+        example: 130.99
         readOnly: true
         minimum: 0
         description: Redundant field indicating how much this ticket cost to book
@@ -677,6 +986,86 @@ definitions:
         example: Half of this payment has been received by cheque
         default: ""
         description: Arbitrary notes field for admins to keep track of ticket perculiarities
+      status:
+        type: string
+        example: PENDING
+        description: "An indication of the ticket's status"
+        default: PENDING
+        enum: 
+          - PENDING
+          - CONFIRMED
+          - CANCELLED
+          - ADMITTED
+          - PENDING_WL
+          - CANCELLED_WL
+  Token: 
+    properties:
+      token:
+        type: string
+        # TODO: invalidate this token
+        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoIjp0cnVlLCJpZCI6MX0.lzALTSPB3iAHYBan5oBbJ23rV_NMfXKQpWCFATwaJwU
+        description: An authorization token for use with the rest of the API
+  # I don't like having to repeat myself here, but it's the tidiest way to add extra properties.
+  # Can use allOf but then swagger UI struggles to render stuff which is unhelpful.
+  # TODO: Add a $merge spec property which we can pick up pre-schema validation to avoid this faff  (do the same with a $exclude instead of x-forbid)
+  TicketFull:
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        readOnly: true
+        description: Ticket identifier
+      user_id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: User identifier for the ticket booker
+      ticket_type_id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Ticket type identifier for this ticket
+      name:   
+        type: string
+        example: Standard
+        description: The name of this type of ticket
+      guest_name:
+        type: string
+        example: Christopher Little
+        default: 'Mabel Guest'
+        description: The name which should be printed on this ticket
+      payment_method_id:
+        type: integer
+        format: int32
+        example: 1
+        minimum: 1
+        description: Payment method identifier for this ticket
+      payment_method:
+        type: string
+        example: "College Bill"
+        description: The name of the payment method used to book this ticket
+      registration_time:
+        type: integer
+        format: int32
+        example: 14419663721
+        readOnly: true
+        description: Date the ticket was booked (seconds since unix epoch)
+      donation:
+        type: boolean
+        example: true
+        default: false
+        description: Whether the booker chose to make a donation which this ticket
+      transaction_value:
+        type: number
+        format: float
+        example: 130.99
+        readOnly: true
+        minimum: 0
+        description: Redundant field indicating how much this ticket cost to book
       status:
         type: string
         example: PENDING

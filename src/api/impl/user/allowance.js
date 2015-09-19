@@ -15,6 +15,11 @@ function allowance(user_id) {
 	};
 
 	function get() {
-		return runSql("SELECT * FROM user_group_allowance WHERE user_id=?", [user_id]);
+		return runSql("SELECT * FROM user_group_allowance WHERE user_id=?", [user_id])
+			.then(function(rows) {
+				return {
+					allowance: rows[0].allowance
+				};
+			});
 	}
 }

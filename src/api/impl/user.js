@@ -21,9 +21,9 @@ function user(id) {
 
 		// subpaths
 		allowance: require('./user/allowance.js')(id),
-		payment_methods: require('./user/payment-methods.js')(id),
-		types: require('./user/types.js')(id),
-		tickets: require("./user/tickets.js")(id),
+		'payment-method': require('./user/payment-methods.js')(id),
+		type: require('./user/types.js')(id),
+		ticket: require("./user/tickets.js")(id),
 	};
 
 	function get() {

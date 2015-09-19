@@ -15,12 +15,12 @@ Example output:
 */
 CREATE OR REPLACE VIEW ticket_status_count AS
 SELECT ticket_type_id,
-       SUM(IF(status='PENDING', 1, 0)) PENDING,
-       SUM(IF(status='CONFIRMED', 1, 0)) CONFIRMED,
-       SUM(IF(status='CANCELLED', 1, 0)) CANCELLED,
-       SUM(IF(status='ADMITTED', 1, 0)) ADMITTED,
-       SUM(IF(status='PENDING_WL', 1, 0)) PENDING_WL,
-       SUM(IF(status='CANCELLED_WL', 1, 0)) CANCELLED_WL
+	   SUM(IF(status='PENDING', 1, 0)) PENDING,
+	   SUM(IF(status='CONFIRMED', 1, 0)) CONFIRMED,
+	   SUM(IF(status='CANCELLED', 1, 0)) CANCELLED,
+	   SUM(IF(status='ADMITTED', 1, 0)) ADMITTED,
+	   SUM(IF(status='PENDING_WL', 1, 0)) PENDING_WL,
+	   SUM(IF(status='CANCELLED_WL', 1, 0)) CANCELLED_WL
 FROM ticket
 GROUP BY ticket_type_id;
 
@@ -34,6 +34,17 @@ SELECT user_id,
 	FROM ticket
 	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ATTENDING'OR status='PENDING_WL')
 	GROUP BY user_id, ticket_type_id;
+
+/*
+Get the number of tickets bought by a particular user, grouped by payment method
+ */
+CREATE OR REPLACE VIEW user_bought_by_payment_method AS
+SELECT user_id,
+		payment_method_id,
+		COUNT(*) bought
+	FROM ticket
+	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ATTENDING'OR status='PENDING_WL')
+	GROUP BY user_id, payment_method_id;
 
 /* 
 Get the number of tickets bought by a particular user overall 
@@ -68,6 +79,8 @@ SELECT user_id, MAX(ticket_limit) l
    FROM user_group
    JOIN user_group_membership ON user_group.id=user_group_membership.group_id
    GROUP BY user_id;
+
+
 
 /* PROCEDURES
 
@@ -178,6 +191,28 @@ BEGIN
 		WHERE B.cap>A.sold AND C.wl<1;
 END//
 
+
+DROP PROCEDURE IF EXISTS user_payment_types//
+CREATE PROCEDURE user_payment_types (IN _user_id int)
+
+BEGIN 
+SELECT payment_method.id,
+	   name, 
+	   description, 
+	   GREATEST(ticket_limit - IFNULL(bought, 0), 0) AS ticket_limit
+	FROM payment_method 
+		JOIN 
+			# See which payment methods our groups give us access to
+			(SELECT DISTINCT(payment_method_id) FROM 
+				(SELECT * FROM user_group_membership WHERE user_id=_user_id) A 
+					JOIN group_payment_method_access 
+					ON A.group_id=group_payment_method_access.group_id) B 
+		ON B.payment_method_id=payment_method.id 
+		LEFT JOIN 
+			(SELECT payment_method_id AS id, bought FROM user_bought_by_payment_method
+				WHERE user_bought_by_payment_method.user_id=_user_id) C
+		ON C.id=payment_method.id;
+END//
 
 
 

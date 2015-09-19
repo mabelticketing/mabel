@@ -12,20 +12,46 @@ var api = require("../../api.js");
 var Q = require("q");
 var moment = require("moment");
 
-module.exports = ticket;
+module.exports = function (user_id) {
 
+	ticket.get = get;
+	ticket.post = post;
 
+	return ticket;
 
+	function ticket(ticket_id) {
+		return {
+			get: get,
+			put: put,
+			delete: del
+		};
 
-// use with e.g. api.user(12).ticket.post({...});
-function ticket(user_id) {
-	return {
-		get:get,
-		post: post
-	};
+		function get() {
+			return runSql("SELECT * FROM ticket WHERE id=? LIMIT 1;",[ticket_id])
+				.then(function(rows) {
+					if (rows.length<1) {
+						var e = new Error("Ticket not found");
+						e.code = 404;
+						throw e;
+					}
+					return rows[0];
+				});
+		}
+
+		function put(opts) {
+			var ticket = opts.ticket;
+			return runSql("UPDATE ticket SET ? WHERE id=?",[ticket, ticket_id]);
+		}
+
+		function del() {
+			return runSql("DELETE FROM ticket where id=?",[ticket_id]).then(function() {
+				return {success:true};
+			});
+		}
+	}
 
 	function get() {
-		var sql = "SELECT ticket.book_time book_time, ticket.id id, ticket.transaction_value, \
+		var sql = "SELECT ticket.registration_time registration_time, ticket.id id, ticket.transaction_value, \
 					 ticket.guest_name guest_name, ticket.status status, ticket.donation donation, \
 					ticket_type.name name, ticket_type.id type_id, \
 					payment_method.name payment_method \
@@ -35,8 +61,9 @@ function ticket(user_id) {
 				WHERE ticket.user_id=?";
 		return runSql(sql, [user_id]);
 	}
-	
-	function post(tickets) {
+
+	function post(data) {
+		var tickets = data.tickets;
 
 		return check_types(tickets)
 			.spread(function(booked, failed) {
@@ -70,6 +97,13 @@ function ticket(user_id) {
 				console.log(user.name + " just made a booking - " + booked.length + " tickets" + 
 					(waiting_list.length>0?" (and" + waiting_list.length + " waiting list)":"") +
 					"(£" + data.totalPrice + ")");
+				return {
+					booked: booked, 
+					waiting_list:waiting_list,
+					failed: failed,
+					totalPrice: data.totalPrice,
+					payment_deadline: data.payment_deadline
+				};
 			});
 	}
 
@@ -239,4 +273,5 @@ function ticket(user_id) {
 					.value();
 			});
 	}
-}
+
+};
