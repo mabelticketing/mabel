@@ -37,7 +37,10 @@ security: # default security is just to have an auth token
 paths:
   /group:
     get:
+      summary: Get all groups
       description: "Get all groups' details"
+      security:
+        - admin: []
       parameters: []
       responses:
         '200':
@@ -46,11 +49,11 @@ paths:
             items:
               $ref: '#/definitions/Group'
             type: array
+    post:
+      summary: Create a group
+      description: "Create a new group with an automatically selected ID. Note that validation will fail if 'id' is provided."
       security:
         - admin: []
-      summary: Get all groups
-    post:
-      description: "Create a new group with an automatically selected ID. Note that validation will fail if 'id' is provided."
       parameters:
         - name: group
           in: body
@@ -70,12 +73,12 @@ paths:
           description: Success. Returns the new group.
           schema:
             $ref: '#/definitions/Group'
-      security:
-        - admin: []
-      summary: Create a group
   '/group/{id}':
     delete:
+      summary: Delete a group
       description: Delete the group with the given ID
+      security:
+        - admin: []
       parameters:
         - name: id
           in: path
@@ -95,11 +98,11 @@ paths:
             required:
               - name
             type: object
+    get:
+      summary: Get group details
+      description: Get group details. Only accessible to admins.
       security:
         - admin: []
-      summary: Delete a group
-    get:
-      description: Get group details. Only accessible to admins.
       parameters:
         - name: id
           in: path
@@ -113,11 +116,11 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Group'
+    put:
+      summary: Modify a group
+      description: "Update the group with the given ID. Note that the ID of the group cannot be changed, and validation will fail if 'id' is present as a property of the body"
       security:
         - admin: []
-      summary: Get group details
-    put:
-      description: "Update the group with the given ID. Note that the ID of the group cannot be changed, and validation will fail if 'id' is present as a property of the body"
       parameters:
         - name: group
           in: body
@@ -140,9 +143,6 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Group'
-      security:
-        - admin: []
-      summary: Modify a group
   /payment-method:
     get:
       description: Get details for all payment methods available
@@ -159,7 +159,10 @@ paths:
       summary: Get all payment method details
   '/payment-method/{id}':
     get:
+      summary: Get payment method details
       description: Get details for the given payment method
+      security:
+        - token: []
       parameters:
         - name: id
           in: path
@@ -173,9 +176,6 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/PaymentMethod'
-      security:
-        - token: []
-      summary: Get payment method details
   /ticket:
     delete:
       description: Cancel a bunch of tickets at once
@@ -202,7 +202,10 @@ paths:
         - admin: []
       summary: Cancel ticket
     get:
+      summary: Get all tickets
       description: "Get all tickets' details. Warning: likely to be big currently..."
+      security:
+        - admin: []
       parameters: []
       responses:
         '200':
@@ -211,11 +214,11 @@ paths:
             items:
               $ref: '#/definitions/Ticket'
             type: array
+    post:
+      summary: Create a ticket
+      description: 'Create a new ticket with an automatically allocated ID. This operation is designed for admin usage, and ticket validation is skipped. Users should use the /user/{id}/ticket route instead.'
       security:
         - admin: []
-      summary: Get all tickets
-    post:
-      description: 'Create a new ticket with an automatically allocated ID. This operation is designed for admin usage, and ticket validation is skipped. Users should use the /user/{id}/ticket route instead.'
       parameters:
         - name: ticket
           in: body
@@ -238,12 +241,12 @@ paths:
           description: Success. Returns the nesly created ticket
           schema:
             $ref: '#/definitions/Ticket'
-      security:
-        - admin: []
-      summary: Create a ticket
   '/ticket/{id}':
     get:
+      summary: Get ticket details
       description: Retrieve details for the ticket with given ID (for admins)
+      security:
+        - token: []
       parameters:
         - name: id
           in: path
@@ -257,11 +260,11 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Ticket'
-      security:
-        - token: []
-      summary: Get ticket details
     put:
+      summary: Modify a ticket
       description: Update the ticket with the given ID using the details in the body
+      security:
+        - admin: []
       parameters:
         - name: ticket
           in: body
@@ -284,59 +287,12 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Ticket'
-      security:
-        - admin: []
-      summary: Modify a ticket
-  /token:
-    get:
-      description: Trade an existing auth token for a newer one which will expire later
-      parameters:
-        - name: access_token
-          in: query
-          description: The old token we want to replace
-          type: string
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Token'
-      summary: Get a new auth token
-  /token/mabel:
-    get:
-      description: Login using mabel credentials and get an authorization token for use with the rest of the API. Can either use basic authorization or pass in email and password as query parameters (not recommended outside of testbed)
-      parameters:
-        - name: email
-          in: query
-          description: The email address of the user trying to log in
-          type: string
-          format: email
-        - name: password
-          in: query
-          description: The password of the user trying to log in
-          type: string
-          format: password
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Token'
-      security:
-        - mabel: []
-      summary: Get an auth token using mabel credentials
-  /token/raven:
-    get:
-      description: Trade a Raven token for a mabel authorization token for use with the rest of the API.
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Token'
-      security:
-        - raven: []
-      summary: Get an auth token using Raven token
   /type:
     get:
+      summary: Get all ticket types
       description: "Get all ticket types' details"
+      security:
+        - token: []
       parameters: []
       responses:
         '200':
@@ -345,11 +301,11 @@ paths:
             items:
               $ref: '#/definitions/TicketType'
             type: array
-      security:
-        - token: []
-      summary: Get all ticket types
     post:
+      summary: Create a ticket type
       description: Create a new ticket type with an automatically selected ID
+      security:
+        - admin: []
       parameters:
         - name: ticket_type
           in: body
@@ -365,12 +321,12 @@ paths:
           description: Success. Returns the new ticket type.
           schema:
             $ref: '#/definitions/TicketType'
-      security:
-        - admin: []
-      summary: Create a ticket type
   '/type/{id}':
     delete:
+      summary: Delete a ticket type
       description: Delete the ticket type with the given ID
+      security:
+        - token: []
       parameters:
         - name: id
           in: path
@@ -390,11 +346,11 @@ paths:
             required:
               - name
             type: object
+    get:
+      summary: Get ticket type details
+      description: Get ticket type details
       security:
         - token: []
-      summary: Delete a ticket type
-    get:
-      description: Get ticket type details
       parameters:
         - name: id
           in: path
@@ -408,11 +364,11 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/TicketType'
+    put:
+      summary: Modify a ticket type
+      description: Update the ticket type with the given ID
       security:
         - token: []
-      summary: Get ticket type details
-    put:
-      description: Update the ticket type with the given ID
       parameters:
         - name: ticket_type
           in: body
@@ -435,12 +391,13 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/TicketType'
-      security:
-        - token: []
-      summary: Modify a ticket type
   '/user/{id}':
     get:
+      summary: "Get a user's details"
       description: "Get a user's details. Normal users can only get themselves, admins can get anyone."
+      security:
+        - self: []
+        - admin: []
       parameters:
         - name: id
           in: path
@@ -454,10 +411,54 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/User'
+
+  /token:
+    get:
+      summary: Get a new auth token
+      description: Trade an existing auth token for a newer one which will expire later
+      parameters:
+        - name: access_token
+          in: query
+          description: The old token we want to replace
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Token'
+  /token/mabel:
+    get:
+      summary: Get an auth token using mabel credentials
+      description: Login using mabel credentials and get an authorization token for use with the rest of the API. Can either use basic authorization or pass in email and password as query parameters (not recommended outside of testbed)
       security:
-        - self: []
-        - admin: []
-      summary: "Get a user's details"
+        - mabel: []
+      parameters:
+        - name: email
+          in: query
+          description: The email address of the user trying to log in
+          type: string
+          format: email
+        - name: password
+          in: query
+          description: The password of the user trying to log in
+          type: string
+          format: password
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Token'
+  /token/raven:
+    get:
+      summary: Get an auth token using Raven token
+      description: Trade a Raven token for a mabel authorization token for use with the rest of the API.
+      security:
+        - raven: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Token'
 
 
 
