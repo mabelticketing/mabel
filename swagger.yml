@@ -34,11 +34,261 @@ securityDefinitions:
 security: # default security is just to have an auth token
   - token: []
 
-
 paths:
-  '/token':
+  /group:
     get:
-      summary: Get a new auth token
+      description: "Get all groups' details"
+      parameters: []
+      responses:
+        '200':
+          description: Success. Returns details for all groups
+          schema:
+            items:
+              $ref: '#/definitions/Group'
+            type: array
+      security:
+        - admin: []
+      summary: Get all groups
+    post:
+      description: "Create a new group with an automatically selected ID. Note that validation will fail if 'id' is provided."
+      parameters:
+        - name: group
+          in: body
+          description: A specification of the group to be created.
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/Group'
+              - required:
+                  - name
+                  - description
+                  - ticket_limit
+                x-forbid:
+                  - id
+      responses:
+        '200':
+          description: Success. Returns the new group.
+          schema:
+            $ref: '#/definitions/Group'
+      security:
+        - admin: []
+      summary: Create a group
+  '/group/{id}':
+    delete:
+      description: Delete the group with the given ID
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The group ID to delete
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            properties:
+              success:
+                default: true
+                type: boolean
+            required:
+              - name
+            type: object
+      security:
+        - admin: []
+      summary: Delete a group
+    get:
+      description: Get group details. Only accessible to admins.
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The group ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Group'
+      security:
+        - admin: []
+      summary: Get group details
+    put:
+      description: "Update the group with the given ID. Note that the ID of the group cannot be changed, and validation will fail if 'id' is present as a property of the body"
+      parameters:
+        - name: group
+          in: body
+          description: A specification of the group to be updated. Omitted properties will remain unchanged.
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/Group'
+              - x-forbid:
+                  - id
+        - name: id
+          in: path
+          minimum: 1
+          description: The group ID to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Group'
+      security:
+        - admin: []
+      summary: Modify a group
+  /payment-method:
+    get:
+      description: Get details for all payment methods available
+      parameters: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/PaymentMethod'
+            type: array
+      security:
+        - token: []
+      summary: Get all payment method details
+  '/payment-method/{id}':
+    get:
+      description: Get details for the given payment method
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The payment method ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/PaymentMethod'
+      security:
+        - token: []
+      summary: Get payment method details
+  /ticket:
+    delete:
+      description: Cancel a bunch of tickets at once
+      parameters:
+        - name: ids
+          in: query
+          description: A csv list of ticket IDs for tickets to be deleted.
+          required: true
+          type: array
+          format: csv
+          items:
+            type: number
+            format: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            properties:
+              success:
+                default: true
+                type: boolean
+            type: object
+      security:
+        - admin: []
+      summary: Cancel ticket
+    get:
+      description: "Get all tickets' details. Warning: likely to be big currently..."
+      parameters: []
+      responses:
+        '200':
+          description: Success. Returns details for all tickets
+          schema:
+            items:
+              $ref: '#/definitions/Ticket'
+            type: array
+      security:
+        - admin: []
+      summary: Get all tickets
+    post:
+      description: 'Create a new ticket with an automatically allocated ID. This operation is designed for admin usage, and ticket validation is skipped. Users should use the /user/{id}/ticket route instead.'
+      parameters:
+        - name: ticket
+          in: body
+          description: A specification of the ticket to be created.
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/Ticket'
+              - required:
+                  - user_id
+                  - ticket_type_id
+                  - guest_name
+                  - payment_method_id
+                x-forbid:
+                  - id
+                  - registration_time
+                  - transaction_value
+      responses:
+        '200':
+          description: Success. Returns the nesly created ticket
+          schema:
+            $ref: '#/definitions/Ticket'
+      security:
+        - admin: []
+      summary: Create a ticket
+  '/ticket/{id}':
+    get:
+      description: Retrieve details for the ticket with given ID (for admins)
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ticket ID to retrieve
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
+      security:
+        - token: []
+      summary: Get ticket details
+    put:
+      description: Update the ticket with the given ID using the details in the body
+      parameters:
+        - name: ticket
+          in: body
+          description: A specification of the ticket to be updated. Omitted properties will remain unchanged.
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/Ticket'
+              - x-forbid:
+                  - id
+        - name: id
+          in: path
+          minimum: 1
+          description: The ticket ID to modify
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
+      security:
+        - admin: []
+      summary: Modify a ticket
+  /token:
+    get:
       description: Trade an existing auth token for a newer one which will expire later
       parameters:
         - name: access_token
@@ -50,23 +300,10 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Token'
-  '/token/raven':
+      summary: Get a new auth token
+  /token/mabel:
     get:
-      summary: Get an auth token using Raven token
-      description: Trade a Raven token for a mabel authorization token for use with the rest of the API. 
-      security:
-        - raven: []
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Token'
-  '/token/mabel':
-    get:
-      summary: Get an auth token using mabel credentials
       description: Login using mabel credentials and get an authorization token for use with the rest of the API. Can either use basic authorization or pass in email and password as query parameters (not recommended outside of testbed)
-      security:
-        - mabel: []
       parameters:
         - name: email
           in: query
@@ -83,121 +320,81 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Token'
-  '/group/{id}':
+      security:
+        - mabel: []
+      summary: Get an auth token using mabel credentials
+  /token/raven:
     get:
-      summary: Get group details
-      description: Get group details. Only accessible to admins.
-      security:
-        - admin: []
-      parameters:
-        - name: id
-          in: path
-          minimum: 1
-          description: The group ID to retrieve
-          required: true
-          type: integer
-          format: int32
+      description: Trade a Raven token for a mabel authorization token for use with the rest of the API.
       responses:
         '200':
           description: Success
           schema:
-            $ref: '#/definitions/Group'
-    put:
-      summary: Modify a group
-      description: "Update the group with the given ID. Note that the ID of the group cannot be changed, and validation will fail if 'id' is present as a property of the body"
+            $ref: '#/definitions/Token'
       security:
-        - admin: []
-      parameters:
-        - name: group
-          in: body
-          description: A specification of the group to be updated. Omitted properties will remain unchanged.
-          required: true
-          schema: 
-            allOf:
-              - $ref: '#/definitions/Group'
-              - x-forbid: 
-                - id
-        - name: id
-          in: path
-          minimum: 1
-          description: The group ID to modify
-          required: true
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Group'
-    delete:
-      summary: Delete a group
-      description: Delete the group with the given ID
-      security:
-        - admin: []
-      parameters:
-        - name: id
-          in: path
-          minimum: 1
-          description: The group ID to delete
-          required: true
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: object
-            required:
-              - name
-            properties:
-              success: 
-                type: boolean
-                default: true
-  '/group':
+        - raven: []
+      summary: Get an auth token using Raven token
+  /type:
     get:
-      summary: Get all groups
-      description: "Get all groups' details"
-      security:
-        - admin: []
-      parameters: [] # TODO: filter parameters? Do something about $count?
-      responses: 
-        200: 
-          description: Success. Returns details for all groups
+      description: "Get all ticket types' details"
+      parameters: []
+      responses:
+        '200':
+          description: Success. Returns details for all ticket types
           schema:
+            items:
+              $ref: '#/definitions/TicketType'
             type: array
-            items: 
-              $ref: '#/definitions/Group'
-    post:
-      summary: Create a group
-      description: Create a new group with an automatically selected ID. Note that validation will fail if 'id' is provided.
-      security:
-        - admin: []
-      parameters:
-        - name: group
-          in: body
-          description: "A specification of the group to be created."
-          required: true
-          schema: 
-            # sadly using allOf means swagger UI doesn't give us the required type but validation works properly
-            allOf:
-              - $ref: '#/definitions/Group'
-              - required:
-                - name
-                - description
-                - ticket_limit
-                x-forbid: 
-                  - id 
-      responses:
-        '200':
-          description: Success. Returns the new group.
-          schema:
-            $ref: '#/definitions/Group'
-  '/type/{id}':
-    get:
-      summary: Get ticket type details
-      description: Get ticket type details
       security:
         - token: []
+      summary: Get all ticket types
+    post:
+      description: Create a new ticket type with an automatically selected ID
+      parameters:
+        - name: ticket_type
+          in: body
+          description: A specification of the ticket type to be created.
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/TicketType'
+              - x-forbid:
+                  - id
+      responses:
+        '200':
+          description: Success. Returns the new ticket type.
+          schema:
+            $ref: '#/definitions/TicketType'
+      security:
+        - admin: []
+      summary: Create a ticket type
+  '/type/{id}':
+    delete:
+      description: Delete the ticket type with the given ID
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ID of the ticket type to delete
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            properties:
+              success:
+                default: true
+                type: boolean
+            required:
+              - name
+            type: object
+      security:
+        - token: []
+      summary: Delete a ticket type
+    get:
+      description: Get ticket type details
       parameters:
         - name: id
           in: path
@@ -211,21 +408,21 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/TicketType'
-    put:
-      summary: Modify a ticket type
-      description: Update the ticket type with the given ID
       security:
         - token: []
+      summary: Get ticket type details
+    put:
+      description: Update the ticket type with the given ID
       parameters:
         - name: ticket_type
           in: body
-          description: A specification of the ticket type to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body.
+          description: "A specification of the ticket type to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body."
           required: true
-          schema: 
+          schema:
             allOf:
-              - $ref: '#/definitions/TicketType' 
-              - x-forbid: 
-                - id
+              - $ref: '#/definitions/TicketType'
+              - x-forbid:
+                  - id
         - name: id
           in: path
           minimum: 1
@@ -238,71 +435,12 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/TicketType'
-    delete:
-      summary: Delete a ticket type
-      description: Delete the ticket type with the given ID
       security:
         - token: []
-      parameters:
-        - name: id
-          in: path
-          minimum: 1
-          description: The ID of the ticket type to delete
-          required: true
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: object
-            required:
-              - name
-            properties:
-              success: 
-                type: boolean
-                default: true
-  '/type':
-    get:
-      summary: Get all ticket types
-      description: "Get all ticket types' details"
-      security:
-        - token: []
-      parameters: [] # TODO: filter parameters? Do something about $count?
-      responses: 
-        200: 
-          description: Success. Returns details for all ticket types
-          schema:
-            type: array
-            items: 
-              $ref: '#/definitions/TicketType'
-    post:
-      summary: Create a ticket type
-      description: Create a new ticket type with an automatically selected ID
-      security:
-        - admin: []
-      parameters:
-        - name: ticket_type
-          in: body
-          description: "A specification of the ticket type to be created."
-          required: true
-          schema:
-            allOf:
-              - $ref: '#/definitions/TicketType'
-              - x-forbid: 
-                - id
-      responses:
-        '200':
-          description: Success. Returns the new ticket type.
-          schema:
-            $ref: '#/definitions/TicketType'
+      summary: Modify a ticket type
   '/user/{id}':
     get:
-      summary: "Get a user's details"
       description: "Get a user's details. Normal users can only get themselves, admins can get anyone."
-      security:
-        - self: []
-        - admin: []
       parameters:
         - name: id
           in: path
@@ -316,151 +454,10 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/User'
-  '/payment-method':
-    get:
-      summary: Get all payment method details
-      description: Get details for all payment methods available
       security:
-        - token: []
-      parameters: []
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/PaymentMethod'
-  '/payment-method/{id}':
-    get:
-      summary: Get payment method details
-      description: Get details for the given payment method
-      security:
-        - token: []
-      parameters:
-        - name: id
-          in: path
-          minimum: 1
-          description: The payment method ID to retrieve
-          required: true
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/PaymentMethod'
-  '/ticket/{id}':
-    get:
-      summary: Get ticket details
-      description: Retrieve details for the ticket with given ID (for admins)
-      security:
-        - token: []
-      parameters:
-        - name: id
-          in: path
-          minimum: 1
-          description: The ticket ID to retrieve
-          required: true
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Ticket'
-    put:
-      summary: Modify a ticket
-      description: Update the ticket with the given ID using the details in the body
-      security:
+        - self: []
         - admin: []
-      parameters:
-        - name: ticket
-          in: body
-          description: A specification of the ticket to be updated. Omitted properties will remain unchanged.
-          required: true
-          schema:
-            allOf:
-              - $ref: '#/definitions/Ticket'
-              - x-forbid: 
-                - id
-        - name: id
-          in: path
-          minimum: 1
-          description: The ticket ID to modify
-          required: true
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Ticket'
-  '/ticket':
-    get:
-      summary: Get all tickets
-      description: "Get all tickets' details. Warning: likely to be big currently..."
-      security:
-        - admin: []
-      parameters: [] # TODO: filter parameters? Do something about $count?
-      responses: 
-        200: 
-          description: Success. Returns details for all tickets
-          schema:
-            type: array
-            items: 
-              $ref: '#/definitions/Ticket'
-    post:
-      summary: Create a ticket
-      description: "Create a new ticket with an automatically allocated ID. This operation is designed for admin usage, and ticket validation is skipped. Users should use the /user/{id}/ticket route instead."
-      security:
-        - admin: []
-      parameters:
-        - name: ticket
-          in: body
-          description: "A specification of the ticket to be created."
-          required: true
-          schema: 
-            allOf:
-              - $ref: '#/definitions/Ticket'
-              - required:
-                - user_id
-                - ticket_type_id
-                - guest_name
-                - payment_method_id
-                x-forbid: 
-                - id
-                - registration_time
-                - transaction_value
-      responses:
-        '200':
-          description: Success. Returns the nesly created ticket
-          schema:
-            $ref: '#/definitions/Ticket'
-    delete:
-      summary: Cancel ticket
-      description: "Cancel a bunch of tickets at once"
-      security:
-        - admin: []
-      parameters:
-        - name: ids
-          in: query
-          description: "A csv list of ticket IDs for tickets to be deleted."
-          required: true
-          type: array
-          format: csv
-          items:
-            type: number
-            format: integer
-      responses:
-        '200':
-          description: Success
-          schema:
-            type: object
-            properties:
-              success: 
-                type: boolean
-                default: true
-
+      summary: "Get a user's details"
 
 
 
