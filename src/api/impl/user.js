@@ -106,8 +106,8 @@ user.post = function post(user) {
 
 // extra methods - internal use only:
 
-user.get_by_email = function(email) {
-	return runSql("SELECT * FROM user WHERE email=? LIMIT 1;", [email])
+user.get_by_email = function(data) {
+	return runSql("SELECT * FROM user WHERE email=? LIMIT 1;", [data.user.email])
 		.then(function(rows) {
 			if (rows.length < 1) {
 				var err = new Error("User does not exist");

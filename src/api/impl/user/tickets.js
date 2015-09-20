@@ -40,7 +40,7 @@ module.exports = function (user_id) {
 
 		function put(opts) {
 			var ticket = opts.ticket;
-			return runSql("UPDATE ticket SET ? WHERE id=?",[ticket, ticket_id])
+			return runSql("UPDATE ticket SET ? WHERE id=?", [ticket, ticket_id])
 				.then(get);
 		}
 

@@ -25,7 +25,7 @@
     "watch": "parallelshell 'npm run watch:scripts' 'npm run watch:sass' 'npm run watch:jade'",
     "inspect": "node-inspector -d 5000",
     "dev": "parallelshell 'npm run watch -s' 'nodemon --debug=5000 app.js'",
-    "test": "echo \"We haven't got any tests yet...\" && exit 0",
+    "test": "mocha --reporter nyan ./tests/*.js",
     "start": "node app.js",
     "prepare": "npm install && bower install && npm run build"
   },
@@ -55,11 +55,14 @@
     "yamljs": "^0.2.3"
   },
   "devDependencies": {
+    "chai": "^3.2.0",
     "livereload": "latest",
+    "mocha": "^2.3.2",
     "node-inspector": "^0.12.2",
     "nodemon": "^1.4.1",
     "parallelshell": "^2.0.0",
     "rimraf": "^2.4.2",
+    "supertest": "^1.1.0",
     "watch": "^0.16.0"
   }
 }

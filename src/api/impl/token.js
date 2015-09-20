@@ -34,7 +34,7 @@ function get(obj) {
 
 // requires obj.email
 function mabel_get(obj) {
-	return runSql("SELECT id FROM user WHERE email=? LIMIT 1", [obj.email])
+	return runSql("SELECT id FROM user WHERE email=? LIMIT 1", [obj.user.email])
 		.then(function(rows) {
 			if (rows.length < 1) {
 				var e = new Error("Requested user was not found.");
