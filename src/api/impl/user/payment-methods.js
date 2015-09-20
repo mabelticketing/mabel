@@ -16,6 +16,9 @@ function payment_method(user_id) {
 
     function get() {
         var sql = "CALL user_payment_types(?)";
-        return runSql(sql, [user_id]);
+        return runSql(sql, [user_id])
+        	.spread(function(result, stuff) {
+        		return result;
+        	});
     }
 }

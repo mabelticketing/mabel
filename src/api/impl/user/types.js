@@ -19,7 +19,10 @@ function types(user_id) {
     // to account for already bought tickets, and also adjusted to return 0 if
     // there's anyone in the waiting list
     function get() {
-        return runSql("CALL get_accessible_types(?);", [user_id]);
+        return runSql("CALL get_accessible_types(?);", [user_id])
+        	.spread(function(types, stuff) {
+        		return types;
+        	});
     }
 }
 

@@ -24,6 +24,103 @@ module.exports = function(app, done) {
 		});
 	});
 
+	// handle $merge and $without
+	traverse(swaggerDoc);
+
+	var fs = require('fs');
+	fs.writeFileSync('/tmp/temp.json', JSON.stringify(swaggerDoc, null, "\t"));
+	
+	function traverse(root, spaces) {
+		spaces = spaces || "";
+		for (var p in root) {
+			// console.log(spaces + p);
+			if (typeof root[p] === "object") {
+				if (root[p] === null) console.log(root);
+				root[p] = apply(root[p]);
+				traverse(root[p], spaces + "   ");
+			}
+		}
+	}
+
+	function safeMerge(o1, o2) {
+		if (typeof o1 === "object" && typeof o2 === "object") {
+			if (o1 instanceof Array && o2 instanceof Array) {
+				return o1.concat(o2);
+			} else {
+				var o = _.extend({}, o1);
+				// console.log(o);
+				for (var p in o2) {
+					// console.log("Considering " + p);
+					if (p in o) {
+						o[p] = safeMerge(o[p], o2[p]);
+					} else {
+						o[p] = o2[p];
+					}
+				}
+				return o;
+			}
+		} else if (o1 === undefined) {
+			return o2;
+		} else if (o2 === undefined) {
+			return o1;
+		} else {
+			if (o1 === o2) {
+				return o1;
+			} else {
+				console.log(o1, o2);
+				throw Error("Conflicting value for merge: ");
+			}
+		}
+	}
+
+	function safeOmit(object, properties) {
+		var out = {};
+		for (var p in object) {
+			if (properties.indexOf(p) < 0) {
+				out[p] = object[p];
+			}
+		}
+		return out;
+	}
+
+	function apply(schema) {
+		if ('$merge' in schema) {
+			// we've got things to merge!
+			if (schema.$merge.length !== 2) throw Error("Unexpected number of $merge items");
+			var s1 = schema.$merge[0];
+			if ('$ref' in s1) s1 = getRef(s1.$ref);
+			
+			var s2 = schema.$merge[1];
+			if ('$ref' in s2) s2 = getRef(s2.$ref);
+
+			schema = safeMerge(s1, s2);
+			// console.log(s1)
+			// console.log(s2)
+			// console.log(schema);
+		}
+
+		if ('$exclude' in schema) {
+			// console.log("\n\n\n\nBEFORE:");
+			// console.log(swaggerDoc.definitions.Group);
+			// we need to remove some properties
+			// console.log(schema);
+			// console.log(["$exclude"].concat(schema.$exclude));
+			schema = _.omit(schema, ["$exclude"].concat(schema.$exclude));
+			// console.log(schema);
+		}
+
+		return schema;
+	}
+
+	function getRef(ref) {
+		var parts = ref.split("/");
+		if (parts[0] !== "#") throw Error("Unexpected $ref format");
+		parts.shift();
+		return _.reduce(parts, function(current, next) {
+			return current[next]; 
+		}, swaggerDoc);
+	}
+
 	swaggerTools.initializeMiddleware(swaggerDoc, function(middleware) {
 		// Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
 		app.use(middleware.swaggerMetadata());
@@ -272,7 +369,7 @@ function respond(req, res, next) {
 			if (pathElm.length < 1) return api;
 			if (pathElm[0] === "{") {
 				// this is a URL parameter 
-				var paramName = "{id}".replace(/[{}]/g, '');
+				var paramName = pathElm.replace(/[{}]/g, '');
 				var paramValue = req.swagger.params[paramName].value;
 				// let's hope the current method is a function!
 				return meth(paramValue);

@@ -60,14 +60,16 @@ paths:
           description: A specification of the group to be created.
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/Group'
               - required:
                   - name
                   - description
                   - ticket_limit
-                x-forbid:
-                  - id
+                additionalProperties: false
+                properties:
+                  $exclude:
+                    - id
       responses:
         '200':
           description: Success. Returns the new group.
@@ -118,7 +120,7 @@ paths:
             $ref: '#/definitions/Group'
     put:
       summary: Modify a group
-      description: "Update the group with the given ID. Note that the ID of the group cannot be changed, and validation will fail if 'id' is present as a property of the body"
+      description: "Update the group with the given ID. Note that the ID of the group cannot be changed."
       security:
         - admin: []
       parameters:
@@ -127,10 +129,12 @@ paths:
           description: A specification of the group to be updated. Omitted properties will remain unchanged.
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/Group'
-              - x-forbid:
-                  - id
+              - properties:
+                  $exclude:
+                    - id
+                additionalProperties: false
         - name: id
           in: path
           minimum: 1
@@ -225,17 +229,19 @@ paths:
           description: A specification of the ticket to be created.
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/Ticket'
               - required:
                   - user_id
                   - ticket_type_id
                   - guest_name
                   - payment_method_id
-                x-forbid:
-                  - id
-                  - registration_time
-                  - transaction_value
+                properties:
+                  $exclude:
+                    - id
+                    - book_time
+                    - transaction_value
+                additionalProperties: false
       responses:
         '200':
           description: Success. Returns the nesly created ticket
@@ -271,10 +277,12 @@ paths:
           description: A specification of the ticket to be updated. Omitted properties will remain unchanged.
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/Ticket'
-              - x-forbid:
-                  - id
+              - properties:
+                  $exclude:
+                    - id
+                additionalProperties: false
         - name: id
           in: path
           minimum: 1
@@ -312,10 +320,12 @@ paths:
           description: A specification of the ticket type to be created.
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/TicketType'
-              - x-forbid:
-                  - id
+              - properties:
+                  $exclude:
+                    - id
+                additionalProperties: false
       responses:
         '200':
           description: Success. Returns the new ticket type.
@@ -375,10 +385,12 @@ paths:
           description: "A specification of the ticket type to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body."
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/TicketType'
-              - x-forbid:
-                  - id
+              - properties:
+                  $exclude:
+                    - id
+                additionalProperties: false
         - name: id
           in: path
           minimum: 1
@@ -416,10 +428,12 @@ paths:
           description: A specification of the user to be created.
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/User'
-              - x-forbid:
-                  - id
+              - properties:
+                  $exclude:
+                    - id
+                additionalProperties: false
       responses:
         '200':
           description: Success. Returns the new user.
@@ -457,10 +471,12 @@ paths:
           description: "A specification of the user to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body."
           required: true
           schema:
-            allOf:
+            $merge:
               - $ref: '#/definitions/User'
-              - x-forbid:
-                  - id
+              - properties:
+                  $exclude:
+                    - id
+                additionalProperties: false
         - name: id
           in: path
           minimum: 1
@@ -584,7 +600,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/TicketFull'
+              $merge:
+                - $ref: '#/definitions/Ticket'
+                - properties: 
+                    name: 
+                      type: string
+                      example: Standard
+                    payment_method: 
+                      type: string
+                      example: College Bill
     post: 
       summary: "Book tickets"
       description: "(Attempt to) book a new list of tickets. Response body partitions successful tickets, invalid tickets, and tickets which were added to the waiting list."
@@ -606,13 +630,7 @@ paths:
           schema:
             type: array
             items: 
-              allOf:
-                - $ref: '#/definitions/Ticket'
-                - x-forbid: 
-                  - id
-                  - status
-                  - registration_time
-                  - transaction_value
+              $ref: '#/definitions/BareTicket'
       responses:
         '200':
           description: Success
@@ -622,15 +640,36 @@ paths:
               booked:
                 type: array
                 items:
-                  $ref: '#/definitions/TicketFull'
+                  $merge:
+                    - $ref: '#/definitions/Ticket'
+                    - properties: 
+                        name: 
+                          type: string
+                          example: Standard
+                        payment_method: 
+                          type: string
+                          example: College Bill
               waiting_list:
                 type: array
                 items: 
-                  $ref: '#/definitions/TicketFull'
+                  $merge:
+                    - $ref: '#/definitions/Ticket'
+                    - properties: 
+                        name: 
+                          type: string
+                          example: Standard
+                        payment_method: 
+                          type: string
+                          example: College Bill
               failed:
                 type: array
                 items:
-                  $ref: '#/definitions/Ticket'
+                  $merge:
+                    - $ref: '#/definitions/Ticket'
+                    - properties: 
+                        reason: 
+                          type: string
+                          example: "You don't have access to this payment method."
               totalPrice:
                 type: number
                 example: 450.97
@@ -716,17 +755,17 @@ paths:
           required: true
           type: integer
           format: int32
-        - name: tickets
+        - name: ticket
           in: body
           description: The updated ticket details
           required: true
           schema:
-            type: array
-            items: 
-              properties:
-                guest_name: 
-                  type: string
-                  example: Christopher Little
+            type: object
+            properties:
+              guest_name: 
+                type: string
+                example: Christopher Little
+            additionalProperties: false
       responses:
         '200':
           description: Success
@@ -787,6 +826,7 @@ paths:
 
 definitions:
   Error:
+    type: object
     properties:
       message:
         type: string
@@ -799,6 +839,7 @@ definitions:
       - success
       - error
   TicketType:
+    type: object
     properties:
       id: 
         type: integer
@@ -840,6 +881,7 @@ definitions:
 
 
   User:
+    type: object
     properties:
       id:
         type: integer
@@ -880,9 +922,8 @@ definitions:
         type: boolean
         example: false
         description: Whether the user is verified (i.e. allowed to buy tickets)
-    description: ''
-
   Group:
+    type: object
     properties:
       id:
         type: integer
@@ -907,6 +948,7 @@ definitions:
         description: The number of tickets a member of this group may buy in total
 
   PaymentMethod:
+    type: object
     properties:
       id:
         type: integer
@@ -932,6 +974,7 @@ definitions:
 
 
   Ticket:
+    type: object
     properties:
       id:
         type: integer
@@ -963,7 +1006,7 @@ definitions:
         example: 1
         minimum: 1
         description: Payment method identifier for this ticket
-      registration_time:
+      book_time:
         type: integer
         format: int32
         example: 14419663721
@@ -999,82 +1042,26 @@ definitions:
           - PENDING_WL
           - CANCELLED_WL
   Token: 
+    type: object
     properties:
       token:
         type: string
         # TODO: invalidate this token
         example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoIjp0cnVlLCJpZCI6MX0.lzALTSPB3iAHYBan5oBbJ23rV_NMfXKQpWCFATwaJwU
         description: An authorization token for use with the rest of the API
-  # I don't like having to repeat myself here, but it's the tidiest way to add extra properties.
-  # Can use allOf but then swagger UI struggles to render stuff which is unhelpful.
-  # TODO: Add a $merge spec property which we can pick up pre-schema validation to avoid this faff  (do the same with a $exclude instead of x-forbid)
-  TicketFull:
-    properties:
-      id:
-        type: integer
-        format: int32
-        example: 1
-        minimum: 1
-        readOnly: true
-        description: Ticket identifier
-      user_id:
-        type: integer
-        format: int32
-        example: 1
-        minimum: 1
-        description: User identifier for the ticket booker
-      ticket_type_id:
-        type: integer
-        format: int32
-        example: 1
-        minimum: 1
-        description: Ticket type identifier for this ticket
-      name:   
-        type: string
-        example: Standard
-        description: The name of this type of ticket
-      guest_name:
-        type: string
-        example: Christopher Little
-        default: 'Mabel Guest'
-        description: The name which should be printed on this ticket
-      payment_method_id:
-        type: integer
-        format: int32
-        example: 1
-        minimum: 1
-        description: Payment method identifier for this ticket
-      payment_method:
-        type: string
-        example: "College Bill"
-        description: The name of the payment method used to book this ticket
-      registration_time:
-        type: integer
-        format: int32
-        example: 14419663721
-        readOnly: true
-        description: Date the ticket was booked (seconds since unix epoch)
-      donation:
-        type: boolean
-        example: true
-        default: false
-        description: Whether the booker chose to make a donation which this ticket
-      transaction_value:
-        type: number
-        format: float
-        example: 130.99
-        readOnly: true
-        minimum: 0
-        description: Redundant field indicating how much this ticket cost to book
-      status:
-        type: string
-        example: PENDING
-        description: "An indication of the ticket's status"
-        default: PENDING
-        enum: 
-          - PENDING
-          - CONFIRMED
-          - CANCELLED
-          - ADMITTED
-          - PENDING_WL
-          - CANCELLED_WL
+  BareTicket:
+    $merge:
+      - $ref: '#/definitions/Ticket'
+      - properties:
+          $exclude:
+            - user_id
+            - id
+            - status
+            - book_time
+            - transaction_value
+        required:
+          - ticket_type_id
+          - payment_method_id
+          - guest_name
+          - donation 
+        additionalProperties: false

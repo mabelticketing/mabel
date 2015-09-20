@@ -13,5 +13,6 @@ module.exports = {
     db_db       : "mabel_test",
     jwt_secret  : "jwt-pass",
     mailgun_api_key: "",
-  	admin_groups: [1]
+  	admin_groups: [1],
+  	donation_value: 2
 };

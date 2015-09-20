@@ -126,7 +126,7 @@ BEGIN
 			ticket_limit - IFNULL(C.sold,0) # otherwise the limit is reduced by however many we've sold
 			) available,
 		GREATEST(
-			per_user_limit - IFNULL(user_bought_by_type.bought, 0),
+			IFNULL(per_user_limit, ticket_limit) - IFNULL(user_bought_by_type.bought, 0),
 			user_group_allowance.allowance) allowance
 	FROM ticket_type
 	# get access rights information
@@ -189,6 +189,7 @@ BEGIN
 		# condition is false, and we select 0 rows instead of 1 as planned.	
 		# Nothing gets inserted.
 		WHERE B.cap>A.sold AND C.wl<1;
+	SELECT LAST_INSERT_ID() AS insertId, ROW_COUNT() AS rowsAffected;
 END//
 
 

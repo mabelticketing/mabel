@@ -25,7 +25,11 @@ function type(id) {
 			runSql("SELECT * FROM ticket_type WHERE id=? LIMIT 1;", [id]), 
 			runSql("SELECT * FROM group_access_right WHERE ticket_type_id=? AND open_time<UNIX_TIMESTAMP() AND close_time>UNIX_TIMESTAMP();", [id])
 		]).spread(function(types, rights) {
-			if (types.length !== 1) throw new Error("Expected one ticket type but got " + types.length);
+			if (types.length < 1) {
+				var e = new Error("Ticket does not exist.");
+				e.code = 404;
+				throw e;
+			}
 			var type = types[0];
 			type.groups = _.pluck(rights, 'group_id');
 			return type;
@@ -96,10 +100,10 @@ type.post = function post(data) {
 type.get = function get(opts) {
 	var sql = connection.getFilteredSQL("ticket_type", opts);
 
-	Q.all(
+	return Q.all([
 		runSql(sql),
 		runSql("SELECT * FROM group_access_right WHERE open_time<UNIX_TIMESTAMP() AND close_time>UNIX_TIMESTAMP();")
-	).spread(function(types, rights) {
+	]).spread(function(types, rights) {
 		return _.map(types, function(type) {
 			type.groups = _.pluck(_.filter(rights, {ticket_type_id: type.id}), 'group_id');
 			return type;

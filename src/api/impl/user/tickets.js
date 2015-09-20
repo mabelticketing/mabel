@@ -40,18 +40,23 @@ module.exports = function (user_id) {
 
 		function put(opts) {
 			var ticket = opts.ticket;
-			return runSql("UPDATE ticket SET ? WHERE id=?",[ticket, ticket_id]);
+			return runSql("UPDATE ticket SET ? WHERE id=?",[ticket, ticket_id])
+				.then(get);
 		}
 
 		function del() {
-			return runSql("DELETE FROM ticket where id=?",[ticket_id]).then(function() {
+			return Q.all([
+				runSql("UPDATE ticket SET status='CANCELLED' where id=? AND status<>'PENDING_WL';",[ticket_id]),
+				runSql("UPDATE ticket SET status='CANCELLED_WL' where id=? AND status='PENDING_WL';",[ticket_id])
+			])
+			.then(function() {
 				return {success:true};
 			});
 		}
 	}
 
 	function get() {
-		var sql = "SELECT ticket.registration_time registration_time, ticket.id id, ticket.transaction_value, \
+		var sql = "SELECT ticket.book_time book_time, ticket.id id, ticket.transaction_value, \
 					 ticket.guest_name guest_name, ticket.status status, ticket.donation donation, \
 					ticket_type.name name, ticket_type.id type_id, \
 					payment_method.name payment_method \
@@ -94,9 +99,12 @@ module.exports = function (user_id) {
 					payment_deadline: moment().add(14,'d').format("dddd, MMMM Do YYYY"),
 					sampleID: booked.length>0?booked[0].id:123
 				};
-				console.log(user.name + " just made a booking - " + booked.length + " tickets" + 
-					(waiting_list.length>0?" (and" + waiting_list.length + " waiting list)":"") +
-					"(£" + data.totalPrice + ")");
+				if (booked.length + waiting_list.length > 0) {
+					// TODO: Actually send the email
+					console.log(user.name + " just made a booking - " + booked.length + " tickets" + 
+						(waiting_list.length>0?" (and " + waiting_list.length + " waiting list)":"") +
+						" for a total of £" + data.totalPrice + "");
+				}
 				return {
 					booked: booked, 
 					waiting_list:waiting_list,
@@ -115,7 +123,7 @@ module.exports = function (user_id) {
 	function check_types(ts) {
 
 		// get the types which are available to me
-		return api.user(user_id).types.get()
+		return api.user(user_id).type.get()
 			.then(function(types) {
 				types = _.indexBy(types, 'id');
 
@@ -133,7 +141,7 @@ module.exports = function (user_id) {
 				// join the waiting list, and that's handled by "book".
 			
 				// ts[0] = [{TICKET}, ...]
-				return _.chain(ts[0])
+				return ts[0].length<1?ts:_.chain(ts[0])
 					.groupBy('ticket_type_id')
 					// { ticket_type_id: [{TICKET}, ...], ...}
 					.values()
@@ -166,7 +174,7 @@ module.exports = function (user_id) {
 	function check_payments(ts) {
 
 		// get the payment methods which are available to me
-		return api.user(user_id).payment_methods.get()
+		return api.user(user_id)["payment-method"].get()
 			.then(function(payment_methods) {
 				payment_methods = _.indexBy(payment_methods, 'id');
 
@@ -179,8 +187,9 @@ module.exports = function (user_id) {
 						}
 						ticket.reason = "You don't have access to this payment method.";
 					});
-				results[0] = _(results[0])
+				var s = _(results[0])
 					.groupBy('payment_method_id')
+						// {id: [{TICKET}, ..], ..}
 						.map(function(grouped_tickets, id) {
 							var l = payment_methods[id].ticket_limit;
 							
@@ -190,9 +199,13 @@ module.exports = function (user_id) {
 								results[1].push(ticket);
 							});
 						})
-					.values().flatten() // ungroup
+						// [[[{TICKET}, ..],[{TICKET_F},..]],..]
+					.thru(_.spread(_.zip))
+					// [ [[{TICKET}, ..],..], [[{TICKET_F}, ..],..] ]
+					.map(_.flatten)
+					// [ [{TICKET}, ..], [{TICKET_F}, ..] ]
 					.value();
-				return results;
+				return [s[0], s[1].concat(results[1])];
 			});
 	}
 
@@ -200,7 +213,7 @@ module.exports = function (user_id) {
 	function check_allowance(ts) {
 		return api.user(user_id).allowance.get()
 			.then(function(allowance) {
-				allowance = allowance[0].allowance;
+				allowance = allowance.allowance;
 				var r = _.partition(ts, function(t, i) {
 					if (i < allowance) return true;
 					t.reason = "You may only book " + allowance + " tickets.";
@@ -216,6 +229,13 @@ module.exports = function (user_id) {
 	// helper function to carefully book tickets (avoiding races and such)
 	function book(ts) {
 
+		if (ts.length < 1) {
+			return {
+				PENDING: [],
+				PENDING_WL: []
+			};
+		}
+
 		var promises = [];
 		// add transaction value to each ticket
 		// This is technically redundant in the DB but Chris is paranoid
@@ -230,7 +250,7 @@ module.exports = function (user_id) {
 		});
 
 		// now actually insert
-		Q.all(promises)
+		return Q.all(promises)
 			.then(function() {
 
 				var sql = "CALL safe_add_ticket(?, ?, ?, ?, ?, ?);";
@@ -239,14 +259,14 @@ module.exports = function (user_id) {
 				_.each(ts, function(t) {
 					promises.push(
 						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method_id, t.transaction_value])
-							.then(function(result) {
+							.spread(function(result, meta) {
 
-								if (result.affectedRows <= 0) {
+								if (result[0].rowsAffected <= 0) {
 									// insert failed - waiting list
 									t.status = "PENDING_WL";
-									return runSql("INSERT INTO ticket SET ?, book_time=UNIX_TIMESTAMP()", [t]);
+									return runSql("INSERT INTO ticket SET user_id=?, ?, book_time=UNIX_TIMESTAMP()", [user_id, _.omit(t, ['ticket_type', 'payment_method'])]);
 								} else {
-									return result;
+									return result[0];
 								}
 							})
 							.then(function(result) {
@@ -258,6 +278,7 @@ module.exports = function (user_id) {
 								// add back the ticket type and payment_method that we jotted down earlier
 								ticket.ticket_type = t.ticket_type;
 								ticket.payment_method = t.payment_method;
+								return ticket;
 							})
 					);
 
@@ -267,10 +288,13 @@ module.exports = function (user_id) {
 			.then(function(results) {
 
 				// split successful and failed inserts
-				return _(results)
+				var res = _(results)
 					.flatten()
 					.groupBy('status')
 					.value();
+				res.PENDING = res.PENDING || [];
+				res.PENDING_WL = res.PENDING_WL || [];
+				return res;
 			});
 	}
 
