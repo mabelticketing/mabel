@@ -13,16 +13,22 @@
     "clean:public": "rimraf public/*.html public/**/*.html public/**/**/*.html public/css/*.css public/js/*.js public/lib/css/*.css public/lib/js/*.js",
     "clean:cache": "rimraf .sass-cache/",
     "clean": "parallelshell 'npm run clean:public' 'npm run clean:cache'",
+
     "build:scripts": "cp -r client/js/* public/js/",
-    "watch:scripts": "echo 'TODO\n'",
+    "watch:scripts": "watch 'npm run build:scripts' client/js",
+    
     "build:sass": "sass client/scss/main.scss public/css/main.min.css --style compressed",
     "watch:sass": "sass --watch client/scss:public/css",
+    
     "build:jade": "./scripts/jade-build.sh",
     "watch:jade": "./scripts/jade-watch.sh",
+    
     "prebuild": "npm run clean && ./scripts/structure.sh",
-    "prewatch": "./scripts/structure.sh",
     "build": "npm run build:scripts & npm run build:sass & npm run build:jade",
+    
+    "prewatch": "npm run build",
     "watch": "parallelshell 'npm run watch:scripts' 'npm run watch:sass' 'npm run watch:jade'",
+    
     "inspect": "node-inspector -d 5000",
     "dev": "parallelshell 'npm run watch -s' 'nodemon --debug=5000 app.js'",
     "test": "mocha --reporter nyan ./tests/*.js",
