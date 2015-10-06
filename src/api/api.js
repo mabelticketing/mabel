@@ -13,6 +13,7 @@ for (var i=0; i<apiPaths.length; i++) {
 	module.exports[apiPaths[i]] = require('./impl/' + apiPaths[i] + '.js');
 	module.exports[apiPaths[i] + 's'] = require('./impl/' + apiPaths[i] + 's.js');
 }
+module.exports.table = require("./impl/table.js");
 module.exports.token = require('./impl/token.js');
 
 /**

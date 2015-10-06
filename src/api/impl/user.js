@@ -117,3 +117,8 @@ user.get_by_email = function(data) {
 			return rows[0];
 		});
 };
+user.me = {
+	get: function(data) {
+		return user(data.user.id).get();
+	}
+};

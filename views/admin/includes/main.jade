@@ -67,8 +67,8 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 	block scripts
 		//- TODO?: Can/should bower do automatic incuding/dependency resolution for us?
 
-		// jquery
-		script(src='/components/jquery/dist/jquery.min.js')
+		//- // jquery
+		script(src='/lib/components/jquery/dist/jquery.min.js')
 			
 		// misc
 		script(type="text/javascript", src="/lib/components/moment/moment.js")
@@ -97,7 +97,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		script(type="text/javascript" src="/lib/components/ng-table-export/ng-table-export.js")
 
 		// bootstrap
-		//- script(src='/components/bootstrap/dist/js/bootstrap.min.js')
+		//- script(src='/lib/components/bootstrap/dist/js/bootstrap.min.js')
 		script.
 			// Add a dummy function to prevent errors
 			jQuery.fn.tooltip = function() {

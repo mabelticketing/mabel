@@ -248,56 +248,7 @@ function getSwaggerAuthObj() {
 	};
 }
 
-// function validate(oschema, obj) {
-// 	var schema;
-// 	if ('schema' in oschema) {
-// 		schema = oschema.schema;
-// 	} else {
-// 		// this might be an oversimplification but for our validation we only care about objects anyway
-// 		return;
-// 	}
-	
-// 	// currently we only validate one thing - that objects don't have forbidden properties
-// 	var i = 0;
-// 	if (schema["x-forbid"] !== undefined) {
-// 		for (i=0; i<schema["x-forbid"].length; i++) {
-// 			if (schema["x-forbid"][i] in obj) {
-// 				// TODO: More complete error in the style of swaggers'
-// 				var e = new Error("Forbidden property " + schema["x-forbid"][i] + " found in object");
-// 				e.code = 400;
-// 				throw e;
-// 			}
-// 		}
-// 	}
-// 	if (schema.properties !== undefined) {
-// 		for (var p in schema.properties) {
-		
-// 			// validate property schemas
-// 			if (p in obj) {
-// 				validate(schema.properties[p], obj[p]);
-// 			}
-// 		}
-// 	}
-// 	if (schema.allOf !== undefined) {
-// 		// validate sub-schemas
-// 		for (i=0; i<schema.allOf.length; i++) {
-// 			validate(schema.allOf[i], obj);
-// 		}
-// 	}
-// }
-
 function respond(req, res, next) {
-	// custom validation here?
-	// for (var i = 0; i<req.swagger.operation.parameters.length; i++) {
-	// 	var n = req.swagger.operation.parameters[i].name;
-	// 	try {
-	// 		validate(req.swagger.operation.parameters[i],
-	// 				 req.swagger.params[n].value);
-	// 	} catch (err) {
-	// 		console.log(err);
-	// 		return next(err);
-	// 	}
-	// }
 
 	// NB this might be kind of fragile, I don't know what operationPath is actually used for...
 	var resource = req.swagger.operationPath[1].split("/");
@@ -324,6 +275,7 @@ function respond(req, res, next) {
 	var promise = meth[req.swagger.operationPath[2]](data);
 	promise.then(function(result) {
 		// if success return result else empty object
+		console.log(req.swagger.params.user);
 		res.json(result || {});
 	}, function(err) {
 		// log & send error

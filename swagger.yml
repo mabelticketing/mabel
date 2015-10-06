@@ -403,6 +403,18 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/TicketType'
+  /user/me:
+    get:
+      summary: "Get the current user"
+      description: "Get details for the user authenticated by the given token"
+      security:
+        - token: []
+      parameters: []
+      responses:
+        '200':
+          description: Success. Returns details for ths user
+          schema:
+            $ref: '#/definitions/User'
   /user:
     get:
       summary: Get all users
@@ -820,8 +832,40 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Token'
-
-
+  /table:
+    get:
+      summary: Get a list of database tables
+      security:
+        - admin: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items: 
+              type: string
+              example: group_access_right
+              description: The name of a mabel table
+  '/table/{table_id}/schema':
+    get:
+      summary: Get a list of database tables
+      security:
+        - admin: []
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          description: The id of the table we are intereted in
+          type: string
+      responses:
+        '200':
+          description: Get the schema of the given table
+          schema: 
+            type: array
+            items: 
+              type: string
+              example: group_access_right
+              description: The name of a mabel table
 
 
 definitions:

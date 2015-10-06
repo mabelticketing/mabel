@@ -32,6 +32,7 @@ function AdminPageController(MabelToken, User) {
 		promise.then(
 			function(data) {
 				// success
+				// TODO: admin group is hardcoded as 1 here...
 				vm.pageStatus = (data.groups.indexOf(1) < 0 ? 
 									pageStatus.unauthorised : pageStatus.authorised);
 

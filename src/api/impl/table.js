@@ -4,54 +4,47 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-var connection = require("./connection.js");
+var connection = require("../connection.js");
 var runSql = connection.runSql;
 var mysql = require("mysql");
 
-module.exports = {
-	getNames: getNames,
-	getSchema: getSchema,
-	getSize: getSize,
-	getDataFromTable: getDataFromTable,
-	getData: getData
+module.exports = function(name) {
+
+	return {
+		schema: {get: getSchema},
+		size: {get: getSize},
+		data: {get: getData}
+	};
+
+	function getSize() {
+		var sql = "SELECT COUNT(*) AS c FROM ??";
+		return runSql(sql, [name]).then(function(values) {
+			return values[0].c;
+		});
+	}
+
+	function getSchema() {
+		var sql = "SHOW columns from ??";
+		return runSql(sql, [name]);
+	}
+
+	function getData(opts) {
+		opts.tables = [name];
+		return runSql(getDataSql(opts));
+	}
 };
 
-function getNames() {
+module.exports.get = function get() {
 	var sql = "SHOW TABLES";
 	return runSql(sql).then(function(values) {
 		return values.map(function(r) {
-			// the results are currently in the form [{"Tables_in_[DBNAME]": "email"}] which is rubbish
+			// the results are currently in the form [{"Tables_in_[DBNAME]": "[tablename]"}] which is rubbish
 			for (var i in r) {
 				return r[i];
 			}
 		});
 	});
-}
-
-function getSize(table_name) {
-	var sql = "SELECT COUNT(*) AS c FROM ??";
-	return runSql(sql, [table_name]).then(function(values) {
-		return values[0].c;
-	});
-}
-
-function getSchema(table_name) {
-	var sql = "SHOW columns from ??";
-	return runSql(sql, [table_name]);
-}
-
-function getDataFromTable(table_name, opts) {
-	opts.tables = [table_name];
-	return runSql(getDataSql(opts));
-}
-
-function getData(opts, join) {
-	var sql = getDataSql(opts);
-	console.log(sql);
-	opts.sql = sql;
-	opts.nestTables = join ? '.' : false;
-	return connection.doQuery(opts);
-}
+};
 
 function getDataSql(opts) {
 	var sql = "SELECT ";
