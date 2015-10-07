@@ -182,7 +182,8 @@ function getSwaggerAuthObj() {
         		};
         		return next();
 			} catch (e) {
-		        var err = new Error("Invalid token/auth pair");
+				throw e;
+		        var err = new Error("Invalid token/auth pair: " + e.message);
 		        err.code = 401;
 		        throw err;
 		    }

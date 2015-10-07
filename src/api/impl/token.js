@@ -60,15 +60,15 @@ function external(auth_id) {
 							.then(function(user) {
 								// after registration, return a token for the new user
 								return {
-									token: "new" + (user.id)
-									// token: helpers.makeToken(user.id)
+									// token: "new" + (user.id)
+									token: helpers.makeToken(user.id)
 								};		
 							});
 					} else {
 						// user exists, so return its id as a valid token
 						return {
-							token: "exists" + (rows[0].id)
-							// token: helpers.makeToken(rows[0].id)
+							// token: "exists" + (rows[0].id)
+							token: helpers.makeToken(rows[0].id)
 						};
 					}
 				});
