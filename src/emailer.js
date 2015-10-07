@@ -7,7 +7,7 @@
 // imports
 var connection = require('./api/connection.js');
 var config = require('./config.js');
-var mailgun = require('mailgun-js')({ apiKey: config.mailgun_api_key, domain: "mg.emmamayball.com" });
+var mailgun = require('mailgun-js')({ apiKey: config.mailgun_api_key, domain: "emmamayball.com" });
 var jade = require("jade");
 var htmlToText = require('html-to-text');
 var Q = require("q");

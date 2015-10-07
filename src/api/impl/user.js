@@ -9,6 +9,8 @@ var runSql = connection.runSql;
 var Q = require("q");
 var _ = require("lodash");
 var crypto = require('crypto');
+var api = require("../api.js");
+
 
 module.exports = user;
 
@@ -25,6 +27,8 @@ function user(id) {
 		'payment-method': require('./user/payment-methods.js')(id),
 		type: require('./user/types.js')(id),
 		ticket: require("./user/tickets.js")(id),
+
+		confirm: require('./user/confirm.js')(id)
 	};
 
 	function get() {
@@ -50,16 +54,19 @@ function user(id) {
 			});
 	}
 
-	function put(user) {
+	function put(data) {
+
+		var u = data.u;
+
 		// update groups separately from the rest of the users' properties
 		var userGroups;
-		if (user.groups !== undefined) {
-			userGroups = user.groups;
-			delete user.groups;
+		if (u.groups !== undefined) {
+			userGroups = u.groups;
+			delete u.groups;
 		}
 
 		// update normal properties
-		var promises = [runSql("UPDATE user SET ? WHERE id=?;", [user, id])];
+		var promises = [runSql("UPDATE user SET ? WHERE id=?;", [u, id])];
 
 		// update groups
 		if (userGroups !== undefined) {
@@ -95,8 +102,10 @@ function user(id) {
 
 // collection methods:
 
-user.post = function post(source) {
+user.post = function post(data) {
+	var source = data.u;
 
+	console.log("Here");
 	var u = {};
 
 	// extract groups
@@ -106,6 +115,7 @@ user.post = function post(source) {
 	}
 
 	// basic validation
+	// name and email are always required
 	var e;
     if (source.name === undefined || source.name === null || source.name.length < 1 || source.name === "Mabel User") {
     	e = new Error("User lacks a valid name");
@@ -119,24 +129,57 @@ user.post = function post(source) {
     u.name = source.name;
     u.email = source.email;
 
+    // pass on crsid if defined
     if (source.crsid !== undefined && source.crsid !== null && source.crsid.length > 0) u.crsid = source.crsid;
-    if (source.is_verified !== undefined && source.is_verified !== null) u.is_verified = source.is_verified;
 
+
+    if (source.is_verified !== undefined && source.is_verified !== null) {
+    	if (source.is_verified === false) {
+	    	// if the source says we're not verified, then generate a verification code	
+	    	u.verification_code = genCode(32);
+	    	u.is_verified = false;
+	    } else {
+			// else assume we've already been verified by some external auth
+	    	u.is_verified = true;
+	    }
+	} else {
+		// if there's no mention of verification, assume we're not verified
+    	u.verification_code = genCode(32);
+    	u.is_verified = false;
+	}
+
+	// hash the password if one has been given
     if (source.password !== undefined) {
+		if (source.password.length < 5) {
+	    	e = new Error("Password must be at least 5 characters long");
+	    	e.code = 401;
+	    	throw e;
+		}
         var hash = crypto.createHash('md5');
         hash.update(source.password);
         u.password_md5 = hash.digest('hex');
     }
 
-	// finally insert
-    return connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [u])
+    // check we're not already registered
+	return connection.runSql("SELECT * FROM user WHERE email=?", [u.email])
+		.then(function(users) {
+			if (users.length > 0) {
+				// user already exists
+		    	e = new Error(u.email + ' has already been registered.');
+		    	e.code = 401;
+		    	throw e;
+			}
+
+			// finally we can insert
+   			return connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [u]);
+   		})
         .then(function(result) {
 
+        	// now also insert group memberships
             var promises = [];
             promises.push(user(result.insertId).get());
 
         	if (groups !== null) {
-        		// now also insert group memberships
 	            for (var i = 0; i < groups.length; i++) {
 	                promises.push(
 	                    connection.runSql("insert into user_group_membership (user_id, group_id) VALUES (?, ?)", [result.insertId, groups[i]])
@@ -146,9 +189,10 @@ user.post = function post(source) {
             return Q.all(promises);
         })
         .spread(function(u, group_result1) {
-        	// don't really care about the result of inserting groups
-        	return u;
-        });
+			// mailgun doesn't seem to like certain characters in the address
+			api.user(u.id).confirm.get();
+			return u;
+		});
 };
 
 
@@ -165,3 +209,14 @@ user.get_by_email = function(data) {
 			return rows[0];
 		});
 };
+
+
+function genCode(len) {
+	var text = "";
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	for (var i = 0; i < len; i++)
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+	return text;
+}

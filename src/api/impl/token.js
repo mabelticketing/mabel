@@ -56,7 +56,7 @@ function external(auth_id) {
 				.then(function(rows) {
 					if (rows.length < 1) {
 						// user not found - so treat this as a registration
-						return api.user.post(obj.user)
+						return api.user.post({u: obj.user})
 							.then(function(user) {
 								// after registration, return a token for the new user
 								return {
