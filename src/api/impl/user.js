@@ -8,6 +8,7 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 var Q = require("q");
 var _ = require("lodash");
+var crypto = require('crypto');
 
 module.exports = user;
 
@@ -94,13 +95,60 @@ function user(id) {
 
 // collection methods:
 
-user.post = function post(user) {
-	var sql = "INSERT INTO user SET ?;";
-	runSql(sql, [user])
-		.then(function(result) {
-		
-		return user(result.insertId).get();
-	});
+user.post = function post(source) {
+
+	var u = {};
+
+	// extract groups
+	var groups = null;
+	if (source.groups !== undefined) {
+		groups = source.groups;
+	}
+
+	// basic validation
+	var e;
+    if (source.name === undefined || source.name === null || source.name.length < 1 || source.name === "Mabel User") {
+    	e = new Error("User lacks a valid name");
+    	e.code = 401;
+    	throw e;
+    } else if (source.email === undefined || source.email === null || source.email.length < 1) {
+    	e = new Error("User lacks a valid email");
+    	e.code = 401;
+    	throw e;
+    }
+    u.name = source.name;
+    u.email = source.email;
+
+    if (source.crsid !== undefined && source.crsid !== null && source.crsid.length > 0) u.crsid = source.crsid;
+    if (source.is_verified !== undefined && source.is_verified !== null) u.is_verified = source.is_verified;
+
+    if (source.password !== undefined) {
+        var hash = crypto.createHash('md5');
+        hash.update(source.password);
+        u.password_md5 = hash.digest('hex');
+    }
+
+	// finally insert
+    return connection.runSql("INSERT INTO user SET ?, registration_time=UNIX_TIMESTAMP()", [u])
+        .then(function(result) {
+
+            var promises = [];
+            promises.push(user(result.insertId).get());
+
+        	if (groups !== null) {
+        		// now also insert group memberships
+	            for (var i = 0; i < groups.length; i++) {
+	                promises.push(
+	                    connection.runSql("insert into user_group_membership (user_id, group_id) VALUES (?, ?)", [result.insertId, groups[i]])
+	                );
+	            }
+        	}
+            return Q.all(promises);
+        })
+        .spread(function(u, group_result1) {
+        	// don't really care about the result of inserting groups
+        	return u;
+        });
 };
 
 

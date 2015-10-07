@@ -57,10 +57,12 @@
               var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("access_token", key, "query");
               window.swaggerUi.api.clientAuthorizations.add("token", apiKeyAuth);
               window.swaggerUi.api.clientAuthorizations.add("admin", apiKeyAuth);
+              window.swaggerUi.api.clientAuthorizations.add("external", apiKeyAuth);
               window.swaggerUi.api.clientAuthorizations.add("self", apiKeyAuth);
           } else {
               window.swaggerUi.api.clientAuthorizations.remove("token");
               window.swaggerUi.api.clientAuthorizations.remove("admin");
+              window.swaggerUi.api.clientAuthorizations.remove("external");
               window.swaggerUi.api.clientAuthorizations.remove("self");
           }
         }

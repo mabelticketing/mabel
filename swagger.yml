@@ -21,8 +21,10 @@ securityDefinitions:
     in: query
   mabel:
     type: basic
-  raven: # Need to figure out how to implement this (normally raven requires redirect)
-    type: basic 
+  external:
+    type: apiKey
+    name: access_token
+    in: query
   admin:
     type: apiKey
     name: access_token
@@ -809,12 +811,17 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Token'
-  /token/raven:
+  /token/external/{auth_id}:
     get:
-      summary: Get an auth token using Raven token
-      description: Trade a Raven token for a mabel authorization token for use with the rest of the API.
+      summary: Get an auth token using an external token
+      description: Trade an external token for a mabel authorization token for use with the rest of the API.
+      parameters: 
+        - name: auth_id
+          in: path
+          type: string
+          required: true
       security:
-        - raven: []
+        - external: []
       responses:
         '200':
           description: Success
@@ -908,7 +915,7 @@ definitions:
         format: int32
         example: 14419663721
         readOnly: true
-        description: 'Date the user registered (or first logged in via Raven, which counts as registration) - seconds since unix epoch'
+        description: 'Date the user registered (or first logged in via an external authenticator, which counts as registration) - seconds since unix epoch'
       password_md5:
         type: string
         example: 5F4DCC3B5AA765D61D8327DEB882CF99
