@@ -16,26 +16,22 @@ block scripts
 	script(type="text/javascript" src="/js/shared/mabeltoken.factory.js")
 	
 	// bootstrap
-	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
+	//- script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 
 block title
-	title Mabel Ticketing | Register to Buy Tickets
+	title mabel | Register
 
 block content
-	h1 Register to Buy Tickets
+	h1 Register
 	.well
+		p You need to register before you are able to purchase tickets. If you are a current student, you should #[a(href="/login/raven") log in with Raven] instead.
+		if error
+			div.alert.alert-dismissable.alert-danger
+				strong Error: 
+				| #{error}
 		form.form-horizontal(method="POST")
 			fieldset
-				if error
-					div.alert.alert-dismissable.alert-danger
-						strong Error: 
-						| #{error}
-				legend You need to register before you are able to purchase tickets.
-					br
-					| If you are a current student, you should 
-					a(href="/login/raven") log in with Raven
-					|	instead.
 				.form-group
 					label.col-lg-2.control-label(for='inputName') Name
 					.col-lg-10
@@ -48,6 +44,6 @@ block content
 					label.col-lg-2.control-label(for='inputPassword') Password
 					.col-lg-10
 						input#inputPassword.form-control(type='password', name="password", placeholder='Password')
-				.form-group
-					.col-lg-10.col-lg-offset-2
-						button.btn.btn-primary(type='submit') Submit
+				.form-group.spacer
+					.col-lg-10
+						button.btn.btn-primary(type='submit' style="width:100%;") Submit
