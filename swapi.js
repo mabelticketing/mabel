@@ -5,7 +5,7 @@ var _ = require("lodash");
 var crypto = require("crypto");
 var api = require("./src/api/api.js");
 var Q = require("q");
-var serveStatic = require('serve-static');
+var jwt = require("jwt-simple");
 
 module.exports = function(app, done) {
 	var swaggerTools = require('swagger-tools');
@@ -165,6 +165,27 @@ function getSwaggerAuthObj() {
 						return next(e);
 					}
 				});
+		},
+
+		external: function(req, secDef, token, next) {
+			var keys = config.external_keys;
+			// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiQ2hyaXN0b3BoZXIgTGl0dGxlIiwiY29sbGVnZSI6IkVtbWFudWVsIiwiZW1haWwiOiJjbDU1NEBjYW0uYWMudWsifQ.CglOSqxd6TNY0sZgfn9bVtDRXBZnH-TkF9-KYgceaZw
+			// decode token using the right key
+			
+			var key = keys[req.swagger.params.auth_id.value];
+
+			try {
+        		var user = jwt.decode(token, key);
+        		// as long as decoding succeeds - we're good to go.
+        		req.swagger.params.user = {
+        			value: user
+        		};
+        		return next();
+			} catch (e) {
+		        var err = new Error("Invalid token/auth pair");
+		        err.code = 401;
+		        throw err;
+		    }
 		},
 
 		// replacing passport functionality - login with username and password either in the authorization header or as query parameters

@@ -21,8 +21,10 @@ securityDefinitions:
     in: query
   mabel:
     type: basic
-  raven: # Need to figure out how to implement this (normally raven requires redirect)
-    type: basic 
+  external:
+    type: apiKey
+    name: access_token
+    in: query
   admin:
     type: apiKey
     name: access_token
@@ -423,7 +425,7 @@ paths:
       security:
         - admin: []
       parameters:
-        - name: user
+        - name: u
           in: body
           description: A specification of the user to be created.
           required: true
@@ -433,6 +435,13 @@ paths:
               - properties:
                   $exclude:
                     - id
+                    - password_md5
+                    - registration_time
+                    - verification_code
+                  password:
+                    type: string
+                    description: "The user's new password"
+                    example: "MyPassword"
                 additionalProperties: false
       responses:
         '200':
@@ -466,7 +475,7 @@ paths:
         - self: []
         - admin: []
       parameters:
-        - name: user
+        - name: u
           in: body
           description: "A specification of the user to be updated. Omitted properties will remain unchanged. It is illegal to provide 'id' in the request body."
           required: true
@@ -476,6 +485,10 @@ paths:
               - properties:
                   $exclude:
                     - id
+                  password:
+                    type: string
+                    description: "The user's new password"
+                    example: "MyPassword"
                 additionalProperties: false
         - name: id
           in: path
@@ -771,7 +784,46 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Ticket'
-
+  '/user/{id}/confirm':
+    get:
+      summary: Resend the verification code by email
+      description: Resend the verification code by email to the specified user. Note that the email will only be resent if the user is not already verified.
+      parameters:
+        - name: id
+          type: string
+          description: The user id wishing to be verified
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Success
+          schema: 
+            type: object
+            properties:
+              success:
+                type: boolean
+    post:
+      summary: Confirm verification code
+      description: Confirm a verification code which was sent by email
+      parameters:
+        - name: id
+          type: string
+          description: The user id wishing to be verified
+          in: path
+          required: true
+        - name: code
+          type: string
+          description: The verification code sent to the user
+          in: query
+          required: true
+      responses:
+        '200':
+          description: Success
+          schema: 
+            type: object
+            properties:
+              success:
+                type: boolean
 
   /token:
     get:
@@ -809,12 +861,17 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Token'
-  /token/raven:
+  /token/external/{auth_id}:
     get:
-      summary: Get an auth token using Raven token
-      description: Trade a Raven token for a mabel authorization token for use with the rest of the API.
+      summary: Get an auth token using an external token
+      description: Trade an external token for a mabel authorization token for use with the rest of the API.
+      parameters: 
+        - name: auth_id
+          in: path
+          type: string
+          required: true
       security:
-        - raven: []
+        - external: []
       responses:
         '200':
           description: Success
@@ -908,7 +965,7 @@ definitions:
         format: int32
         example: 14419663721
         readOnly: true
-        description: 'Date the user registered (or first logged in via Raven, which counts as registration) - seconds since unix epoch'
+        description: 'Date the user registered (or first logged in via an external authenticator, which counts as registration) - seconds since unix epoch'
       password_md5:
         type: string
         example: 5F4DCC3B5AA765D61D8327DEB882CF99

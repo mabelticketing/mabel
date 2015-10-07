@@ -14,5 +14,8 @@ module.exports = {
     jwt_secret  : "jwt-pass",
     mailgun_api_key: "",
   	admin_groups: [1],
-  	donation_value: 2
+  	donation_value: 2,
+    external_keys: {
+        raven: "lknjf3o4fuihqfhq234pf98h23q4prndqr23rfcq43r34n"
+    }
 };
