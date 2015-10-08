@@ -5,40 +5,129 @@
 extends ./main.jade
 
 block scripts	
-	script(type="text/javascript", src="/lib/components/angular/angular.js")
+	script(type="text/javascript", src="/lib/components/angular/angular.min.js")
+	script(type="text/javascript", src="/lib/components/angular-route/angular-route.min.js")
+	script(type="text/javascript", src="/lib/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/lib/components/angular-resource/angular-resource.js")
 	// bootstrap
 	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
+	script(type="text/javascript", src="/js/shared/mabel.shared.js")
+	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
+	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
+	script(type="text/javascript").
+		var LoginApp = angular.module("LoginApp", ["mabel.shared", "ngRoute"]);
+
+		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
+			$scope.mabelLogin = function() {
+				$http.get('/api/token/mabel', {params:{email:$scope.email, password:$scope.password}}).
+					then(function(data) {
+						$scope.error = "";
+						$location.path("/done/" + data.data.token);
+					}, function(failure) {
+						$scope.error = failure.data.message;
+					});
+			}
+			
+			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port() ;
+
+			if ($cookies.get("mabelAuthToken")) {
+				$location.path("/done");
+			}
+		});
+
+		LoginApp.controller("ExternalController", function($scope, $http, $location, $routeParams) {
+			$scope.token = $routeParams.token;
+
+			// trade the external token for a valid one
+			$http.get('/api/token/external/' + $routeParams.auth_id, {params:{access_token:$routeParams.token}}).
+				then(function(data) {
+					$scope.error = "";
+					$location.path("/done/" + data.data.token);
+				}, function(failure) {
+					$scope.error = failure.data.message;
+				});
+		});
+
+		LoginApp.controller("DoneController", function($location, $cookies, $routeParams) {
+			
+			if ( $routeParams.token ) {
+				var token = $routeParams.token;
+				$cookies.put("mabelAuthToken", token, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
+			} else if ( $cookies.get("mabelAuthToken") ) {
+				// probably don't need to do anything here after all...
+			} else {
+				throw Error("Token not provided but you said I was done!");
+			}
+			
+			$location.path("/done");
+			// TODO: Redirect to /dash
+			
+		});
+
+		LoginApp.controller("LogoutController", function($cookies) {
+			$cookies.remove("mabelAuthToken", {path:"/"});
+		});
+
+		LoginApp.config(function($routeProvider, $locationProvider) {
+			$locationProvider.hashPrefix('!');
+			$routeProvider
+				.when('/', {
+					templateUrl: '/mainLogin.html',
+					controller: 'LoginController'
+				})
+				.when('/external/:auth_id/:token', {
+					template: "",
+					controller: 'ExternalController'
+				})
+				.when('/done/:token?', {
+					templateUrl: '/done.html',
+					controller: 'DoneController'
+				})
+				.when('/logout?', {
+					templateUrl: '/logout.html',
+					controller: 'LogoutController'
+				})
+				.otherwise( { redirectTo: "/" });
+		});
 
 block title
 	title Mabel Ticketing | Login to Buy Tickets
+	base(href="/login")
 
 block content
 	h1 Login to Buy Tickets
-	.well
-		form.form-horizontal(method="POST")
-			fieldset
-				if error
-					div.alert.alert-dismissable.alert-danger
+	.well(ng-app="LoginApp")
+		ng-view
+		script(type="text/ng-template" id="/mainLogin.html")
+			form.form-horizontal(novalidate, ng-submit="mabelLogin()")
+				fieldset
+					div.alert.alert-dismissable.alert-danger(ng-if="error.length>0")
 						strong Error: 
-						!= error
-				legend Login with a ticketing account.
-					br
-					| If you are a current student, you should 
-					a(href="/login/raven") log in with Raven
-					|  instead.
-					br
-					| If you do not have a ticketing account, 
-					a(href="/register") click here to register
-					| .
-				.form-group
-					label.col-lg-2.control-label(for='inputEmail') Email
-					.col-lg-10
-						input#inputEmail.form-control(type='text', name="email", value=email, placeholder='Email')
-				.form-group
-					label.col-lg-2.control-label(for='inputPassword') Password
-					.col-lg-10
-						input#inputPassword.form-control(type='password', name="password", placeholder='Password')
-				.form-group
-					.col-lg-10.col-lg-offset-2
-						button.btn.btn-primary(type='submit') Submit
+						span {{error}}
+					legend Login with a ticketing account.
+						br
+						| If you are a current student, you should 
+						a(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/login/%23!/external/raven") log in with Raven
+						|  instead.
+						br
+						| If you do not have a ticketing account, 
+						a(href="/register") click here to register
+						| .
+					.form-group
+						label.col-lg-2.control-label(for='inputEmail') Email
+						.col-lg-10
+							input#inputEmail.form-control(type='text',ng-model="email", name="email", placeholder='Email')
+					.form-group
+						label.col-lg-2.control-label(for='inputPassword') Password
+						.col-lg-10
+							input#inputPassword.form-control(type='password', name="password", ng-model="password", placeholder='Password')
+					.form-group
+						.col-lg-10.col-lg-offset-2
+							button.btn.btn-primary(type='submit') Submit
+		script(type="text/ng-template" id="/done.html")
+			| You're logged in! To log out, 
+			a(href="#!/logout")  click here
+		script(type="text/ng-template" id="/logout.html")
+			| You've logged out. To log back in, 
+			a(href="#!/")  click here
