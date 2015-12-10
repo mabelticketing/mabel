@@ -6,10 +6,10 @@
 
 angular.module('mabel.shared')
 	.factory('MabelToken', function($cookies) {
-		var token = $cookies.mabelAuthToken;
+		var token = $cookies.get("mabelAuthToken");
 		if (token === null || token === undefined) {
 			alert("Please log in before proceeding.");
-			window.location = "/login/raven";
+			window.location = "/login";
 			return null;
 		}
 		authToken = token;
