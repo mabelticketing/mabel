@@ -448,6 +448,17 @@ paths:
           description: Success. Returns the new user.
           schema:
             $ref: '#/definitions/User'
+  '/user/me':
+    get:
+      summary: "Get the current user's details"
+      description: "Get the current user's details."
+      security:
+        - self: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
   '/user/{id}':
     get:
       summary: "Get a user's details"
@@ -1101,6 +1112,11 @@ definitions:
   Token: 
     type: object
     properties:
+      id: 
+        type: number
+        format: integer
+        example: 1
+        description: "The ID of the user which this token authenticates."
       token:
         type: string
         # TODO: invalidate this token

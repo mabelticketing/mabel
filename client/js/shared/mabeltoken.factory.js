@@ -7,11 +7,15 @@
 angular.module('mabel.shared')
 	.factory('MabelToken', function($cookies) {
 		var token = $cookies.get("mabelAuthToken");
+		var id = $cookies.get("mabelUserId");
+
 		if (token === null || token === undefined) {
 			alert("Please log in before proceeding.");
 			window.location = "/login";
 			return null;
 		}
-		authToken = token;
-		return token;
+		return {
+			token: token,
+			id: id
+		};
 	});

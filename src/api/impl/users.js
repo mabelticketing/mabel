@@ -9,7 +9,12 @@ var runSql = connection.runSql;
 
 module.exports = {
 	// main methods
-	get: get
+	get: get,
+
+	// subpaths
+	me: function() {
+		return runSql("SELECT 1");
+	}
 };
 
 function get(opts) {

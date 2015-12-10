@@ -10,7 +10,7 @@ angular.module('mabel.shared')
 function TicketType(MabelToken, MabelResource) {
 	return MabelResource('/api/ticket_type/:event_id/:id', 
 		{
-			access_token: MabelToken,
+			access_token: MabelToken.token,
 			id: '@id',
 			// TODO: parameterise this
 			event_id: 1,

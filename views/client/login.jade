@@ -23,7 +23,7 @@ block scripts
 				$http.get('/api/token/mabel', {params:{email:$scope.email, password:$scope.password}}).
 					then(function(data) {
 						$scope.error = "";
-						$location.path("/done/" + data.data.token);
+						$location.path("/done/" + data.data.id + "/" + data.data.token);
 					}, function(failure) {
 						$scope.error = failure.data.message;
 					});
@@ -43,7 +43,7 @@ block scripts
 			$http.get('/api/token/external/' + $routeParams.auth_id, {params:{access_token:$routeParams.token}}).
 				then(function(data) {
 					$scope.error = "";
-					$location.path("/done/" + data.data.token);
+					$location.path("/done/" + data.data.id + "/" + data.data.token);
 				}, function(failure) {
 					$scope.error = failure.data.message;
 				});
@@ -51,22 +51,25 @@ block scripts
 
 		LoginApp.controller("DoneController", function($location, $cookies, $routeParams) {
 			
-			if ( $routeParams.token ) {
+			if ( $routeParams.token && $routeParams.id) {
 				var token = $routeParams.token;
+				var id = $routeParams.id;
 				$cookies.put("mabelAuthToken", token, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
+				$cookies.put("mabelUserId", id, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
 			} else if ( $cookies.get("mabelAuthToken") ) {
-				// probably don't need to do anything here after all...
+				// we already have a cookie so it's fine to proceed without route parameters
 			} else {
 				throw Error("Token not provided but you said I was done!");
 			}
 			
-			$location.path("/done");
+			//- $location.path("/done");
 			// TODO: Redirect to /dash
 			
 		});
 
 		LoginApp.controller("LogoutController", function($cookies) {
 			$cookies.remove("mabelAuthToken", {path:"/"});
+			$cookies.remove("mabelUserId", {path:"/"});
 		});
 
 		LoginApp.config(function($routeProvider, $locationProvider) {
@@ -80,7 +83,11 @@ block scripts
 					template: "",
 					controller: 'ExternalController'
 				})
-				.when('/done/:token?', {
+				.when('/done/:id/:token', {
+					templateUrl: '/done.html',
+					controller: 'DoneController'
+				})
+				.when('/done', {
 					templateUrl: '/done.html',
 					controller: 'DoneController'
 				})

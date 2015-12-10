@@ -10,7 +10,7 @@ angular.module('mabel.shared')
 function UserGroup(MabelToken, MabelResource) {
 	return MabelResource('/api/user/group/:id', 
 		{
-			access_token: MabelToken,
+			access_token: MabelToken.token,
 			id: '@id',
 		}, 
 		{}, // no custom actions for this resource

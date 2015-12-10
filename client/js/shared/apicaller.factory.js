@@ -9,7 +9,7 @@ angular.module('mabel.shared')
 
 function APICaller($http, MabelToken) {
 	var apiRoot = '/api/';
-	var token = MabelToken;
+	var token = MabelToken.token;
 	if (token === undefined || token === null || token.length < 1) {
 		console.error("No auth token found!"); // TODO: scream louder than this
 		// break the call function

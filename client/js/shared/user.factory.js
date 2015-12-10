@@ -11,14 +11,14 @@ angular.module('mabel.shared')
 function User(MabelToken, MabelResource) {
 	return MabelResource('/api/user/:id', 
 		{
-			access_token: MabelToken,
+			access_token: MabelToken.token,
 			id: '@id',
-		}, 
+		},
 		{
 			// add a custom action to retrieve the current user
 			'current': {
 				method: 'GET',
-				url: '/api/user/me',
+				url: '/api/user/' + MabelToken.id,
 				mabelSerialize: true
 			}
 		},

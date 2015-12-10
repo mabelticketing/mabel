@@ -26,6 +26,7 @@ function get(obj) {
 		obj.access_token = obj.access_token[0];
 	var old_token = helpers.checkToken(obj.access_token);
 	return Q({
+		id: old_token.id,
 		token: helpers.makeToken(old_token.id)
 	});
 }
@@ -40,6 +41,7 @@ function mabel_get(obj) {
 				throw e;
 			}
 			return {
+				id: rows[0].id,
 				token: helpers.makeToken(rows[0].id)
 			};
 		});
@@ -61,6 +63,7 @@ function external(auth_id) {
 								// after registration, return a token for the new user
 								return {
 									// token: "new" + (user.id)
+									id: user.id,
 									token: helpers.makeToken(user.id)
 								};		
 							});
@@ -68,6 +71,7 @@ function external(auth_id) {
 						// user exists, so return its id as a valid token
 						return {
 							// token: "exists" + (rows[0].id)
+							id: rows[0].id,
 							token: helpers.makeToken(rows[0].id)
 						};
 					}
