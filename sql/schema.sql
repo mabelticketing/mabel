@@ -25,8 +25,7 @@ create table if not exists ticket_type (
 	id int auto_increment not null,
 	name varchar(128) not null,
 	price DECIMAL(6,2) not null,
-	ticket_limit int not null,
-	per_user_limit int null,
+	total_limit int not null,
 	primary key (id)
 );
 
@@ -52,7 +51,7 @@ create table if not exists user_group (
 	id int auto_increment not null,
 	name varchar(128) not null,
 	description varchar(256),
-	ticket_limit int not null,
+	overall_allowance int not null,
 	primary key (id)
 );
 
@@ -74,6 +73,7 @@ create table if not exists group_access_right (
 	id int auto_increment not null,
 	group_id int not null,
 	ticket_type_id int not null,
+	allowance int,
 	open_time int,
 	close_time int,
 	primary key (id),
@@ -87,7 +87,6 @@ create table if not exists payment_method (
 	id int auto_increment not null,
 	name varchar(128) not null,
 	description varchar(256),
-	ticket_limit int not null,
 	primary key (id)
 );
 
