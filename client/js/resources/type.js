@@ -4,11 +4,13 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-/* globals app */
-app.factory('Type', typeResource);
+angular.module('mabel.shared')
+	.factory('Type', typeResource);
 
-function typeResource($resource) {
-	return $resource('/api/type/:id', {}, {
+function typeResource($resource, MabelToken) {
+	return $resource('/api/type/:id', {
+		access_token: MabelToken.token
+	}, {
 		'get': {
 			method: 'GET'
 		},
@@ -16,7 +18,7 @@ function typeResource($resource) {
 			method: 'POST'
 		},
 		'query': {
-			url: '/api/types',
+			url: '/api/type',
 			method: 'GET',
 			isArray: true
 		},

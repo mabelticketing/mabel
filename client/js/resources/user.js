@@ -4,11 +4,13 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-/* globals app */
-app.factory('user', userResource);
+angular.module('mabel.shared')
+	.factory('User', userResource);
 
-function userResource($resource) {
-	var User = $resource('/api/user/:id', {}, {
+function userResource($resource, MabelToken) {
+	var User = $resource('/api/user/:id', {
+		access_token: MabelToken.token
+	}, {
 		'get': {
 			method: 'GET'
 		},
@@ -25,20 +27,22 @@ function userResource($resource) {
 		},
 		'delete': {
 			method: 'DELETE'
+		},
+		
+		// add a custom action to retrieve the current user
+		'current': {
+			method: 'GET',
+			url: '/api/user/' + MabelToken.id,
+			mabelSerialize: true
 		}
 	});
 
 	// I think I'm chris
-	var subpaths = ['allowance', 'payment_methods', 'types'];
+	var subpaths = ['allowance', 'payment_methods', 'type'];
 	var subpath_fn = function(path) {
 		return function() {
-			return $resource('/api/user/:id/' + path, { id: this.id }, {
-				'get': {
-					method: 'GET',
-					isArray: true
-				}
-			});
-		}
+			return $resource('/api/user/:id/' + path, { access_token: MabelToken.token, id: this.id });
+		};
 	};
 
 	for (var i=0; i<subpaths.length; i++) {
@@ -46,7 +50,7 @@ function userResource($resource) {
 	}
 
 	User.prototype.tickets = function() {
-		return $resource('/api/user/:id/tickets', { id: this.id }, {
+		return $resource('/api/user/:id/tickets', { id: this.id,  access_token: MabelToken.token }, {
 			'get': {
 				method: 'GET',
 				isArray: true
@@ -57,6 +61,14 @@ function userResource($resource) {
 			}
 		});
 	};
+
+	// User.prototype.tickets = function() {
+	// 	return $resource('/api/user/:id/allowance', { id: this.id, access_token: MabelToken.token }, {
+	// 		'get': {
+	// 			method: 'GET'
+	// 		}
+	// 	});
+	// };
 
 	return User;
 }
