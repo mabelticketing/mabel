@@ -67,12 +67,11 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	    for (var i=0; i<vm.available_tickets.length; i++) {
 	    	var lim = 20;  // limit to 20 for rendering speed;
 	    	Math.min(vm.meta.ticketAllowance, lim); // can't buy more than your remaining allowance
-	    	Math.min(vm.available_tickets[i].ticket_limit, lim); // can't buy more tickets than we have for sale
+	    	Math.min(vm.available_tickets[i].total_limit, lim); // can't buy more tickets than we have for sale
 	    	Math.min(vm.available_tickets[i].per_user_limit, lim); // can't buy more tickets than an individual is allowed
 	    	if (vm.limitRanges[vm.available_tickets[i].id] === undefined || 
 	    		vm.limitRanges[vm.available_tickets[i].id].length !== lim) 
 	    		vm.limitRanges[vm.available_tickets[i].id] = _.range(0, lim + 1); // +1 because we're counting 0
-	   //  	if () 
 				// // add each ticket, quantity 0 to vm.booking
 				// // this is possibly a stupid idea, gives lots of undefineds in array
 				// vm.booking.tickets.push({
