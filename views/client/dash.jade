@@ -75,7 +75,7 @@ block content
 					td # {{ ticket.id }}
 					td #[em ({{ ticket.name }})]
 					td
-						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.setChanged(ticket);" ng-focus="dashCtrl.clearStatus(ticket)")
+						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)")
 
 					//- TODO: allow users to change payment method
 					td {{ ticket.payment_method }}
@@ -83,8 +83,8 @@ block content
 					td(class="{{ ticket.status }}") {{ ticket.status }}
 					td(style="text-align:right")
 						//- button.btn.btn-xs(ng-click="dashCtrl.saveTicket(ticket)") Save 
-						button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
-						span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
+						button.btn.btn-xs.btn-danger(ng-if="ticket.status=='PENDING'" tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
+						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
 			tfoot
 				tr
 					th(colspan=2) Total
@@ -93,8 +93,6 @@ block content
 					td(style="text-align:right;")
 						b &pound;{{ dashCtrl.totalValue | number:2 }}
 					td
-		p(style="font-size:2em; margin-top:20px; text-align:right;")
-			button.btn.btn-large(class="btn-{{dashCtrl.saveBtnClass}}" ng-click="dashCtrl.saveTickets()") Save changes
 		
 		h3 Waiting List
 
@@ -119,26 +117,7 @@ block content
 						span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
 
 
-		//- h2 Billing
-		//- p(ng-if="dashCtrl.transactionsLoading") #[em Loading...]
-		//- div(ng-if="!dashCtrl.transactionsLoading && dashCtrl.transactions.length === 0")
-		//- 	p #[em We have not yet processed any transactions from you.]
-		//- table.table.table-striped.table-hover(ng-if="dashCtrl.transactions.length !== 0")
-		//- 	thead
-		//- 		tr
-		//- 			th Payment Method
-		//- 			th Notes
-		//- 			th Value
-		//- 			th Date Processed
-		//- 	tbody
-		//- 		tr(ng-repeat="transaction in dashCtrl.transactions")
-		//- 			td {{ transaction.payment_method }}
-		//- 			td {{ transaction.notes }}
-		//- 			td &pound;{{ transaction.value | number: 2}}
-		//- 			td {{ transaction.time }}
-		//- 	tfoot
-		//- 		tr 
-		//- 			th Total
-		//- 			td
-		//- 			th &pound;{{ dashCtrl.totalTransactions | number: 2 }}
-		//- 			td
+		h2 Billing
+
+		p(ng-if="dashCtrl.billingLoading") #[em Loading...]
+		p(ng-if="!dashCtrl.billingLoading") We have received #[strong &pound;{{ dashCtrl.confirmedValue | number: 2 }}] from you. You owe #[strong &pound;{{ dashCtrl.pendingValue | number: 2 }}]. Please allow #{ payment_processing_time } for your transactions to show on this page.

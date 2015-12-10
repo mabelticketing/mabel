@@ -4,6 +4,8 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
+// TODO: use resources instead of APICaller - you should be able to delete apicaller
+
 angular.module('mabel.dash')
 	.controller("DashController", DashController);
 
@@ -21,10 +23,11 @@ function DashController($scope, APICaller, User) {
 	vm.waitingListTickets = [];
 	// vm.donationTickets  = [];
 	// vm.transactions     = [];
-	// vm.changedTickets   = [];
+	vm.changedTickets   = [];
 
-	// vm.totalValue        = 0;
-	// vm.totalTransactions = 0;
+	vm.totalValue     = 0;
+	vm.confirmedValue = 0;
+	vm.pendingValue   = 0;
 
 	vm.waitingListLoading      = true;
 	vm.ticketsBookedLoading    = true;
@@ -36,13 +39,13 @@ function DashController($scope, APICaller, User) {
 	// vm.saveTicket          = saveTicket;
 	// vm.saveTickets         = saveTickets;
 	// vm.setChanged          = setChanged;
+	vm.nameChange = nameChange;
 	// vm.clearStatus         = clearStatus;
 
 	vm.saveBtnClass = "primary";
 
 	/*** INITIAL ACTION ***/
 
-	// TODO: do we need to show available tickets?
 	// APICaller.get('type', function(err, data) {
 	// 	if (err) return console.log(err);
 	// 	// assign response to tickets array
@@ -57,7 +60,6 @@ function DashController($scope, APICaller, User) {
 		
 		APICaller.get('user/' + user.id + '/ticket', function(err, data) {
 			if (err !== undefined && err !== null) return console.log(err);
-			console.log(data);
 
 			// sort tickets associated with user
 			for (var i=0; i<data.length; i++) {
@@ -78,47 +80,35 @@ function DashController($scope, APICaller, User) {
 			updateTotal();
 		});
 
+		APICaller.get('user/' + user.id + '/allowance', function(err, data) {
+			if (err !== undefined && err !== null) return console.log(err);
+			console.log(data);
+
+			// TODO: when endpoint is finished, populate the box at the top of the dashboard.
+
+		});
+
+
 	});
 	
 
 	/*** FUNCTION DEFINITIONS ***/
 
-	// function saveTicket(ticket) {
-	// 	ticket._status = "warning";
-	// 	// TODO: This kind of get/save/delete thing is literally what $resources are for
-	// 	APICaller.post('ticket/' + ticket.id, ticket, function(err) {
-	// 			if (err!==undefined && err!==null) {
-	// 				ticket._status = "danger";
-	// 				alert(err);
-	// 				return console.log(err);
-	// 			}
-	// 			ticket._status = "success";
-	// 	});
+	function nameChange(ticket) {
+		if(ticket.guest_name && typeof ticket.guest_name === 'string' && ticket.guest_name.length > 0) {
 
-	// }
+			APICaller.put('user/' + vm.user.id + '/ticket/' + ticket.id, {
+				"guest_name": ticket.guest_name
+			}, function(err) {
+				if (err !== undefined && err !== null) {
+					return console.log(err);
+				}
 
-	// function setChanged(ticket) {
-	// 	if (vm.changedTickets.indexOf(ticket) < 0) 
-	// 		vm.changedTickets.push(ticket);
-	// }
+				// else we got here and the name was changed
 
-	// function saveTickets() {
-	// 	vm.saveBtnClass = "warning";
-		
-	// 	APICaller.post('ticket/multi/', vm.changedTickets, function(err) {
-	// 			if (err!==undefined && err!==null) {
-	// 				vm.saveBtnClass = "danger";
-	// 				alert(err);
-	// 				return console.log(err);
-	// 			}
-	// 			alert("Thank you, your changes have been saved.");
-	// 			vm.saveBtnClass = "success";
-	// 	});
-	// }
-
-	// function clearStatus(ticket) {
-	// 	ticket._status = "";
-	// }
+			});
+		}
+	}
 
 	function cancelTicket(ticket) {
 		if (window.confirm("Do you really want to cancel this ticket?")) { 
@@ -149,20 +139,22 @@ function DashController($scope, APICaller, User) {
 						break;
 					}
 				}
-
 			});
 		}
 	}
 
 	function updateTotal() {
-		// updates total ticket price
-
 		vm.totalValue = 0;
+		vm.pendingValue = 0;
+		vm.confirmedValue = 0;
 		for (var i = 0; i<vm.ticketsBooked.length; i++) {
+			if (vm.ticketsBooked[i].status === 'PENDING') {
+				vm.pendingValue += vm.ticketsBooked[i].transaction_value;
+			} else if (vm.ticketsBooked[i].status === 'CONFIRMED' || vm.ticketsBooked[i].status === 'ADMITTED') {
+				vm.confirmedValue += vm.ticketsBooked[i].transaction_value;
+			}
 			vm.totalValue += vm.ticketsBooked[i].transaction_value;
 		}
-
+		vm.billingLoading = false;
 	}
-
-	
 }
