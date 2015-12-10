@@ -74,8 +74,6 @@ function setupSockets() {
 		connection
 			.runSql('select distinct group_id, ticket_type_id from group_access_right where open_time < UNIX_TIMESTAMP() and close_time > UNIX_TIMESTAMP()')
 			.then(function(types) {
-				console.log("Emitting");
-				console.log(types);
 				io.emit('open_types', types);
 			});
 	}, 3000);
