@@ -27,6 +27,7 @@ block scripts
 	// resources
 	script(type="text/javascript", src="/js/resources/type.js")
 	script(type="text/javascript", src="/js/resources/user.js")
+	script(type="text/javascript", src="/js/resources/payment-method.js")
 
 	// booking
 	script(type = "text/javascript" src="/js/booking/mabel.booking.js")
@@ -80,8 +81,7 @@ block content
 													input(type="hidden" 
 														ng-model="bookingCtrl.booking.tickets[$index].ticket_type_id"
 														value="ticket.ticket_type_id")
-													select(ng-model="bookingCtrl.booking.tickets[$index].quantity")
-														option(ng-value="$index" ng-repeat="i in [0].concat(bookingCtrl.booking.tickets[$index].max_tickets) track by $index") {{$index}}
+													select(ng-model="bookingCtrl.booking.tickets[$index].quantity" ng-options="i for i in bookingCtrl.limitRanges[ticket.id]")
 													div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length>bookingCtrl.booking.tickets[$index].max_available && bookingCtrl.booking.tickets[$index].max_available === 1")
 														em Only {{bookingCtrl.booking.tickets[$index].max_available}} ticket available
 													div(ng-if="bookingCtrl.booking.tickets[$index].max_tickets.length>bookingCtrl.booking.tickets[$index].max_available && bookingCtrl.booking.tickets[$index].max_available > 1")

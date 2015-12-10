@@ -4,11 +4,13 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-/* globals app */
-app.factory('Group', groupResource);
+angular.module('mabel.shared')
+	.factory('Group', groupResource);
 
-function groupResource($resource) {
-	return $resource('/api/group/:id', {}, {
+function groupResource($resource, MabelToken) {
+	return $resource('/api/group/:id',  {
+		access_token: MabelToken.token
+	}, {
 		'get': {
 			method: 'GET'
 		},

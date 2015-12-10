@@ -10,7 +10,7 @@ angular.module('mabel.booking')
 
 // TODO Maybe: I feel like BookingController is trying to do too much, but maybe that doesn't matter
 // e.g. the call to user/me should perhaps be the responsibility of some other controller
-function BookingController($scope, User, Type, Socket) {
+function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	var vm = this;
 
 	e = vm; // TODO: get rid
@@ -28,17 +28,20 @@ function BookingController($scope, User, Type, Socket) {
 		tickets: [],
 		donate: true
 	};
+	vm.limitRanges = {};
 	// function on submission
 	vm.submitBooking = submitBooking;
 
 	// get all ticket types first, so we know what we're talking about
 	var all_ticket_types = Type.query();
 
+	// get all payment methods
+	vm.payment_methods = PaymentMethod.query();
+
 	vm.user.$promise.then(function() {
 		var a = vm.user.allowance().get();
 		a.$promise.then(function() {
 			vm.meta.ticketAllowance = a.allowance;
-			// $scope.$apply();
 		});
 	});
 
@@ -60,26 +63,32 @@ function BookingController($scope, User, Type, Socket) {
 	    		return _.contains(data, t.id);
 	    	})
 	    	.value();
+
+	    for (var i=0; i<vm.available_tickets.length; i++) {
+	    	var lim = 20;  // limit to 20 for rendering speed;
+	    	Math.min(vm.meta.ticketAllowance, lim); // can't buy more than your remaining allowance
+	    	Math.min(vm.available_tickets[i].ticket_limit, lim); // can't buy more tickets than we have for sale
+	    	Math.min(vm.available_tickets[i].per_user_limit, lim); // can't buy more tickets than an individual is allowed
+	    	if (vm.limitRanges[vm.available_tickets[i].id] === undefined || 
+	    		vm.limitRanges[vm.available_tickets[i].id].length !== lim) 
+	    		vm.limitRanges[vm.available_tickets[i].id] = _.range(0, lim + 1); // +1 because we're counting 0
+	   //  	if () 
+				// // add each ticket, quantity 0 to vm.booking
+				// // this is possibly a stupid idea, gives lots of undefineds in array
+				// vm.booking.tickets.push({
+				// 	ticket_type_id: vm.available_tickets[i].id,
+				// 	max_tickets: new Array(Math.min(vm.available_tickets[i].per_user_limit, vm.available_tickets[i].ticket_limit, vm.meta.ticketAllowance, 20)), // limit to 20 for rendering speed
+				// 	max_available: available_tickets[i].ticket_limit,
+				// 	quantity: 0,
+				// 	price: available_tickets[i].price,
+				// 	name: available_tickets[i].name,
+				// 	payment_methods: []
+				// });
+		}
     });
 
 	// result of booking (for confirmation)
 	vm.ticketResult = {};
-
-	// // for storing the interval ID of the poller
-	// var poller;
-
-	// /*** INITIAL ACTION ***/
-
-
-	// // TODO: Parameterise event id
-	// APICaller.get("booking/open/1", function(err, data) {
-	// 	if (err) return console.log(err); // error handling
-		
-	// 	// set up polling at intervals
-	// 	poller = $interval(pollApi, 30000);
-	// 	processStatus(data);
-	// });	
-
 
 
 	// /*** FUNCTION DEFINITIONS ***/
@@ -87,57 +96,6 @@ function BookingController($scope, User, Type, Socket) {
 
 	}
 
-	// function resizeArray(array, size, default_obj) {
-	// 	if (array.length > size) {
-	// 		return array.slice(0, size);
-	// 	} 
-	// 	if (array.length < size) {
-	// 		var arr = array.slice(0);
-	// 		var obj = arr[0] || default_obj;
-	// 		for (var i=array.length; i<size; i++) {
-	// 			arr[i] = angular.copy(obj);
-	// 		}
-	// 		return arr;
-	// 	}
-	// 	return array;
-	// }
-
-	// function processStatus(status) {
-	// 	if (status.open) {
-	// 		// show the booking page and stuff
-
-	// 		// get available ticket types
-	// 		// TODO: parameterise event id
-	// 		APICaller.get("ticket_type/available/1", function(err, available_tickets) {
-	// 			if (err) return console.log(err);
-
-	// 			// get the user's ticket allowance
-	// 			APICaller.get("user/ticket_limit", function(err, data) {
-	// 				if (err) return console.log(err);
-	// 				if (data[0].allowance < 1) return;
-
-	// 				vm.meta.ticketAllowance = data[0].allowance;
-	// 				// generate an empty array to get ng-repeat to work (it only works for arrays, not up to a range)
-	// 				// get available payment methods
-	// 				APICaller.get("payment_method", function(err, payment_method) {
-	// 					if (err) return console.log(err);
-
-	// 					vm.payment_methods = payment_method;
-								
-	// 					vm.available_tickets = available_tickets;
-	// 					for (var i=0; i<available_tickets.length; i++) {
-	// 						// add each ticket, quantity 0 to vm.booking
-	// 						// this is possibly a stupid idea, gives lots of undefineds in array
-	// 						vm.booking.tickets.push({
-	// 							ticket_type_id: available_tickets[i].id,
-	// 							max_tickets: new Array(Math.min(vm.meta.ticketAllowance, 20)), // limit to 20 for rendering speed
-	// 							max_available: available_tickets[i].ticket_limit,
-	// 							quantity: 0,
-	// 							price: available_tickets[i].price,
-	// 							name: available_tickets[i].name,
-	// 							payment_methods: []
-	// 						});
-	// 					}
 
 	// 					// we will watch for changes to the tickets array or donations boolean and update summaries when the array changes
 	// 					$scope.$watch(function() {
