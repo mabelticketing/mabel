@@ -54,6 +54,15 @@ SELECT user_id, SUM(bought) bought
    FROM user_bought_by_type
    GROUP BY user_id;
 
+/*
+Get the largest limit for a user, given all the groups he is a member of
+ */
+CREATE OR REPLACE VIEW user_group_limit AS 
+SELECT user_id, MAX(ticket_limit) l
+   FROM user_group
+   JOIN user_group_membership ON user_group.id=user_group_membership.group_id
+   GROUP BY user_id;
+
 /* 
 Get the user's remaining allowance -- i.e. the number of tickets that this user is allowed to buy overall,
 given the groups he is a member of and the tickets he has already bought.
@@ -70,16 +79,6 @@ SELECT user_group_limit.user_id,
 FROM user_group_limit
 LEFT JOIN user_bought
 ON user_group_limit.user_id=user_bought.user_id;
-
-/*
-Get the largest limit for a user, given all the groups he is a member of
- */
-CREATE OR REPLACE VIEW user_group_limit AS 
-SELECT user_id, MAX(ticket_limit) l
-   FROM user_group
-   JOIN user_group_membership ON user_group.id=user_group_membership.group_id
-   GROUP BY user_id;
-
 
 
 /* PROCEDURES
