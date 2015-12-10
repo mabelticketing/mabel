@@ -1,6 +1,6 @@
 #!/bin/bash
 
-jade views/client -o public --hierarchy --pretty;
+jade views/client -O mabel.json -o public --hierarchy --pretty;
 # TODO: admin pages...
 
 # move (...).html to /(...)/index.html  (except index.html)
