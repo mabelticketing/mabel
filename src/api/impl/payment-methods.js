@@ -13,5 +13,5 @@ module.exports = {
 };
 
 function get() {
-	return runSql("SELECT id, name, description, ticket_limit FROM payment_method");
+	return runSql("SELECT id, name, description FROM payment_method");
 }

@@ -4,30 +4,21 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-insert into ticket_type (id, name, price, ticket_limit, per_user_limit) VALUES (
+insert into ticket_type (id, name, price, total_limit) VALUES (
 	1,
 	'Standard',
 	135.00,
-	700,
-	NULL
+	700
 ), (
 	2,
 	'Queue Jump',
 	145.00,
-	100,
-	NULL
+	100
 ), (
 	3,
 	'Dining',
 	165.00,
-	100,
-	NULL
-), (
-	4,
-	'Early Bird',
-	135.00,
-	300,
-	1
+	100
 );
 
 
@@ -54,7 +45,7 @@ insert into user (id, name, email, password_md5, registration_time, is_verified)
 	1
 );
 
-insert into user_group (id, name, description, ticket_limit) VALUES (
+insert into user_group (id, name, description, overall_allowance) VALUES (
 	1,
 	'admins',
 	'Administrators',
@@ -76,39 +67,35 @@ insert into user_group_membership (user_id, group_id) VALUES
 			(2, 2),
 					(3, 3);
 
-insert into group_access_right (group_id, ticket_type_id, open_time, close_time) VALUES
+insert into group_access_right (group_id, ticket_type_id, allowance, open_time, close_time) VALUES
 # Admins can have anything any time (< 10 years from now)
-	(1,1,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
-	(1,2,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
-	(1,3,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
-	(1,4,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
+	(1,1,null,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
+	(1,2,null,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
+	(1,3,null,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
 # Current students can have any "normal" ticket since yesterday
-# Early bird tickets were open last week until yesterday
-	(2,1,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(2,3,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(2,4,UNIX_TIMESTAMP()- 7 * 24 * 60 * 60, UNIX_TIMESTAMP() - 1 * 24 * 60 * 60),
+	(2,1,null,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
+	(2,2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
+	(2,3,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
+# Early bird tickets were open to current students until yesterday
+	(2,1,1,UNIX_TIMESTAMP()- 7 * 24 * 60 * 60, UNIX_TIMESTAMP() - 1 * 24 * 60 * 60),
 # Alumni can have any "normal" ticket since yesterday
-	(3,1,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(3,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(3,3,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 );
+	(3,1,null,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
+	(3,2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
+	(3,3,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 );
 
-insert into payment_method (id, name, description, ticket_limit) VALUES 
+insert into payment_method (id, name, description) VALUES 
 (
 	1,
 	'College Bill',
-	'Payment will be added to the end of term college bill',
-	1
+	'Payment will be added to the end of term college bill'
 ), (
 	2,
 	'Cheque',
-	'Cheque made payable to "Emmanuel Colege May Ball"',
-	2000 # TODO: this should probably be nullable rather than setting arbitrary upper bounds
+	'Cheque made payable to "Emmanuel Colege May Ball"'
 ), (
 	3,
 	'Bank Transfer',
-	'Pay by Bank Transfer',
-	2000
+	'Pay by Bank Transfer'
 );
 
 insert into group_payment_method_access (group_id, payment_method_id) VALUES 

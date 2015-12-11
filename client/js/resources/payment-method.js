@@ -4,16 +4,18 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-/* globals app */
-app.factory('PaymentMethod', paymentMethodResource);
+angular.module('mabel.shared')
+	.factory('PaymentMethod', PaymentMethod);
 
-function paymentMethodResource($resource) {
-	return $resource('/api/payment_method/:id', {}, {
+function PaymentMethod($resource, MabelToken) {
+	return $resource('/api/payment-method/:id', {
+		access_token: MabelToken.token
+	}, {
 		'get': {
 			method: 'GET'
 		},
 		'query': {
-			url: '/api/payment_method',
+			url: '/api/payment-method',
 			method: 'GET',
 			isArray: true
 		},

@@ -27,20 +27,22 @@ function userResource($resource, MabelToken) {
 		},
 		'delete': {
 			method: 'DELETE'
+		},
+		
+		// add a custom action to retrieve the current user
+		'current': {
+			method: 'GET',
+			url: '/api/user/' + MabelToken.id,
+			mabelSerialize: true
 		}
 	});
 
 	// I think I'm chris
-	var subpaths = ['allowance', 'payment_methods', 'types'];
+	var subpaths = ['allowance', 'payment_methods', 'type'];
 	var subpath_fn = function(path) {
 		return function() {
-			return $resource('/api/user/:id/' + path, { id: this.id }, {
-				'get': {
-					method: 'GET',
-					isArray: true
-				}
-			});
-		}
+			return $resource('/api/user/:id/' + path, { access_token: MabelToken.token, id: this.id });
+		};
 	};
 
 	for (var i=0; i<subpaths.length; i++) {
@@ -48,7 +50,7 @@ function userResource($resource, MabelToken) {
 	}
 
 	User.prototype.tickets = function() {
-		return $resource('/api/user/:id/tickets', { id: this.id }, {
+		return $resource('/api/user/:id/tickets', { id: this.id,  access_token: MabelToken.token }, {
 			'get': {
 				method: 'GET',
 				isArray: true
@@ -59,6 +61,14 @@ function userResource($resource, MabelToken) {
 			}
 		});
 	};
+
+	// User.prototype.tickets = function() {
+	// 	return $resource('/api/user/:id/allowance', { id: this.id, access_token: MabelToken.token }, {
+	// 		'get': {
+	// 			method: 'GET'
+	// 		}
+	// 	});
+	// };
 
 	return User;
 }

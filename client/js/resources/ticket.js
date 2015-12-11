@@ -4,11 +4,13 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-/* globals app */
-app.factory('Ticket', ticketResource);
+angular.module('mabel.shared')
+	.factory('Ticket', ticketResource);
 
-function ticketResource($resource) {
-	return $resource('/api/ticket/:id', {}, {
+function ticketResource($resource, MabelToken) {
+	return $resource('/api/ticket/:id',  {
+		access_token: MabelToken.token
+	}, {
 		'get': {
 			method: 'GET'
 		},

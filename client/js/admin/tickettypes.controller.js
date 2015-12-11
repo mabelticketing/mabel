@@ -33,11 +33,11 @@ function TicketTypesController(TicketType) {
 			sortable: 'price',
 			filter: {price:'text'}
 		}, {
-			title: 'Ticket Limit',
-			name: 'ticket_limit',
+			title: 'Total Limit',
+			name: 'total_limit',
 			type: 'text',
-			sortable: 'ticket_limit',
-			filter: {ticket_limit:'text'}
+			sortable: 'total_limit',
+			filter: {total_limit:'text'}
 		}
 	];
 }

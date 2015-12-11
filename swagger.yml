@@ -67,7 +67,7 @@ paths:
               - required:
                   - name
                   - description
-                  - ticket_limit
+                  - overall_allowance
                 additionalProperties: false
                 properties:
                   $exclude:
@@ -540,7 +540,7 @@ paths:
   '/user/{id}/payment-method':
     get: 
       summary: Get user payment methods
-      description: "Get the user's available payment methods, taking into account the groups they are a member of. Note that this operation returns personalised ticket_limits -- i.e. taking into account the number of tickets this particular user as already bought using that payment method."
+      description: "Get the user's available payment methods, taking into account the groups they are a member of."
       security:
         - self: []
         - admin: []
@@ -562,7 +562,7 @@ paths:
   '/user/{id}/type':
     get:
       summary: Get available ticket types 
-      description: "gets the ticket types available to the user, with ticket limit adjusted to account for already bought tickets, and also adjusted to return 0 if there's anyone in the waiting list for that ticket type."
+      description: "gets the ticket types available to the user, with ticket allowance adjusted to account for already bought tickets, and also adjusted to return 0 if there's anyone in the waiting list for that ticket type."
       security:
         - self: []
         - admin: []
@@ -926,18 +926,12 @@ definitions:
         example: 130.00
         minimum: 0
         description: The price per unit for a ticket of this type
-      ticket_limit: 
+      total_limit: 
         type: integer
         format: int32
         example: 1
         minimum: 0
         description: The total number of tickets of this type which may be sold
-      per_user_limit: 
-        type: integer
-        format: int32
-        example: 1
-        minimum: 0
-        description: The number of tickets of this type that a single user may hold (may be null)
       groups:
         type: array
         format: csv
@@ -1008,7 +1002,7 @@ definitions:
         type: string
         example: Members who are currently students at Emmanuel College
         description: Group description
-      ticket_limit:
+      overall_allowance:
         type: integer
         format: int32
         example: 8
@@ -1033,12 +1027,6 @@ definitions:
         type: string
         example: Pay for tickets by adding the price to your end of term college bill
         description: Payment method description
-      ticket_limit:
-        type: integer
-        format: int32
-        example: 1
-        minimum: 0
-        description: The number of tickets which may be paid for using this payment method
 
 
   Ticket:

@@ -32,7 +32,7 @@ SELECT user_id,
 		ticket_type_id,
 		COUNT(*) bought
 	FROM ticket
-	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ATTENDING'OR status='PENDING_WL')
+	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
 	GROUP BY user_id, ticket_type_id;
 
 /*
@@ -43,7 +43,7 @@ SELECT user_id,
 		payment_method_id,
 		COUNT(*) bought
 	FROM ticket
-	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ATTENDING'OR status='PENDING_WL')
+	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
 	GROUP BY user_id, payment_method_id;
 
 /* 
@@ -55,30 +55,30 @@ SELECT user_id, SUM(bought) bought
    GROUP BY user_id;
 
 /*
-Get the largest limit for a user, given all the groups he is a member of
+Get the overall allowance for a user, given all the groups he is a member of
  */
-CREATE OR REPLACE VIEW user_group_limit AS 
-SELECT user_id, MAX(ticket_limit) l
+CREATE OR REPLACE VIEW user_group_allowance AS 
+SELECT user_id, MAX(overall_allowance) overall_allowance
    FROM user_group
    JOIN user_group_membership ON user_group.id=user_group_membership.group_id
    GROUP BY user_id;
 
 /* 
-Get the user's remaining allowance -- i.e. the number of tickets that this user is allowed to buy overall,
+Get the user's remaining overall allowance -- i.e. the number of tickets that this user is allowed to buy overall,
 given the groups he is a member of and the tickets he has already bought.
 Example output:
-+---------+-----------+
-| user_id | allowance |
-+---------+-----------+
-|     298 |         5 |
-|     301 |         7 |
++---------+---------------------+
+| user_id | remaining_allowance |
++---------+---------------------+
+|     298 |                   5 |
+|     301 |                   7 |
 */
-CREATE OR REPLACE VIEW user_group_allowance AS
-SELECT user_group_limit.user_id,
-	   l - IFNULL(bought, 0) AS allowance
-FROM user_group_limit
+CREATE OR REPLACE VIEW user_group_remaining_allowance AS
+SELECT user_group_allowance.user_id,
+	   overall_allowance - IFNULL(bought, 0) AS remaining_allowance
+FROM user_group_allowance
 LEFT JOIN user_bought
-ON user_group_limit.user_id=user_bought.user_id;
+ON user_group_allowance.user_id=user_bought.user_id;
 
 
 /* PROCEDURES
@@ -101,18 +101,8 @@ DELIMITER //
 /* Get the ticket types available for the given user id to book. 
 The ticket limit takes into account the amount of tickets sold and the waiting
 list rule (if there are others in the waiting list, you can't book any). It 
-doesn't take into account overall group ticket limits, nor payment method limits.
-It also returns per-user and group ticket limits, considering how many tickets have been bought already.
-
-Example output:
-
-+----+------------+--------+--------------+
-| id | name       | price  | ticket_limit |
-+----+------------+--------+--------------+
-|  2 | Queue Jump | 145.00 |            0 |
-|  3 | Dining     | 165.00 |            2 |
-|  1 | Standard   | 135.00 |            0 |
-+----+------------+--------+--------------+
+doesn't take into account allowances.
+It also returns allowance, considering how many tickets have been bought already.
 */
 DROP PROCEDURE IF EXISTS get_accessible_types//
 CREATE PROCEDURE get_accessible_types (IN inputid int)
@@ -122,29 +112,32 @@ BEGIN
 		name,
 		price,
 		IF(C.wl>0, 0, # if the waiting list is not empty, say the limit is 0
-			ticket_limit - IFNULL(C.sold,0) # otherwise the limit is reduced by however many we've sold
+			total_limit - IFNULL(C.sold,0) # otherwise the limit is reduced by however many we've sold
 			) available,
-		GREATEST(
-			IFNULL(per_user_limit, ticket_limit) - IFNULL(user_bought_by_type.bought, 0),
-			user_group_allowance.allowance) allowance
+		LEAST(
+			IFNULL(allowance, total_limit) - IFNULL(user_bought_by_type.bought, 0),
+			user_group_remaining_allowance.remaining_allowance) allowance
 	FROM ticket_type
-	# get access rights information
+	# get access rights and allowance information
 	JOIN 
-		(SELECT DISTINCT(ticket_type_id)
-		FROM
-			# find the groups we have access to
-			(SELECT *
-				FROM user_group_membership
-				WHERE user_id=inputid) A
-		# find what ticket types that gives us access to
-		JOIN group_access_right 
-		ON A.group_id=group_access_right.group_id
-		# only count access rights which are currently open
-		WHERE open_time<UNIX_TIMESTAMP()
-		AND close_time>UNIX_TIMESTAMP()) B 
+	(SELECT ticket_type_id, 
+	# tricky because we want to preserve 'null'. If the allowance is null for one window, then we are allowed unlimited tickets
+	CASE WHEN MAX(CASE WHEN allowance is NULL THEN 1 ELSE 0 END)=0 THEN MAX(allowance) END allowance
+	FROM
+	# find the groups we have access to
+	(SELECT *
+	FROM user_group_membership
+	WHERE user_id=inputid) A
+	# find what ticket types that gives us access to
+	JOIN group_access_right 
+	ON A.group_id=group_access_right.group_id
+	# only count access rights which are currently open
+	WHERE open_time<UNIX_TIMESTAMP()
+	AND close_time>UNIX_TIMESTAMP()
+	GROUP BY ticket_type_id) B 
 	ON B.ticket_type_id=ticket_type.id
 	# get availability information
-	LEFT JOIN # left join so that tickets we've got no entries for still show up
+	LEFT JOIN # left join so that tickets we've got no sales for still show up
 		# get the number sold/in the waiting list for each ticket type
 		(SELECT ticket_type_id,
 			PENDING_WL wl,
@@ -154,12 +147,14 @@ BEGIN
 	# get the number of tickets bought so far of this type
 	LEFT JOIN user_bought_by_type
 	ON user_bought_by_type.user_id=inputid AND user_bought_by_type.ticket_type_id=ticket_type.id
-	# get group limits too
-	LEFT JOIN user_group_allowance ON user_group_allowance.user_id=inputid;
+	# get overall group limits too
+	LEFT JOIN user_group_remaining_allowance ON user_group_remaining_allowance.user_id=inputid;
 END//
 
 /* insert tickets one at a time to make sure we don't go over. 
-It works by selecting our set of values once for each row in the inner SELECT'd table. */
+It works by selecting our set of values once for each row in the inner SELECT'd table. 
+NB - it does not take into account user allowances
+*/
 DROP PROCEDURE IF EXISTS safe_add_ticket//
 CREATE PROCEDURE safe_add_ticket (IN _user_id int, IN _ticket_type_id int, IN _guest_name varchar(128), IN _donation boolean, IN _payment_method_id int, IN _transaction_value DECIMAL(6,2))
 
@@ -180,7 +175,7 @@ BEGIN
 			WHERE ticket_type_id=_ticket_type_id AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
 		JOIN \
 		# this table will have 1 row, containing 1 value - the limit for this ticket type
-		(SELECT ticket_limit cap FROM ticket_type WHERE id=_ticket_type_id) B \
+		(SELECT total_limit cap FROM ticket_type WHERE id=_ticket_type_id) B \
 		JOIN \
 		# this table will have 1 row, containing 1 value - the number of people in the waiting list
 		(SELECT COUNT(*) AS wl FROM ticket WHERE ticket_type_id=_ticket_type_id AND status='PENDING_WL') C \
@@ -198,8 +193,7 @@ CREATE PROCEDURE user_payment_types (IN _user_id int)
 BEGIN 
 SELECT payment_method.id,
 	   name, 
-	   description, 
-	   GREATEST(ticket_limit - IFNULL(bought, 0), 0) AS ticket_limit
+	   description
 	FROM payment_method 
 		JOIN 
 			# See which payment methods our groups give us access to

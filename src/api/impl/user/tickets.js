@@ -178,8 +178,7 @@ module.exports = function (user_id) {
 			.then(function(payment_methods) {
 				payment_methods = _.indexBy(payment_methods, 'id');
 
-				var results = 
-					_.partition(ts, function(ticket) {
+				return _.partition(ts, function(ticket) {
 						if (ticket.payment_method_id in payment_methods) {
 							// jot down the payment method while we have it
 							ticket.payment_method= payment_methods[ticket.payment_method_id];
@@ -187,25 +186,6 @@ module.exports = function (user_id) {
 						}
 						ticket.reason = "You don't have access to this payment method.";
 					});
-				var s = _(results[0])
-					.groupBy('payment_method_id')
-						// {id: [{TICKET}, ..], ..}
-						.map(function(grouped_tickets, id) {
-							var l = payment_methods[id].ticket_limit;
-							
-							return _.partition(grouped_tickets, function(t, i) {
-								if (i < l) return true;
-								ticket.reason = "You may only book " + l + " tickets using this payment method.";
-								results[1].push(ticket);
-							});
-						})
-						// [[[{TICKET}, ..],[{TICKET_F},..]],..]
-					.thru(_.spread(_.zip))
-					// [ [[{TICKET}, ..],..], [[{TICKET_F}, ..],..] ]
-					.map(_.flatten)
-					// [ [{TICKET}, ..], [{TICKET_F}, ..] ]
-					.value();
-				return [s[0], s[1].concat(results[1])];
 			});
 	}
 

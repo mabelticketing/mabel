@@ -15,9 +15,7 @@ function types(user_id) {
         get: get
     };
 
-    // gets the ticket types available to the user, with ticket limit adjusted
-    // to account for already bought tickets, and also adjusted to return 0 if
-    // there's anyone in the waiting list
+    // gets the ticket types available to the user, with up-to-date ticket limits and user allowances
     function get() {
         return runSql("CALL get_accessible_types(?);", [user_id])
         	.spread(function(types, stuff) {
