@@ -4,8 +4,6 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
-// TODO: use resources instead of APICaller - you should be able to delete apicaller
-
 angular.module('mabel.dash')
 	.controller("DashController", DashController);
 
@@ -51,23 +49,25 @@ function DashController($scope, APICaller, User) {
 	// });
 
 	var userPromise = User.current();
+	userPromise.init();
 	userPromise.$promise.then(function(user) {
 		
 		vm.user = user;
-		
-		APICaller.get('user/' + user.id + '/ticket', function(err, data) {
-			if (err !== undefined && err !== null) return console.log(err);
 
+		// tickets
+
+		user.tickets().get().$promise.then(function(tickets) {
+			
 			// sort tickets associated with user
-			for (var i=0; i<data.length; i++) {
-				if (data[i].status === 'PENDING_WL') {
-					vm.waitingListTickets.push(data[i]);
-				} else if (data[i].status === 'CANCELLED'
-					|| data[i].status === 'CANCELLED_WL'
-					|| data[i].status === 'INVALID') {
+			for (var i=0; i<tickets.length; i++) {
+				if (tickets[i].status === 'PENDING_WL') {
+					vm.waitingListTickets.push(tickets[i]);
+				} else if (tickets[i].status === 'CANCELLED'
+					|| tickets[i].status === 'CANCELLED_WL'
+					|| tickets[i].status === 'INVALID') {
 					continue;
 				} else {
-					vm.ticketsBooked.push(data[i]);
+					vm.ticketsBooked.push(tickets[i]);
 				}
 			}
 
@@ -75,14 +75,18 @@ function DashController($scope, APICaller, User) {
 			vm.waitingListLoading = false;
 
 			updateTotal();
+
+		}, function(err) {
+			console.log(err);
 		});
 
-		APICaller.get('user/' + user.id + '/allowance', function(err, data) {
-			if (err !== undefined && err !== null) return console.log(err);
-			console.log(data);
+		// allowance
 
-			// TODO: when endpoint is finished, populate the box at the top of the dashboard.
-
+		user.allowance.get().$promise.then(function(allowance) {
+			// TODO: do something with allowance
+			console.log(allowance);
+		}, function(err) {
+			console.log(err);
 		});
 
 
@@ -94,26 +98,23 @@ function DashController($scope, APICaller, User) {
 	// TODO: settimeout in order to prevent loads of requests at once
 	// TODO: some sort of notification that it worked... a tick maybe
 	function nameChange(ticket) {
+		// check if non-empty string
 		if(ticket.guest_name && typeof ticket.guest_name === 'string' && ticket.guest_name.length > 0) {
 
-			APICaller.put('user/' + vm.user.id + '/ticket/' + ticket.id, {
-				"guest_name": ticket.guest_name
+			vm.user.ticket(ticket.id).update({
+				guest_name: ticket.guest_name
+			}).$promise.then(function() {
+				console.log("name changed");
 			}, function(err) {
-				if (err !== undefined && err !== null) {
-					return console.log(err);
-				}
-
-				// else we got here and the name was changed
-
+				console.log(err);
 			});
 		}
 	}
 
 	function cancelTicket(ticket) {
-		if (window.confirm("Do you really want to cancel this ticket?")) { 
-			APICaller.del('user/' + vm.user.id + '/ticket/' + ticket.id, function(err) {
-				if (err!==undefined && err!==null) return console.log(err);
-				
+		if (window.confirm("Do you really want to cancel this ticket?")) {
+
+			vm.user.ticket(ticket.id).delete().$promise.then(function() {
 				for (var i=0; i<vm.ticketsBooked.length; i++) {
 					if (vm.ticketsBooked[i] === ticket) {
 						// removes deleted ticket from array
@@ -122,15 +123,18 @@ function DashController($scope, APICaller, User) {
 					}
 				}
 				updateTotal();
+
+			}, function(err) {
+				console.log(err);
 			});
+
 		}
 	}
 
 	function cancelWaitingTicket(ticket) {
 		if (window.confirm("Do you really want to leave the waiting list?")) {
-			APICaller.del('user/' + vm.user.id + '/ticket/' + ticket.id, function(err) {
-				if (err!==undefined && err!==null) return console.log(err);
-				
+
+			vm.user.ticket(ticket.id).delete().$promise.then(function() {
 				for (var i=0; i<vm.waitingListTickets.length; i++) {
 					if (vm.waitingListTickets[i] === ticket) {
 						// removes deleted ticket from array
@@ -138,6 +142,8 @@ function DashController($scope, APICaller, User) {
 						break;
 					}
 				}
+			}, function(err) {
+				console.log(err);
 			});
 		}
 	}

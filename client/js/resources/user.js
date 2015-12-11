@@ -49,25 +49,35 @@ function userResource($resource, MabelToken) {
 	};
 
 	User.prototype.tickets = function() {
-		return $resource('/api/user/:id/tickets', { id: this.id,  access_token: MabelToken.token }, {
+		return $resource('/api/user/:id/ticket', { id: this.id,  access_token: MabelToken.token }, {
 			'get': {
 				method: 'GET',
 				isArray: true
 			},
 			'save': {
-				url: '/api/user/:id/tickets',
+				url: '/api/user/:id/ticket',
 				method: 'POST'
 			}
 		});
 	};
 
-	// User.prototype.tickets = function() {
-	// 	return $resource('/api/user/:id/allowance', { id: this.id, access_token: MabelToken.token }, {
-	// 		'get': {
-	// 			method: 'GET'
-	// 		}
-	// 	});
-	// };
+	User.prototype.ticket = function(ticket_id) {
+		return $resource('/api/user/:id/ticket/:ticket_id', {
+			id: this.id,
+			ticket_id: ticket_id,
+			access_token: MabelToken.token
+		}, {
+			'get': {
+				method: 'GET'
+			},
+			'delete': {
+				method: 'DELETE'
+			},
+			'update': {
+				method: 'PUT'
+			}
+		});
+	};
 
 	return User;
 }
