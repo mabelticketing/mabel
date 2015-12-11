@@ -533,7 +533,7 @@ paths:
           description: Success
           schema:
             properties:
-              allowance:
+              overall_allowance:
                 type: integer
                 format: int32
                 minimum: 0
