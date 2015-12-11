@@ -21,18 +21,15 @@ function DashController($scope, APICaller, User) {
 	vm.ticketsAvailable = [];
 	vm.ticketsBooked    = [];
 	vm.waitingListTickets = [];
-	// vm.donationTickets  = [];
-	// vm.transactions     = [];
 	vm.changedTickets   = [];
 
 	vm.totalValue     = 0;
 	vm.confirmedValue = 0;
 	vm.pendingValue   = 0;
 
-	vm.waitingListLoading      = true;
-	vm.ticketsBookedLoading    = true;
-	// vm.transactionsLoading     = true;
-	// vm.ticketsAvailableLoading = true;
+	vm.waitingListLoading   = true;
+	vm.ticketsBookedLoading = true;
+	vm.billingLoading       = true;
 
 	vm.cancelTicket        = cancelTicket;
 	vm.cancelWaitingTicket = cancelWaitingTicket;
@@ -94,6 +91,8 @@ function DashController($scope, APICaller, User) {
 
 	/*** FUNCTION DEFINITIONS ***/
 
+	// TODO: settimeout in order to prevent loads of requests at once
+	// TODO: some sort of notification that it worked... a tick maybe
 	function nameChange(ticket) {
 		if(ticket.guest_name && typeof ticket.guest_name === 'string' && ticket.guest_name.length > 0) {
 
