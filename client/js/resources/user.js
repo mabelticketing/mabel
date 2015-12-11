@@ -37,17 +37,16 @@ function userResource($resource, MabelToken) {
 		}
 	});
 
-	// I think I'm chris
-	var subpaths = ['allowance', 'payment_methods', 'type'];
-	var subpath_fn = function(path) {
-		return function() {
-			return $resource('/api/user/:id/' + path, { access_token: MabelToken.token, id: this.id });
-		};
-	};
+	User.prototype.init = function() {
+		this.$promise.then(function(u) {
+			var subpaths = ['allowance', 'payment-method', 'type'];
 
-	for (var i=0; i<subpaths.length; i++) {
-		User.prototype[subpaths[i]] = subpath_fn(subpaths[i]);
-	}
+			for (var i=0; i<subpaths.length; i++) {
+				var path = subpaths[i];
+				u[path] = $resource('/api/user/:id/' + path, { access_token: MabelToken.token, id: u.id });
+			}
+		});
+	};
 
 	User.prototype.tickets = function() {
 		return $resource('/api/user/:id/tickets', { id: this.id,  access_token: MabelToken.token }, {
