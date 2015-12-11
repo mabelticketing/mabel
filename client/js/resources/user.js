@@ -49,13 +49,13 @@ function userResource($resource, MabelToken) {
 	};
 
 	User.prototype.tickets = function() {
-		return $resource('/api/user/:id/tickets', { id: this.id,  access_token: MabelToken.token }, {
+		return $resource('/api/user/:id/ticket', { id: this.id,  access_token: MabelToken.token }, {
 			'get': {
 				method: 'GET',
 				isArray: true
 			},
 			'save': {
-				url: '/api/user/:id/tickets',
+				url: '/api/user/:id/ticket',
 				method: 'POST'
 			}
 		});
