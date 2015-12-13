@@ -11,6 +11,7 @@ var config = require('./src/config.js');
 var server = require('http').Server(app);
 var connection = require('./src/api/connection.js');
 var io = require('socket.io')(server);
+var _ = require('lodash');
 
 // bail if it doesn't look like we've got a real config
 if (!config.port) throw new Error("I don't think you've initialised the config.");
@@ -70,11 +71,37 @@ function setupSockets() {
 		});
 	});
 
+	// periodically broadcast open windows and how many tickets are available to book for each type
+
 	setInterval(function() {
 		connection
-			.runSql('select distinct group_id, ticket_type_id from group_access_right where open_time < UNIX_TIMESTAMP() and close_time > UNIX_TIMESTAMP()')
-			.then(function(types) {
-				io.emit('open_types', types);
+			.runSql('select group_id, group_access_right.ticket_type_id, total_limit, allowance, sold, total_limit - sold available from group_access_right  LEFT JOIN (SELECT ticket_type_id, PENDING + CONFIRMED + ADMITTED sold FROM ticket_status_count) C ON group_access_right.ticket_type_id=C.ticket_type_id JOIN ticket_type ON ticket_type.id=group_access_right.ticket_type_id where open_time < UNIX_TIMESTAMP() and close_time > UNIX_TIMESTAMP()')
+			.then(function(newRights) {
+				newRights = _(newRights)
+					.groupBy('group_id')
+					.mapValues(function (rs) { 
+						return _(rs)
+							.groupBy('ticket_type_id')
+							// mapValues below is used to aggregate multiple windows which apply to a single group/type pair
+							.mapValues(function(v) {
+								// console.log(v);
+								var o = {
+									available: Math.max(0, _.max(_.pluck(v, 'available'))),
+
+									allowance: _.foldl(_.pluck(v, 'allowance'), function(u, t) {
+										// preserve nulls so that if one allowance window is unbounded, the overall allowance is too
+										if (u===null || t===null) return null;
+										return Math.max(u, t);
+									})
+								};
+								return o;
+							})
+							.value();
+
+					})
+					.value();
+
+				io.emit('open_types', newRights);
 			});
 	}, 3000);
 }

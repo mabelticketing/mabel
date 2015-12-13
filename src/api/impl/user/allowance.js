@@ -7,6 +7,8 @@
 var connection = require("../../connection.js");
 var runSql = connection.runSql;
 
+var Q = require('q');
+
 module.exports = allowance;
 
 function allowance(user_id) {
@@ -16,17 +18,16 @@ function allowance(user_id) {
 
 	function get() {
 
-		// TODO: add more detail here for the box at the top of the dashboard.
-		//       probably a good idea to wait for the schema changes to be finished.
-
-
-
-
-		return runSql("SELECT * FROM user_group_allowance WHERE user_id=?", [user_id])
-			.then(function(rows) {
-				return {
-					allowance: rows[0].allowance
-				};
-			});
+		var access = runSql("SELECT * FROM user_group_membership as A, group_access_right as B,\
+		ticket_type as C WHERE A.group_id=B.group_id AND B.ticket_type_id=C.id AND user_id=?", [user_id]);
+		var overall = runSql("SELECT * FROM user_group_remaining_allowance WHERE user_id=?", [user_id]);
+			
+		return Q.spread([access, overall], function(a, o) {
+			return {
+				access: a,
+				overall: o[0].remaining_allowance
+			};
+		});
 	}
+
 }
