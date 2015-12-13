@@ -4,15 +4,18 @@
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
 
+/* global moment */
+/* global _ */
 angular.module('mabel.dash')
 	.controller("DashController", DashController);
 
 function DashController($scope, APICaller, User) {
 	var vm = this;
 
+
 	/*** DECLARATION ***/
 
-	// display dots when loading
+	// display dots when loading (maybe could be more consistent than this)
 	vm.user = {name: "..."};
 
 	// initialise scope vars
@@ -25,46 +28,38 @@ function DashController($scope, APICaller, User) {
 	vm.confirmedValue = 0;
 	vm.pendingValue   = 0;
 
-	vm.waitingListLoading   = true;
-	vm.ticketsBookedLoading = true;
-	vm.billingLoading       = true;
+	vm.waitingListLoading      = true;
+	vm.ticketsBookedLoading    = true;
+	vm.billingLoading          = true;
+	vm.ticketsAvailableLoading = true;
 
 	vm.cancelTicket        = cancelTicket;
 	vm.cancelWaitingTicket = cancelWaitingTicket;
-	// vm.saveTicket          = saveTicket;
-	// vm.saveTickets         = saveTickets;
-	// vm.setChanged          = setChanged;
+	
 	vm.nameChange = nameChange;
-	// vm.clearStatus         = clearStatus;
+	
+	vm.ticketAccessList = [];
+	vm.overallLimit = 0;
 
-	vm.saveBtnClass = "primary";
 
 	/*** INITIAL ACTION ***/
 
-	// APICaller.get('type', function(err, data) {
-	// 	if (err) return console.log(err);
-	// 	// assign response to tickets array
-	// 	vm.ticketsAvailable = data;
-	// 	vm.ticketsAvailableLoading = false;
-	// });
-
-	var userPromise = User.current();
-	userPromise.init();
-	userPromise.$promise.then(function(user) {
-		
-		vm.user = user;
+	vm.user = User.current();
+	// initialise properties
+	vm.user.init();
+	vm.user.$promise.then(function() {
 
 		// tickets
 
-		user.tickets().get().$promise.then(function(tickets) {
+		vm.user.tickets().get().$promise.then(function(tickets) {
 			
 			// sort tickets associated with user
 			for (var i=0; i<tickets.length; i++) {
 				if (tickets[i].status === 'PENDING_WL') {
 					vm.waitingListTickets.push(tickets[i]);
-				} else if (tickets[i].status === 'CANCELLED'
-					|| tickets[i].status === 'CANCELLED_WL'
-					|| tickets[i].status === 'INVALID') {
+				} else if (tickets[i].status === 'CANCELLED' ||
+					tickets[i].status === 'CANCELLED_WL' ||
+					tickets[i].status === 'INVALID') {
 					continue;
 				} else {
 					vm.ticketsBooked.push(tickets[i]);
@@ -82,9 +77,17 @@ function DashController($scope, APICaller, User) {
 
 		// allowance
 
-		user.allowance.get().$promise.then(function(allowance) {
-			// TODO: do something with allowance
-			console.log(allowance);
+		vm.user.allowance.get().$promise.then(function(allowance) {
+			// how many tickets are left for the user to purchase
+			vm.overallLimit = allowance.overall;
+
+			// add formatted times to result
+			vm.ticketAccessList = _.forEach(allowance.access, function(v) {
+				v['opening'] = moment(v.open_time).format('MMM Do YYYY, h:mm a');
+				v['closing'] = moment(v.close_time).format('MMM Do YYYY, h:mm a');
+			});
+
+			vm.ticketsAvailableLoading = false;
 		}, function(err) {
 			console.log(err);
 		});
@@ -162,4 +165,5 @@ function DashController($scope, APICaller, User) {
 		}
 		vm.billingLoading = false;
 	}
+
 }
