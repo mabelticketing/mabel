@@ -9,91 +9,47 @@ angular.module('mabel.booking')
 	.controller("BookingController", BookingController);
 
 function BookingController($scope, User, Type, PaymentMethod, Socket) {
+
 	var vm = this;
 
-	vm.ticketPrice = function() {
-		var price = 0;
-		for (var id in vm.tickets) {
-			price += vm.tickets[id].type.price * vm.tickets[id].quantity;
-			if (vm.donate) {
-				price += vm.tickets[id].quantity * 2;
-			}
-		}
-		return price;
-	};
+	vm.range = range;
 
-	vm.ticketNumber = function() {
-		var n = 0;
-		for (var id in vm.tickets) {
-			n += vm.tickets[id].quantity;
-		}
-		return n;
-	};
-
-	vm.range = function(num) {
-		return new Array(num);
-	};
-
-	function resizeArray(array, size, default_obj) {
-		if (array.length > size) {
-			return array.slice(0, size);
-		} 
-		if (array.length < size) {
-			var arr = array.slice(0);
-			var obj = arr[arr.length-1] || default_obj;
-			for (var i=array.length; i<size; i++) {
-				arr[i] = angular.copy(obj);
-			}
-			return arr;
-		}
-		return array;
-	}
-
-	function updateMeta() {
-		vm.ticketPrice = 0;
-		vm.ticketNumber = 0;
-		for (var id in vm.tickets) {
-			vm.ticketPrice += vm.tickets[id].quantity * vm.tickets[id].type.price;
-			vm.ticketNumber += vm.tickets[id].quantity;
-			vm.tickets[id].payment_methods = resizeArray(vm.tickets[id].payment_methods, vm.tickets[id].quantity);
-
-			// TODO: un-hard-code donation value
-			if (vm.donate === true) vm.ticketPrice += vm.tickets[id].quantity * 2;
-		}
-	}
 
 	e = vm; // TODO: get rid
 
 	/*** DECLARATION ***/
 	// initialise scope vars 
 	vm.user = User.current();
+	vm.all_ticket_types = Type.query();
+	vm.payment_methods = PaymentMethod.query();
+
+	// initialise the user's subresources (payment methods and allowances)
 	vm.user.init();
 	vm.user.$promise.then(function() {
 		vm.payment_methods =  vm.user["payment-method"].query();
 		var a = vm.user.allowance.get();
 		a.$promise.then(function() {
-			vm.remaining_allowance = a.remaining_allowance;
+			vm.allowance = a;
 		});
 	});
-	vm.all_ticket_types = Type.query();
-	vm.payment_methods = PaymentMethod.query();
 	vm.bookstate = 1;
 	vm.price = 0;
-	vm.remaining_allowance =  0;
+	vm.allowance = {
+		remaining_allowance: 0
+	};
 	vm.donate = false;
 
 	// function on submission
 	vm.submitBooking = submitBooking;
-	// we will watch for changes to the tickets array or donations boolean and update summaries when the array changes
+
+	// we will watch for changes to the number of tickets and update summaries when the array changes
 	$scope.$watch(function() {
 		return _.pluck(_.values(vm.tickets), 'quantity');
-	}, updateMeta, true); // the true argument causes 'deep' watching the array
-
+	}, updateMeta, true);
 	$scope.$watch(function() {
 		return vm.donate;
 	}, updateMeta);
 
-	// TODO: look up ticket types with an open time in the future to warn the user what they will eventually have access to.
 	Socket.on('open_types', function(data) {
 		var oldTypes = vm.tickets;
 		vm.tickets = {};
@@ -148,12 +104,10 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 
 	});
 
-	// result of booking (for confirmation)
-	vm.ticketResult = {};
 
-
-	// /*** FUNCTION DEFINITIONS ***/
-	// booking submission method
+	/*** FUNCTION DEFINITIONS ***/
+	
+	// send booking to the server, and process the result in case of errors (otherwise just update the controller)
 	function submitBooking() {
 		vm.errorMsg = "";
 		// construct array of tickets
@@ -171,24 +125,55 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 			}
 
 		}
-		console.log(tickets);
+
 		vm.user.tickets().save(tickets).$promise.then(function(result) {
 			console.log(result);
+			if (result.booked.length) { 
+				console.error("Nothing booked");
+			} else {
+				vm.booked = result.booked;
+				vm.failed = result.failed;
+				vm.waiting_list = result.waiting_list;
+			}
 		}, function(err) {
+			// TODO: generic error handling
 			console.error(err);
 		});
-		// 	if (err) {
-		// 		vm.meta.errorMsg = err;
-		// 		return console.log(err); // error handling
-		// 	}
-		// 	if (result.success) {
-		// 		vm.status = "done";
-		// 		vm.ticketResult = result;
-		// 		return;
-		// 	}
-		// 	// weird, no error but success is false;
-		// 	console.log(err, result);
-		// });
 	}
+
+	// periodically update the total number of tickets booked, and their price in the controller
+	function updateMeta() {
+		vm.ticketPrice = 0;
+		vm.ticketNumber = 0;
+		for (var id in vm.tickets) {
+			vm.ticketPrice += vm.tickets[id].quantity * vm.tickets[id].type.price;
+			vm.ticketNumber += vm.tickets[id].quantity;
+			vm.tickets[id].payment_methods = resizeArray(vm.tickets[id].payment_methods, vm.tickets[id].quantity);
+
+			// TODO: un-hard-code donation value
+			if (vm.donate === true) vm.ticketPrice += vm.tickets[id].quantity * 2;
+		}
+	}
+
+	// generic helper functions
+	function range(num) {
+		return new Array(num);
+	}
+	
+	function resizeArray(array, size, default_obj) {
+		if (array.length > size) {
+			return array.slice(0, size);
+		} 
+		if (array.length < size) {
+			var arr = array.slice(0);
+			var obj = arr[arr.length-1] || default_obj;
+			for (var i=array.length; i<size; i++) {
+				arr[i] = angular.copy(obj);
+			}
+			return arr;
+		}
+		return array;
+	}
+
 
 }

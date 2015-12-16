@@ -11,6 +11,7 @@ angular.module('mabel.dash')
 
 function DashController($scope, APICaller, User) {
 	var vm = this;
+	e=vm;
 
 
 	/*** DECLARATION ***/
@@ -39,7 +40,10 @@ function DashController($scope, APICaller, User) {
 	vm.nameChange = nameChange;
 	
 	vm.ticketAccessList = [];
-	vm.overallLimit = 0;
+	vm.overallAllowance = 0;
+	vm.remainingAllowance = 0;
+	vm.nowTime = (new Date()).getTime();
+	vm.greaterThan = greaterThan;
 
 
 	/*** INITIAL ACTION ***/
@@ -79,12 +83,13 @@ function DashController($scope, APICaller, User) {
 
 		vm.user.allowance.get().$promise.then(function(allowance) {
 			// how many tickets are left for the user to purchase
-			vm.overallLimit = allowance.remaining_allowance;
+			vm.remainingAllowance = allowance.remaining_allowance;
+			vm.overallAllowance = allowance.overall_allowance;
 
 			// add formatted times to result
 			vm.ticketAccessList = _.forEach(allowance.access, function(v) {
-				v['opening'] = moment(v.open_time).format('MMM Do YYYY, h:mm a');
-				v['closing'] = moment(v.close_time).format('MMM Do YYYY, h:mm a');
+				v['opening'] = moment(v.open_time*1000).format('MMM Do [at] hh:mm');
+				v['closing'] = moment(v.close_time*1000).format('MMM Do [at] hh:mm');
 			});
 
 			vm.ticketsAvailableLoading = false;
@@ -164,6 +169,12 @@ function DashController($scope, APICaller, User) {
 			vm.totalValue += vm.ticketsBooked[i].transaction_value;
 		}
 		vm.billingLoading = false;
+	}
+
+	function greaterThan(prop, val){
+	    return function(item){
+	      return item[prop] > val;
+	    };
 	}
 
 }

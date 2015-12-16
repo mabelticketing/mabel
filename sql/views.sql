@@ -75,6 +75,7 @@ Example output:
 */
 CREATE OR REPLACE VIEW user_group_remaining_allowance AS
 SELECT user_group_allowance.user_id,
+	   overall_allowance,
 	   overall_allowance - IFNULL(bought, 0) AS remaining_allowance
 FROM user_group_allowance
 LEFT JOIN user_bought
@@ -98,11 +99,11 @@ ON user_group_allowance.user_id=user_bought.user_id;
 
 DELIMITER //
 
-/* Get the ticket types available for the given user id to book. 
-The ticket limit takes into account the amount of tickets sold and the waiting
-list rule (if there are others in the waiting list, you can't book any). It 
-doesn't take into account allowances.
-It also returns allowance, considering how many tickets have been bought already.
+/* Get the ticket types available for the given user id to book. The ticket
+limit takes into account the amount of tickets sold and the waiting list rule
+(if there are others in the waiting list, you can't book any). It also returns
+per-type allowance, both with and without considering how many tickets have
+been bought already.
 */
 DROP PROCEDURE IF EXISTS get_accessible_types//
 CREATE PROCEDURE get_accessible_types (IN inputid int)
@@ -150,6 +151,42 @@ BEGIN
 	ON user_bought_by_type.user_id=inputid AND user_bought_by_type.ticket_type_id=ticket_type.id
 	# get overall group limits too
 	LEFT JOIN user_group_remaining_allowance ON user_group_remaining_allowance.user_id=inputid;
+END//
+
+
+/* Get the ticket types which will be available in future for the given user id to book. 
+The ticket limit takes into account the amount of tickets sold and the waiting
+list rule (if there are others in the waiting list, you can't book any). It 
+doesn't take into account allowances.
+It also returns allowance, considering how many tickets have been bought already.
+*/
+DROP PROCEDURE IF EXISTS get_future_accessible_types//
+CREATE PROCEDURE get_future_accessible_types (IN inputid int)
+
+BEGIN
+	SELECT id,
+		name,
+		price,
+		allowance type_allowance
+	FROM ticket_type
+	# get access rights and allowance information
+	JOIN 
+	(SELECT ticket_type_id, 
+	# tricky because we want to preserve 'null'. If the allowance is null for one window, then we are allowed unlimited tickets
+	CASE WHEN MAX(CASE WHEN allowance is NULL THEN 1 ELSE 0 END)=0 THEN MAX(allowance) END allowance
+	FROM
+	# find the groups we have access to
+	(SELECT *
+	FROM user_group_membership
+	WHERE user_id=inputid) A
+	# find what ticket types that gives us access to
+	JOIN group_access_right 
+	ON A.group_id=group_access_right.group_id
+	# only count access rights which will open in the future
+	WHERE open_time>UNIX_TIMESTAMP()
+	AND close_time>UNIX_TIMESTAMP()
+	GROUP BY ticket_type_id) B 
+	ON B.ticket_type_id=ticket_type.id;
 END//
 
 /* insert tickets one at a time to make sure we don't go over. 

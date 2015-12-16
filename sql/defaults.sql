@@ -48,17 +48,17 @@ insert into user (id, name, email, password_md5, registration_time, is_verified)
 insert into user_group (id, name, description, overall_allowance) VALUES (
 	1,
 	'admins',
-	'Administrators',
+	'an administrator',
 	2000 # TODO: this should probably be nullable rather than setting arbitrary upper bounds
 ), (
 	2,
 	'emma_students',
-	'Current Students of Emmanuel College',
+	'a student of Emmanuel College',
 	8
 ), (
 	3,
 	'emma_alum',
-	'Alumni of Emmanuel College',
+	'an alumnus of Emmanuel College',
 	2
 );
 

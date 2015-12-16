@@ -41,14 +41,17 @@ block content
 			.panel-heading Available tickets
 			.panel-body
 				p(ng-if="dashCtrl.ticketsAvailableLoading") #[em Loading...]
-				p(ng-if="!dashCtrl.ticketsAvailableLoading && (dashCtrl.ticketAccessList.length === 0 || dashCtrl.overallLimit===0)", style="font-style:italic;")
+				p(ng-if="!dashCtrl.ticketsAvailableLoading && (dashCtrl.ticketAccessList.length === 0 || dashCtrl.remainingAllowance===0)", style="font-style:italic;")
 					| We couldn't find any tickets available to you.
 				div(ng-if="(!dashCtrl.ticketsAvailableLoading) && dashCtrl.ticketAccessList.length > 0")
-					p You are able to purchase #[strong {{ dashCtrl.overallLimit }}] more ticket{{dashCtrl.overallLimit===1?"":"s"}} of the following type:
+					p You may book up to #[strong {{ dashCtrl.remainingAllowance }}] more ticket{{dashCtrl.remainingAllowance===1?"":"s"}} of the following type{{dashCtrl.ticketAccessList.length>1?"s":""}}:
 					ul
-						li(ng-repeat="ticket in dashCtrl.ticketAccessList").
-							#[b {{ ticket.allowance===null?"infinite":ticket.allowance }}] tickets of type #[b {{ ticket.name }}] from #[b {{ ticket.opening }}] to #[b {{ ticket.closing }}].
-					p If tickets are sold out you will be added to the waiting list provided your ticket limits permit.
+						li(ng-repeat="ticket in dashCtrl.ticketAccessList" ng-if="ticket.open_time*1000<dashCtrl.nowTime").
+							You may currently book #[b {{ (ticket.allowance===null)?"unlimited":ticket.allowance }} {{ ticket.name }}] tickets until #[b {{ ticket.closing }}].
+					ul
+						li(ng-repeat="ticket in dashCtrl.ticketAccessList" ng-if="ticket.open_time*1000>dashCtrl.nowTime").
+							You will be able to book #[b {{ (ticket.allowance===null)?"unlimited":ticket.allowance }} {{ ticket.name }}] tickets from #[b {{ ticket.opening }}] until #[b {{ ticket.closing }}].
+					p If tickets are sold out you will automatically be added to the waiting list when you book.
 
 		
 		p
