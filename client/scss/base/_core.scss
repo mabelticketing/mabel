@@ -22,3 +22,25 @@ h1, h2, h3, h4, h5 {
   font-family: $font--headings;
   font-weight: 500;
 }
+
+.PENDING {
+  color: blue;
+  font-weight: bold;
+}
+
+.CONFIRMED {
+  color: green;
+  font-weight: bold;
+}
+
+.ADMITTED {
+  color: purple;
+  font-weight: bold;
+}
+
+.PENDING_WL {
+  color: blue;
+  font-weight: bold;
+}
+
+

@@ -61,13 +61,23 @@ function userResource($resource, MabelToken) {
 		});
 	};
 
-	// User.prototype.tickets = function() {
-	// 	return $resource('/api/user/:id/allowance', { id: this.id, access_token: MabelToken.token }, {
-	// 		'get': {
-	// 			method: 'GET'
-	// 		}
-	// 	});
-	// };
+	User.prototype.ticket = function(ticket_id) {
+		return $resource('/api/user/:id/ticket/:ticket_id', {
+			id: this.id,
+			ticket_id: ticket_id,
+			access_token: MabelToken.token
+		}, {
+			'get': {
+				method: 'GET'
+			},
+			'delete': {
+				method: 'DELETE'
+			},
+			'update': {
+				method: 'PUT'
+			}
+		});
+	};
 
 	return User;
 }

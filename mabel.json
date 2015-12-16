@@ -1,3 +1,5 @@
 {
-  "ticketing_email": "joebloggs@mymayball.com"
+  "ticketing_officer": "Joe",
+  "ticketing_email": "joebloggs@mymayball.com",
+  "payment_processing_time": "up to 2 weeks"
 }

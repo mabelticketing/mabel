@@ -533,6 +533,10 @@ paths:
           description: Success
           schema:
             properties:
+              access:
+                type: integer
+                format: int32
+                minimum: 0
               remaining_allowance:
                 type: integer
                 format: int32

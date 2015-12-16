@@ -40,13 +40,13 @@ module.exports = function (user_id) {
 
 		function put(opts) {
 			var ticket = opts.ticket;
-			return runSql("UPDATE ticket SET ? WHERE id=?", [ticket, ticket_id])
+			return runSql("UPDATE ticket SET ? WHERE id=?;", [ticket, ticket_id])
 				.then(get);
 		}
 
 		function del() {
 			return Q.all([
-				runSql("UPDATE ticket SET status='CANCELLED' where id=? AND status<>'PENDING_WL';",[ticket_id]),
+				runSql("UPDATE ticket SET status='CANCELLED' where id=? AND status='PENDING';",[ticket_id]),
 				runSql("UPDATE ticket SET status='CANCELLED_WL' where id=? AND status='PENDING_WL';",[ticket_id])
 			])
 			.then(function() {

@@ -5,187 +5,165 @@
  */
 
 /* global moment */
+/* global _ */
 angular.module('mabel.dash')
 	.controller("DashController", DashController);
 
 function DashController($scope, APICaller, User) {
 	var vm = this;
 
-	/*** DECLARATION ***/
-	//TODO: stop exposing vm on every controller!
-	e = vm;
 
-	// initialise scope vars 
+	/*** DECLARATION ***/
+
+	// display dots when loading (maybe could be more consistent than this)
+	vm.user = {name: "..."};
+
+	// initialise scope vars
 	vm.ticketsAvailable = [];
 	vm.ticketsBooked    = [];
-	vm.donationTickets  = [];
-	vm.transactions     = [];
+	vm.waitingListTickets = [];
 	vm.changedTickets   = [];
 
-	vm.totalValue        = 0;
-	vm.totalTransactions = 0;
+	vm.totalValue     = 0;
+	vm.confirmedValue = 0;
+	vm.pendingValue   = 0;
 
 	vm.waitingListLoading      = true;
-	vm.transactionsLoading     = true;
 	vm.ticketsBookedLoading    = true;
+	vm.billingLoading          = true;
 	vm.ticketsAvailableLoading = true;
 
-	vm.saveTicket          = saveTicket;
-	vm.saveTickets         = saveTickets;
-	vm.setChanged          = setChanged;
 	vm.cancelTicket        = cancelTicket;
-	vm.clearStatus         = clearStatus;
 	vm.cancelWaitingTicket = cancelWaitingTicket;
+	
+	vm.nameChange = nameChange;
+	
+	vm.ticketAccessList = [];
+	vm.overallLimit = 0;
 
-	vm.saveBtnClass = "primary";
 
 	/*** INITIAL ACTION ***/
 
-	APICaller.get('ticket_type/available/1', function(err, data) {
-		if (err) return console.log(err);
-		// assign response to tickets array
-		vm.ticketsAvailable = data;
-		vm.ticketsAvailableLoading = false;
-	});
+	vm.user = User.current();
+	// initialise properties
+	vm.user.init();
+	vm.user.$promise.then(function() {
 
-	var userPromise = User.current();
-	userPromise.$promise.then(function(user) {
-		
-		APICaller.get('ticket/getByUser/' + user.id, function(err, data) {
-			if (err!==undefined && err!==null) return console.log(err);
+		// tickets
 
-			vm.ticketsBooked = data.real;
-
-			// I kind of want data.extra to represent a general "meta-ticket",
-			// but here I'm assuming exclusively donations - not very generalised.
-			vm.donationTickets = data.extra;
+		vm.user.tickets().get().$promise.then(function(tickets) {
+			
+			// sort tickets associated with user
+			for (var i=0; i<tickets.length; i++) {
+				if (tickets[i].status === 'PENDING_WL') {
+					vm.waitingListTickets.push(tickets[i]);
+				} else if (tickets[i].status === 'CANCELLED' ||
+					tickets[i].status === 'CANCELLED_WL' ||
+					tickets[i].status === 'INVALID') {
+					continue;
+				} else {
+					vm.ticketsBooked.push(tickets[i]);
+				}
+			}
 
 			vm.ticketsBookedLoading = false;
-			updateTotal();
-		});
-
-		APICaller.get('waiting_list/getByUser/' + user.id, function(err, data) {
-			if (err!==undefined && err!==null) return console.log(err);
-
-			vm.waitingListTickets = data;
-
 			vm.waitingListLoading = false;
+
+			updateTotal();
+
+		}, function(err) {
+			console.log(err);
+		});
+
+		// allowance
+
+		vm.user.allowance.get().$promise.then(function(allowance) {
+			// how many tickets are left for the user to purchase
+			vm.overallLimit = allowance.remaining_allowance;
+
+			// add formatted times to result
+			vm.ticketAccessList = _.forEach(allowance.access, function(v) {
+				v['opening'] = moment(v.open_time).format('MMM Do YYYY, h:mm a');
+				v['closing'] = moment(v.close_time).format('MMM Do YYYY, h:mm a');
+			});
+
+			vm.ticketsAvailableLoading = false;
+		}, function(err) {
+			console.log(err);
 		});
 
 
-		APICaller.get('transaction/getByUser/'+user.id, function(err, data) {
-			if (err!==undefined && err!==null) return console.log(err);
-			vm.transactions = [];
-			vm.totalTransactions = 0;
-
-			for (var i=0; i<data.length; i++) {
-				vm.transactions.push({
-					time: moment.unix(data[i].transaction_time).format("Mo MMM LT"),
-					payment_method: data[i].payment_method,
-					notes: data[i].notes,
-					value: data[i].value
-				});
-				vm.totalTransactions += data[i].value;
-			}
-			
-			vm.transactionsLoading = false;
-		});
 	});
 	
 
 	/*** FUNCTION DEFINITIONS ***/
 
-	function saveTicket(ticket) {
-		ticket._status = "warning";
-		// TODO: This kind of get/save/delete thing is literally what $resources are for
-		APICaller.post('ticket/' + ticket.id, ticket, function(err) {
-				if (err!==undefined && err!==null) {
-					ticket._status = "danger";
-					alert(err);
-					return console.log(err);
-				}
-				ticket._status = "success";
-		});
+	// TODO: settimeout in order to prevent loads of requests at once
+	// TODO: some sort of notification that it worked... a tick maybe
+	function nameChange(ticket) {
+		// check if non-empty string
+		if(ticket.guest_name && typeof ticket.guest_name === 'string' && ticket.guest_name.length > 0) {
 
-	}
-
-	function setChanged(ticket) {
-		if (vm.changedTickets.indexOf(ticket) < 0) 
-			vm.changedTickets.push(ticket);
-	}
-
-	function saveTickets() {
-		vm.saveBtnClass = "warning";
-		
-		APICaller.post('ticket/multi/', vm.changedTickets, function(err) {
-				if (err!==undefined && err!==null) {
-					vm.saveBtnClass = "danger";
-					alert(err);
-					return console.log(err);
-				}
-				alert("Thank you, your changes have been saved.");
-				vm.saveBtnClass = "success";
-		});
-	}
-
-	function clearStatus(ticket) {
-		ticket._status = "";
+			vm.user.ticket(ticket.id).update({
+				guest_name: ticket.guest_name
+			}).$promise.then(function() {
+				console.log("name changed");
+			}, function(err) {
+				console.log(err);
+			});
+		}
 	}
 
 	function cancelTicket(ticket) {
-		if (window.confirm("Do you really want to cancel this ticket?")) { 
-			APICaller.del('ticket/' + ticket.id, function(err) {
-				if (err!==undefined && err!==null) return console.log(err);
-				
+		if (window.confirm("Do you really want to cancel this ticket?")) {
+
+			vm.user.ticket(ticket.id).delete().$promise.then(function() {
 				for (var i=0; i<vm.ticketsBooked.length; i++) {
 					if (vm.ticketsBooked[i] === ticket) {
+						// removes deleted ticket from array
 						vm.ticketsBooked.splice(i, 1);
 						break;
 					}
 				}
-
 				updateTotal();
-			});
-			if (vm.donationTickets.length > 0) {
-				// TODO: this is pretty hacky
-				// delete one of the donation tickets 
-				var toDelete = vm.donationTickets.pop();
-				APICaller.del('/ticket/' + toDelete.id, function(err) {
-					if (err && err!==null) return console.log(err);
 
-					updateTotal();
-				});
-			}
+			}, function(err) {
+				console.log(err);
+			});
+
 		}
 	}
-	function cancelWaitingTicket(ticket) {
 
-		if (window.confirm("Do you really want to leave the waiting list?")) { 
-			APICaller.del('waiting_list/' + ticket.id, function(err) {
-				if (err!==undefined && err!==null) return console.log(err);
-				
+	function cancelWaitingTicket(ticket) {
+		if (window.confirm("Do you really want to leave the waiting list?")) {
+
+			vm.user.ticket(ticket.id).delete().$promise.then(function() {
 				for (var i=0; i<vm.waitingListTickets.length; i++) {
 					if (vm.waitingListTickets[i] === ticket) {
+						// removes deleted ticket from array
 						vm.waitingListTickets.splice(i, 1);
 						break;
 					}
 				}
+			}, function(err) {
+				console.log(err);
 			});
 		}
 	}
+
 	function updateTotal() {
-
 		vm.totalValue = 0;
+		vm.pendingValue = 0;
+		vm.confirmedValue = 0;
 		for (var i = 0; i<vm.ticketsBooked.length; i++) {
-			vm.totalValue += vm.ticketsBooked[i].price;
+			if (vm.ticketsBooked[i].status === 'PENDING') {
+				vm.pendingValue += vm.ticketsBooked[i].transaction_value;
+			} else if (vm.ticketsBooked[i].status === 'CONFIRMED' || vm.ticketsBooked[i].status === 'ADMITTED') {
+				vm.confirmedValue += vm.ticketsBooked[i].transaction_value;
+			}
+			vm.totalValue += vm.ticketsBooked[i].transaction_value;
 		}
-		vm.donationValue = 0;
-		for (i = 0; i<vm.donationTickets.length; i++) {
-			vm.donationValue += vm.donationTickets[i].price;
-		}
-		vm.totalValue += vm.donationValue;
-
+		vm.billingLoading = false;
 	}
 
-	
 }
