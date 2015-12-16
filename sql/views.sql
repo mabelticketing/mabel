@@ -116,7 +116,8 @@ BEGIN
 			) available,
 		LEAST(
 			IFNULL(allowance, total_limit) - IFNULL(user_bought_by_type.bought, 0),
-			user_group_remaining_allowance.remaining_allowance) allowance
+			user_group_remaining_allowance.remaining_allowance) remaining_allowance,
+		allowance type_allowance
 	FROM ticket_type
 	# get access rights and allowance information
 	JOIN 

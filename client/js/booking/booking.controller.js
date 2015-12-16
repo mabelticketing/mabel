@@ -72,14 +72,14 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 		vm.payment_methods =  vm.user["payment-method"].query();
 		var a = vm.user.allowance.get();
 		a.$promise.then(function() {
-			vm.overall_allowance = a.overall_allowance;
+			vm.remaining_allowance = a.remaining_allowance;
 		});
 	});
 	vm.all_ticket_types = Type.query();
 	vm.payment_methods = PaymentMethod.query();
 	vm.bookstate = 1;
 	vm.price = 0;
-	vm.overall_allowance=  0;
+	vm.remaining_allowance =  0;
 	vm.donate = false;
 
 	// function on submission

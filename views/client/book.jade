@@ -56,12 +56,12 @@ block content
 		div(ng-if="bookingCtrl.bookstate === 3")
 			h1 Booking
 			.well
-				p(ng-if="bookingCtrl.overall_allowance <= 0") You may not book any more tickets.
-				form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.overall_allowance > 0")
+				p(ng-if="bookingCtrl.remaining_allowance <= 0") You may not book any more tickets.
+				form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.remaining_allowance > 0")
 					fieldset
 						legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
 						p Guest names can be assigned to tickets after you make your booking.
-						p You may book {{ bookingCtrl.overall_allowance }} ticket{{ bookingCtrl.overall_allowance===1?"":"s in total"}}.
+						p You may book {{ bookingCtrl.remaining_allowance }} ticket{{ bookingCtrl.remaining_allowance===1?"":"s in total"}}.
 						p(style="font-weight:bold") If we are unable to book all the tickets you request, the remainder will be added to the waiting list instead.
 						.form-group
 							.col-lg-10
@@ -88,9 +88,9 @@ block content
 											input(type="checkbox", ng-model="bookingCtrl.donate") 
 											| I wish to make a charitable donation of #[b &pound;2.00] per ticket to your charitable causes.
 									p You can find out more about our charitable causes on our #[a(href="http://emmamayball.com") homepage].
-						.form-group(ng-if="bookingCtrl.ticketNumber > bookingCtrl.overall_allowance")
-							label.col-lg-2.control-label You may only buy {{ bookingCtrl.overall_allowance }} tickets at this time.
-						.form-group(ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.overall_allowance")
+						.form-group(ng-if="bookingCtrl.ticketNumber > bookingCtrl.remaining_allowance")
+							label.col-lg-2.control-label You may only buy {{ bookingCtrl.remaining_allowance }} tickets at this time.
+						.form-group(ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.remaining_allowance")
 							label.col-lg-2.control-label Summary
 							.col-lg-10
 								table.table.table-striped
@@ -111,7 +111,7 @@ block content
 								span(aria-hidden="true") &times;
 							strong Error: 
 							| {{bookingCtrl.errorMsg}}
-						p(style="text-align:center;" ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.overall_allowance")
+						p(style="text-align:center;" ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.remaining_allowance")
 							input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
 
 			//- div(ng-switch-when="done")

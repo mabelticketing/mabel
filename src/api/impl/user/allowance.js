@@ -18,7 +18,7 @@ function allowance(user_id) {
 		return runSql("SELECT * FROM user_group_remaining_allowance WHERE user_id=?", [user_id])
 			.then(function(rows) {
 				var r = {
-					overall_allowance: rows[0].remaining_allowance
+					remaining_allowance: rows[0].remaining_allowance
 				};
 				return r;
 			});

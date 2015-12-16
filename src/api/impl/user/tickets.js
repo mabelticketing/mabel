@@ -77,6 +77,10 @@ module.exports = function (user_id) {
 			})
 			.spread(function(results, failed) {
 
+				// NB there is technically a race condition here which would allow a user to book more than their allowance
+				// It's a time-of-check-to-time-of-use (TOCTTOU) vulnerability, since a user could have two sessions, both
+				// of which pass the check_allowance before either has proceeded to `book`. I don't currently believe this 
+				// is a significant threat, so no measures are in place to mitigate it.
 				return [check_allowance(results[0]), failed.concat(results[1])];
 			})
 			.spread(function(results, failed) {
@@ -136,21 +140,32 @@ module.exports = function (user_id) {
 						} 
 						ticket.reason = "You don't have access to this kind of ticket right now.";
 					});
-				// note that we do not really look at available. That's
-				// because if there are no tickets available we shouold still
+
+				// note that we do not look at ticket_limit. That's
+				// because if there are no tickets available we should still
 				// join the waiting list, and that's handled by "book".
 			
+				// array of tickets:
 				// ts[0] = [{TICKET}, ...]
 				return ts[0].length<1?ts:_.chain(ts[0])
 					.groupBy('ticket_type_id')
 					// { ticket_type_id: [{TICKET}, ...], ...}
 					.values()
+					// array of tickets grouped by type:
 					// [ [{TICKET}, ...], ...]
 					.map(function(tickets) {
+						// array of tickets, all of which have the same type
 						// tickets = [{TICKET}, ...]
 						return _.partition(tickets, function(t, i) {
-							if (i < t.ticket_type.allowance) return true;
-							t.reason = "You may only book " + t.ticket_type.allowance + " " + t.ticket_type.name + " tickets.";
+							if (i < t.ticket_type.remaining_allowance) return true;
+							t.reason = "You may only book " + t.ticket_type.type_allowance + " " + t.ticket_type.name + " tickets in total. ";
+							if (t.ticket_type.remaining_allowance > 0) {
+								t.reason += "You already have " + 
+									(t.ticket_type.type_allowance - t.ticket_type.remaining_allowance) + 
+									" tickets booked, so you may currently only book " + t.ticket_type.remaining_allowance + " more.";
+							} else {
+								t.reason += "You already have this many tickets booked, so you may not currently book any more.";
+							}
 						});
 						// returns [[{TICKET_S}, ...], [{TICKET_F}, ...]]
 					})
@@ -189,14 +204,15 @@ module.exports = function (user_id) {
 			});
 	}
 
-	// helper function to get users' overall allowance
+	// helper function to get users' remaining allowance
 	function check_allowance(ts) {
 		return api.user(user_id).allowance.get()
 			.then(function(allowance) {
-				allowance = allowance.allowance;
+				console.log(allowance);
+				var a = allowance.remaining_allowance;
 				var r = _.partition(ts, function(t, i) {
-					if (i < allowance) return true;
-					t.reason = "You may only book " + allowance + " tickets.";
+					if (i < a) return true;
+					t.reason = "You may only book " + a + " tickets.";
 				});
 				return r;
 			});
