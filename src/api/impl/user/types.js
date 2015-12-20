@@ -19,7 +19,7 @@ function types(user_id) {
     function get() {
         return runSql("CALL get_accessible_types(?);", [user_id])
         	.then(function(types) {
-        		return types;
+        		return types[0];
         	});
     }
 }

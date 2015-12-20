@@ -43,176 +43,189 @@ block title
 
 block content
 	div(ng-app="mabel.booking" ng-controller="BookingController as bookingCtrl" ng-view)
-		div(ng-if="bookingCtrl.bookstate === 1")
-			h2 Loading...
-			.well
-				p Please do not refresh this page - the booking form will load automatically as soon as possible.
+		div(ng-switch="bookingCtrl.status")
+			div(ng-switch-when="loading")
+				h2 Loading...
+				.well
+					p Please do not refresh this page - the booking form will load automatically as soon as possible.
 
-		div(ng-if="bookingCtrl.bookstate === 2")
-			h2 No tickets currently available
-			.well
-				p Please do not refresh this page - the booking form will load automatically as soon as tickets are available.
+			div(ng-switch-when="notix")
+				h2 No tickets currently available
+				.well
+					p Please do not refresh this page - the booking form will load automatically as soon as tickets are available.
 
-		div(ng-if="bookingCtrl.bookstate === 3")
-			h1 Booking
-			.well
-				p(ng-if="bookingCtrl.allowance.remaining_allowance <= 0") You may not book any more tickets.
-				form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.allowance.remaining_allowance > 0")
-					fieldset
-						legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
-						p Guest names can be assigned to tickets after you make your booking.
-						p You may book {{ bookingCtrl.allowance.remaining_allowance }} ticket{{ bookingCtrl.allowance.remaining_allowance===1?"":"s in total"}}. To see how your allowance may change in future, please return to your 
-							a(href="/dash") dashboard
-							| .
-						p(style="font-weight:bold") If we are unable to book all the tickets you request, the remainder will be added to the waiting list instead.
-						.form-group
-							.col-lg-10
-								table.table
-									thead
-										tr
-											th Ticket types
-											th Price
-											th Quantity
-									tbody
-										tr(ng-repeat="(id, ticket) in bookingCtrl.tickets track by id", style="background-color:#ffffff;")
-											td {{ ticket.type.name }} 
-												em  ({{ ticket.available }} remaining)
-											td &pound;{{ ticket.type.price }}
-											td
-												div
-													select(ng-model="ticket.quantity" ng-options="i for i in ticket.allowanceRange" ng-change="updateMeta")
-						.form-group
-							label.col-lg-2.control-label Donation
-							.col-lg-10
-								.checkbox
-									label
-										p
-											input(type="checkbox", ng-model="bookingCtrl.donate") 
-											| I wish to make a charitable donation of #[b &pound;2.00] per ticket to your charitable causes.
-									p You can find out more about our charitable causes on our #[a(href="http://emmamayball.com") homepage].
-						.form-group(ng-if="bookingCtrl.ticketNumber > bookingCtrl.allowance.remaining_allowance")
-							label.col-lg-2.control-label You may only buy {{ bookingCtrl.allowance.remaining_allowance }} tickets at this time.
-						.form-group(ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.allowance.remaining_allowance")
-							label.col-lg-2.control-label Summary
-							.col-lg-10
-								table.table.table-striped
-									tbody(ng-repeat="(id, ticket) in bookingCtrl.tickets", ng-if="ticket.quantity > 0")
-										tr(style="background-color:#ffffff;")
-											th {{ ticket.type.name }} (&pound;{{ ticket.type.price | number:2 }}) 
-										tr(ng-repeat="t in ticket.payment_methods track by $index" style="background-color:#ffffff;")
-											td Payment method for {{ticket.type.name}} Ticket {{$index + 1}}: 
-												select(ng-model="ticket.payment_methods[$index]" ng-options="m.id as m.name for m in bookingCtrl.payment_methods")
-									tbody
-										tr(ng-if="bookingCtrl.donate", style="background-color:#ffffff;")
-											td #[b Charitable donation @ &pound;2.00 per ticket]
-									tfoot
-										tr.info
-											td Total cost: #[b &pound;{{ bookingCtrl.ticketPrice | number:2 }}]
-						div.alert.alert-danger(ng-if="bookingCtrl.errorMsg.length > 0")
-							button.close(type="button", aria-label="Close", ng-click="bookingCtrl.errorMsg = '';") 
-								span(aria-hidden="true") &times;
-							strong Error: 
-							| {{bookingCtrl.errorMsg}}
-						p(style="text-align:center;" ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.allowance.remaining_allowance")
-							input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
+			div(ng-switch-when="open")
+				h1 Booking
+				.well
+					p(ng-if="bookingCtrl.allowance.remaining_allowance <= 0") You may not book any more tickets.
+					form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.allowance.remaining_allowance > 0")
+						fieldset
+							legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
+							p Guest names can be assigned to tickets after you make your booking.
+							p You may book {{ bookingCtrl.allowance.remaining_allowance }} ticket{{ bookingCtrl.allowance.remaining_allowance===1?"":"s in total"}}, . To see how your allowance may change in future, please return to your 
+								a(href="/dash") dashboard
+								| .
+							p(style="font-weight:bold") If we are unable to book all the tickets you request, the remainder will be added to the waiting list instead.
+							.form-group
+								.col-lg-10
+									table.table
+										thead
+											tr
+												th Ticket types
+												th Price
+												th Quantity
+										tbody
+											tr(ng-repeat="(id, ticket) in bookingCtrl.tickets track by id", style="background-color:#ffffff;")
+												td {{ ticket.type.name }} 
+													em  ({{ ticket.available }} remaining)
+												td &pound;{{ ticket.type.price }}
+												td
+													div
+														select(ng-model="ticket.quantity" ng-options="i for i in ticket.allowanceRange" ng-change="updateMeta")
+							.form-group
+								label.col-lg-2.control-label Donation
+								.col-lg-10
+									.checkbox
+										label
+											p
+												input(type="checkbox", ng-model="bookingCtrl.donate") 
+												| I wish to make a charitable donation of #[b &pound;2.00] per ticket to your charitable causes.
+										p You can find out more about our charitable causes on our #[a(href="http://emmamayball.com") homepage].
+							.form-group(ng-if="bookingCtrl.ticketNumber > bookingCtrl.allowance.remaining_allowance")
+								label.col-lg-12 You may only buy {{ bookingCtrl.allowance.remaining_allowance }} tickets at this time.
+							.form-group(ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.allowance.remaining_allowance")
+								label.col-lg-2.control-label Summary
+								.col-lg-10
+									table.table.table-striped
+										tbody(ng-repeat="(id, ticket) in bookingCtrl.tickets", ng-if="ticket.quantity > 0")
+											tr(style="background-color:#ffffff;")
+												th(colspan="2") {{ ticket.type.name }} (&pound;{{ ticket.type.price | number:2 }}) 
+											tr(ng-repeat="t in ticket.payment_methods track by $index" style="background-color:#ffffff;")
+												td Payment method for {{ticket.type.name}} Ticket {{$index + 1}}: 
+													select(ng-model="ticket.payment_methods[$index]" ng-options="m.id as m.name for m in bookingCtrl.payment_methods")
+													div.alert.alert-danger(ng-if="ticket.errors[$index].length > 0" style="margin-top:10px;")
+														button.close(type="button", aria-label="Close", ng-click="ticket.errors[$index] = '';") 
+															span(aria-hidden="true") &times;
+														strong Error: 
+														| {{ticket.errors[$index]}}
+										tbody
+											tr(ng-if="bookingCtrl.donate", style="background-color:#ffffff;")
+												td(colspan="2") #[b Charitable donation @ &pound;2.00 per ticket]
+										tfoot
+											tr.info
+												td(colspan="2") Total cost: #[b &pound;{{ bookingCtrl.ticketPrice | number:2 }}]
+							div.alert.alert-danger(ng-if="bookingCtrl.overall_error.length > 0")
+								button.close(type="button", aria-label="Close", ng-click="bookingCtrl.overall_error = '';") 
+									span(aria-hidden="true") &times;
+								strong Error: 
+								| {{bookingCtrl.overall_error}}
+							p(style="text-align:center;" ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.allowance.remaining_allowance")
+								input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
+			div(ng-switch-when="done")
+				h1 Booking {{bookingCtrl.failed.length > 0?"Partially":""}} Successful!
+				p(ng-if="bookingCtrl.failed.length > 0") There was a problem booking some of your tickets, and these have #[b not been booked] at all. Details of the problems are listed below.
+				table.table.table-striped.table-hover(ng-if="bookingCtrl.failed.length > 0")
+					thead
+						tr
+							th Ticket
+							th Reason
+							th Status
+					tbody
+						tr(ng-repeat="ticket in bookingCtrl.failed")
+							td {{ ticket.ticket_type.name }}
+							td {{ ticket.reason }}
+							td
+								span.label.label-danger Not Booked
 
-			//- div(ng-switch-when="done")
-			//- 	h1 Booking Successful!
-			//- 	p A summary of your booking is below. This confirmation has also been emailed to {{bookingCtrl.ticketResult.user.email}}.
-			//- 	p(ng-if="bookingCtrl.ticketResult.tickets.ticketsRejected.length > 0") We weren't able to book all of the tickets you requested. These tickets have been added to the waiting list. You will be contacted if these tickets become available.
-			//- 	table.table.table-striped.table-hover
-			//- 		thead
-			//- 			tr
-			//- 				th(colspan=2) Ticket Number
-			//- 				th Payment Method
-			//- 				th Price
-			//- 				th Status
-			//- 		tbody
-			//- 			tr(ng-repeat="ticket in bookingCtrl.ticketResult.tickets.ticketsAllocated")
-			//- 				td # {{ ticket.rowId }}
-			//- 				td #[em ({{ ticket.request.ticket_type.name }})]
-			//- 				td {{ ticket.request.payment_method.name }}
-			//- 				td &pound;{{ ticket.request.ticket_type.price |number:2 }}
-			//- 				td
-			//- 					span.label.label-info Booked
-			//- 			tr(ng-repeat="ticket in bookingCtrl.ticketResult.tickets.ticketsRejected")
-			//- 				td(colspan=2) {{ ticket.request.ticket_type.name }}
-			//- 				td {{ ticket.request.payment_method.name }}
-			//- 				td -
-			//- 				td
-			//- 					span.label.label-warning Waiting list
-			//- 			tr(ng-if="bookingCtrl.ticketResult.donationPrice > 0")
-			//- 				th(colspan=2) Donations
-			//- 				td
-			//- 				td &pound;{{bookingCtrl.ticketResult.donationPrice | number:2}} 
-			//- 				td
-			//- 		tfoot
-			//- 			tr
-			//- 				th(colspan=2) Total Due
-			//- 				td
-			//- 				td &pound;{{bookingCtrl.ticketResult.totalPrice | number:2}} 
-			//- 				td
+				p A summary of your booking is below. 
+				p(ng-if="bookingCtrl.waiting_list.length > 0") Some of the tickets you requested have sold out. These tickets have been added to the #[b waiting list] instead. You will be contacted if these tickets become available.
+				table.table.table-striped.table-hover(ng-if="bookingCtrl.booked.length + bookingCtrl.waiting_list.length > 0")
+					thead
+						tr
+							th(colspan=2) Ticket Number
+							th Payment Method
+							th Price
+							th Status
+					tbody
+						tr(ng-repeat="ticket in bookingCtrl.booked")
+							td # {{ ticket.id }}
+							td #[em ({{ ticket.ticket_type.name }})]
+							td {{ ticket.payment_method.name }}
+							td &pound;{{ ticket.transaction_value | number:2 }}
+							td
+								span.label.label-info Booked
+						//- TODO: donations not represented here.
+						tr(ng-repeat="ticket in bookingCtrl.waiting_list")
+							td(colspan=2) {{ ticket.ticket_type.name }}
+							td {{ ticket.payment_method.name }}
+							td -
+							td
+								span.label.label-warning Waiting list
+					tfoot
+						tr
+							th(colspan=2) Total Due
+							td
+							td &pound;{{bookingCtrl.totalPrice | number:2}} 
+							td
 
-			//- 	div(ng-if="bookingCtrl.ticketResult.totalPrice > 0")
-			//- 		h2 Payment Information
-			//- 		p Payment must be received within #[strong 14] days of booking (i.e. before #[strong {{bookingCtrl.ticketResult.payment_deadline}}]). 
-			//- 			| Any tickets which are not paid for by this date may be cancelled without further notice.
+				div(ng-if="bookingCtrl.totalPrice > 0")
+					h2 Payment Information
+					p Payment must be received within #[strong 14] days of booking (i.e. before #[strong {{bookingCtrl.payment_deadline}}]). 
+						| Any tickets which are not paid for by this date may be cancelled without further notice.
 
-			//- 		h4 Cheque Payments
-			//- 		p 
-			//- 			| To pay for tickets by #[strong Cheque], 
-			//- 			| please hand in a cheque made payable to 
-			//- 			| #[strong Emmanuel College May Ball] 
-			//- 			| to the Emmanuel College Porter's Lodge. 
-			//- 			| Please ensure that your surname and ticket
-			//- 			| number are written on the back of the
-			//- 			| cheque. To pay for multiple tickets with a
-			//- 			| single cheque, please include the ticket
-			//- 			| numbers for all the tickets you wish to pay
-			//- 			| for.
+					h4(ng-if="bookingCtrl.payment_instructions.cheque") Cheque Payments
+					p(ng-if="bookingCtrl.payment_instructions.cheque") 
+						| To pay for tickets by #[strong Cheque], 
+						| please hand in a cheque made payable to 
+						| #[strong Emmanuel College May Ball] 
+						| to the Emmanuel College Porter's Lodge. 
+						| Please ensure that your surname and ticket
+						| number are written on the back of the
+						| cheque. To pay for multiple tickets with a
+						| single cheque, please include the ticket
+						| numbers for all the tickets you wish to pay
+						| for.
 
-			//- 		h4 Bank Transfer Payments
-			//- 		p 
-			//- 			| To pay for tickets by #[strong Bank Transfer], 
-			//- 			| please send the amount due to the following
-			//- 			| account:								
-			//- 			table(style="padding-bottom:10px;")
-			//- 				tr 
-			//- 					th(style="padding: 5px;padding-right: 20px;") Account Number
-			//- 					td 60067911
-			//- 				tr
-			//- 					th(style="padding: 5px;") Sort Code
-			//- 					td 20-17-19
-			//- 				tr
-			//- 					th(style="padding: 5px;") Account name
-			//- 					td Emmanuel College May Ball
-			//- 		p 
-			//- 			| Please set the payment reference to your
-			//- 			| surname followed by the ticket number above. 
-			//- 			| For example, if your name is John Smith, 
-			//- 			| your ticket reference should be 
-			//- 			| #[em SMITH {{bookingCtrl.ticketResult.sampleID}}]
-			//- 			| . To pay for multiple tickets with a single
-			//- 			| payment, simply use the ticket number of the
-			//- 			| first ticket booked.
+					h4(ng-if="bookingCtrl.payment_instructions.banktransfer") Bank Transfer Payments
+					p(ng-if="bookingCtrl.payment_instructions.banktransfer") 
+						| To pay for tickets by #[strong Bank Transfer], 
+						| please send the amount due to the following
+						| account:								
+						table(ng-if="bookingCtrl.payment_instructions.banktransfer", style="padding-bottom:10px;")
+							tr 
+								th(style="padding: 5px;padding-right: 20px;") Account Number
+								td 60067911
+							tr
+								th(style="padding: 5px;") Sort Code
+								td 20-17-19
+							tr
+								th(style="padding: 5px;") Account name
+								td Emmanuel College May Ball
+					p(ng-if="bookingCtrl.payment_instructions.banktransfer") 
+						| Please set the payment reference to your
+						| surname followed by the ticket number above. 
+						| For example, if your name is John Smith, 
+						| your ticket reference should be 
+						| #[em SMITH {{bookingCtrl.booked[0].id}}]
+						| . To pay for multiple tickets with a single
+						| payment, simply use the ticket number of the
+						| first ticket booked.
 
 
-			//- 		h4 College Bill Payments
-			//- 		p 
-			//- 			| To pay for tickets by #[strong College Bill], 
-			//- 			| no further action needs to be taken. The
-			//- 			| price of your ticket will be added to your
-			//- 			| Lent term bill. Please note that payment by
-			//- 			| college bill is only available to current
-			//- 			| students at Emmanuel College, and that only
-			//- 			| one ticket may be put on your end of term
-			//- 			| bill.
+					h4(ng-if="bookingCtrl.payment_instructions.college_bill") College Bill Payments
+					p(ng-if="bookingCtrl.payment_instructions.college_bill") 
+						| To pay for tickets by #[strong College Bill], 
+						| no further action needs to be taken. The
+						| price of your ticket will be added to your
+						| Lent term bill. Please note that payment by
+						| college bill is only available to current
+						| students at Emmanuel College.
 
-			//- 	h2 Ticket Management
-			//- 	p You may now visit the #[a(href="/dash") ticket management page].
-			//- 		| On this page, you can add guest names to any tickets, or cancel any tickets or waiting list slots.
-			//- 	p You will be able to change guest names on your tickets via the management page until #[b 7th June].
+				h2 Ticket Management
+				p You may now visit the #[a(href="/dash") ticket management page].
+					| On this page, you can add guest names to any tickets, or cancel any tickets or waiting list slots.
+				p You will be able to change guest names on your tickets via the management page until #[b 7th June] (TODO: un-hard-code this).
 
-			//- 	p(style="text-align:center")
-			//- 		a.btn.btn-large.btn-success(href="/dash") Return to Management Page
+				p(style="text-align:center")
+					a.btn.btn-large.btn-success(href="/dash") Return to Management Page
 						

@@ -138,6 +138,8 @@ module.exports = function (user_id) {
 							ticket.ticket_type = types[ticket.ticket_type_id];
 							return true;	
 						} 
+						// console.log(ticket.ticket_type_id + "is not in ");
+						// console.log(types);
 						ticket.reason = "You don't have access to this kind of ticket right now.";
 					});
 
@@ -158,13 +160,15 @@ module.exports = function (user_id) {
 						// tickets = [{TICKET}, ...]
 						return _.partition(tickets, function(t, i) {
 							if (i < t.ticket_type.remaining_allowance) return true;
-							t.reason = "You may only book " + t.ticket_type.type_allowance + " " + t.ticket_type.name + " tickets in total. ";
+							t.reason = "You may currently only book " + t.ticket_type.type_allowance + " " + t.ticket_type.name + " ticket" + (t.ticket_type.type_allowance===1?"":"s" ) + " in total. ";
 							if (t.ticket_type.remaining_allowance > 0) {
 								t.reason += "You already have " + 
 									(t.ticket_type.type_allowance - t.ticket_type.remaining_allowance) + 
 									" tickets booked, so you may currently only book " + t.ticket_type.remaining_allowance + " more.";
-							} else {
+							} else if (t.ticket_type.remaining_allowance === 0) {
 								t.reason += "You already have this many tickets booked, so you may not currently book any more.";
+							} else {
+								t.reason += "You already have more than this many tickets booked, so you may not currently book any more.";
 							}
 						});
 						// returns [[{TICKET_S}, ...], [{TICKET_F}, ...]]
@@ -208,7 +212,6 @@ module.exports = function (user_id) {
 	function check_allowance(ts) {
 		return api.user(user_id).allowance.get()
 			.then(function(allowance) {
-				console.log(allowance);
 				var a = allowance.remaining_allowance;
 				var r = _.partition(ts, function(t, i) {
 					if (i < a) return true;
@@ -260,7 +263,7 @@ module.exports = function (user_id) {
 								if (result[0].rowsAffected <= 0) {
 									// insert failed - waiting list
 									t.status = "PENDING_WL";
-									return runSql("INSERT INTO ticket SET user_id=?, ?, book_time=UNIX_TIMESTAMP()", [user_id, _.omit(t, ['ticket_type', 'payment_method'])]);
+									return runSql("INSERT INTO ticket SET user_id=?, ?, book_time=UNIX_TIMESTAMP()", [user_id, _.omit(t, ['ticket_type', 'payment_method', 'form_id'])]);
 								} else {
 									return result[0];
 								}

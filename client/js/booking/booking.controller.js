@@ -32,7 +32,7 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 			vm.allowance = a;
 		});
 	});
-	vm.bookstate = 1;
+	vm.status = "loading";
 	vm.price = 0;
 	vm.allowance = {
 		remaining_allowance: 0
@@ -51,9 +51,10 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	}, updateMeta);
 
 	Socket.on('open_types', function(data) {
+		if (vm.status === "done") return;
 		var oldTypes = vm.tickets;
 		vm.tickets = {};
-		vm.bookstate = 2;
+		vm.status = "notix";
 		var tt;
 
 		// check access through each of my groups
@@ -64,7 +65,7 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 				for (tt in data[vm.user.groups[i]]) {
 					if (!(tt in vm.tickets)) {
 						vm.showBooking = true;
-						vm.bookstate = 3;
+						vm.status = "open";
 						vm.tickets[tt] = {
 							available: data[vm.user.groups[i]][tt].available,
 							type: _.findWhere(vm.all_ticket_types, {'id': parseInt(tt)}),
@@ -73,13 +74,15 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 							allowance: (data[vm.user.groups[i]][tt].allowance === null ? 
 											data[vm.user.groups[i]][tt].available : 
 											data[vm.user.groups[i]][tt].allowance),
-							payment_methods: []
+							payment_methods: [],
+							errors: []
 						};
 
 						// preserve quantity if we've already set one
 						if (oldTypes && oldTypes[tt]) {
 							vm.tickets[tt].quantity = oldTypes[tt].quantity;
 							vm.tickets[tt].payment_methods = oldTypes[tt].payment_methods;
+							vm.tickets[tt].errors = oldTypes[tt].errors;
 						}
 					} else {
 						// we have access to this type through multiple groups
@@ -109,7 +112,7 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	
 	// send booking to the server, and process the result in case of errors (otherwise just update the controller)
 	function submitBooking() {
-		vm.errorMsg = "";
+		vm.overall_error = "";
 		// construct array of tickets
 		var tickets = [];
 		for (var id in vm.tickets) {
@@ -120,7 +123,8 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 					"guest_name": "[Please Enter a Guest Name]",
 					"payment_method_id": vm.tickets[id].payment_methods[i],
 					"donation": vm.donate,
-					"notes": ""
+					"notes": "",
+					"form_id": id + "-" + i
 				});
 			}
 
@@ -128,16 +132,62 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 
 		vm.user.tickets().save(tickets).$promise.then(function(result) {
 			console.log(result);
-			if (result.booked.length) { 
-				console.error("Nothing booked");
+			for (var j=0; j<result.failed.length; j++) {
+				// find the offending tickets
+				var form_id = result.failed[j].form_id.split("-");
+				vm.tickets[form_id[0]].errors[form_id[1]] = result.failed[j].reason;
+			}
+			if (result.booked.length < 1 && result.waiting_list.length <1) { 
+				// nothing's been booked - so give the user the opportunity to try to fix things.
 			} else {
+				vm.status = "done";
 				vm.booked = result.booked;
 				vm.failed = result.failed;
 				vm.waiting_list = result.waiting_list;
+				vm.totalPrice = result.totalPrice;
+				vm.payment_deadline = result.payment_deadline;
+				
+				vm.sampleID = 123;
+				vm.payment_instructions = {};
+				vm.payment_instructions.banktransfer = false;
+				vm.payment_instructions.college_bill = false;
+				vm.payment_instructions.cheque = false;
+
+				for (var i=vm.booked.length-1; i>=0; i--) {
+					vm.sampleID = vm.booked[i].id;
+					switch (vm.booked[i].payment_method_id) {
+						case 3: 
+							vm.payment_instructions.banktransfer = true;
+							break;
+						case 2: 
+							vm.payment_instructions.cheque = true;
+							break;
+						case 1: 
+							vm.payment_instructions.college_bill = true;
+							break;
+					}
+
+				}
 			}
 		}, function(err) {
-			// TODO: generic error handling
-			console.error(err);
+			// this was a connection error affecting the whole booking - I don't think anything was booked.
+			if (err.status === 400) {
+				// the input data was wrong; this is probably swagger complaining about something
+				if (err.data.error.code === "SCHEMA_VALIDATION_FAILED" && err.data.error.paramName === "tickets") {
+					// definitely swagger.
+					// Literally the only thing under user control is the payment method, and 
+					// even then the only thing Swagger should complain about is if we leave it blank.
+					// So the only error I'm going to check for is that the payment method is missing.
+					if (err.data.error.results.errors.length > 0 && err.data.error.results.errors[0].message.indexOf("payment_method_id") >= 0) {
+						vm.overall_error = "You must enter a payment method for every ticket you want to book!";
+						return;
+					}
+				}
+			}
+			// unpredicted error - dunno how to parse usefully.
+			vm.overall_error = "An unexpected error occurred during booking - sorry! Please copy and paste this message in an email to the administrator (address at the bottom of the page) to help us fix the problem!";
+			err.dt = (new Date()).getTime();
+			vm.overall_error += JSON.stringify(err);
 		});
 	}
 
@@ -149,6 +199,7 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 			vm.ticketPrice += vm.tickets[id].quantity * vm.tickets[id].type.price;
 			vm.ticketNumber += vm.tickets[id].quantity;
 			vm.tickets[id].payment_methods = resizeArray(vm.tickets[id].payment_methods, vm.tickets[id].quantity);
+			vm.tickets[id].errors = resizeArray(vm.tickets[id].errors, vm.tickets[id].quantity);
 
 			// TODO: un-hard-code donation value
 			if (vm.donate === true) vm.ticketPrice += vm.tickets[id].quantity * 2;
