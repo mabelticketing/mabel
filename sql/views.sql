@@ -81,6 +81,25 @@ FROM user_group_allowance
 LEFT JOIN user_bought
 ON user_group_allowance.user_id=user_bought.user_id;
 
+/* UNDOCUMENTED VIEWS SOZ */
+
+CREATE OR REPLACE VIEW tickets_sold AS
+	SELECT ticket_type_id
+		,PENDING + CONFIRMED + ADMITTED sold
+	FROM ticket_status_count;
+
+CREATE OR REPLACE VIEW user_group_type_update AS
+SELECT group_id
+	,group_access_right.ticket_type_id
+	,total_limit
+	,allowance
+	,IFNULL(sold, 0) sold
+	,total_limit - IFNULL(sold, 0) available
+FROM group_access_right
+LEFT JOIN tickets_sold C ON group_access_right.ticket_type_id = C.ticket_type_id
+INNER JOIN ticket_type ON ticket_type.id = group_access_right.ticket_type_id
+WHERE open_time < UNIX_TIMESTAMP()
+	AND close_time > UNIX_TIMESTAMP();
 
 /* PROCEDURES
 
