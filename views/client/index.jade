@@ -5,24 +5,33 @@
 extends ./main.jade
 
 append scripts
-	//- script(type="text/javascript", src="/components/jquery/dist/jquery.min.js")
 	//- meta(name="blitz" content="mu-b71b91c7-69521387-684f86b3-c1bbca15")
-	//- link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 
 block title
 	title Ticketing Home
 
 block content
-	h1 Mabel Ticketing
-	p
-		| If you are a current student, please log in with Raven. If
-		| not, please login into or register a Ticketing account.
-
+	h1.h1 Mabel Ticketing
 	.row
-		.col-xs-12.col-md-4
+		.col-xs-12.col-md-6
+			h4.h4 Current students of the University
+			p.
+				If you are a #[strong current] student
+				of the University of Cambridge, you
+				may log in with Raven. Otherwise, please
+				use the buttons on the right.
+		.col-xs-12.col-md-6
+			h4.h4 Alumni / members of staff / other
+			p.
+				If you are here for the first time, you'll need to register.
+				Otherwise, you may log in.
+	.row
+		.col-xs-12.col-md-6
 			a.btn.btn-info.index-btn(href="/login/raven") Log in with Raven
-		.col-xs-12.col-md-4
-			a.btn.btn-default.index-btn(href="/register") Ticketing registration
-		.col-xs-12.col-md-4
-			a.btn.btn-default.index-btn(href="/login/mabel") Ticketing login
+		.col-xs-12.col-md-6
+			.row
+				.col-xs-12.col-md-6
+					a.btn.btn-default.index-btn(href="/register") Register
+				.col-xs-12.col-md-6
+					a.btn.btn-info.index-btn(href="/login/mabel") Log in
