@@ -1128,5 +1128,4 @@ definitions:
           - ticket_type_id
           - payment_method_id
           - guest_name
-          - donation 
-        additionalProperties: false
+          - donation
