@@ -12,7 +12,13 @@ Coming soon...
 
 ## Setup
 
-Coming soon...
+1. Install Node/NPM.
+2. Install MySQL.
+3. `npm run prepare`
+4. `npm run dev`
+5. ???
+6. Profit!
+
 <!--
 ### Requirements
 
