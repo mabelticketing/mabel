@@ -75,7 +75,8 @@ block content
 										tbody
 											tr(ng-repeat="(id, ticket) in bookingCtrl.tickets track by id", style="background-color:#ffffff;")
 												td {{ ticket.type.name }} 
-													em  ({{ ticket.available }} remaining)
+													em(ng-if="ticket.available<10")  ({{ ticket.available }} remaining)
+													em(ng-if="ticket.available<=0")  (Sold Out)
 												td &pound;{{ ticket.type.price }}
 												td
 													div

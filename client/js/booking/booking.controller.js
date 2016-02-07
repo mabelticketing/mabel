@@ -11,7 +11,7 @@ angular.module('mabel.booking')
 function BookingController($scope, User, Type, PaymentMethod, Socket) {
 
 	var vm = this;
-
+	a = vm;
 	vm.range = range;
 
 
@@ -65,9 +65,9 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 							type: _.findWhere(vm.all_ticket_types, {'id': parseInt(tt)}),
 							quantity: 0,
 							// if the allowance is unbounded, set the limit to the number of tix available
-							allowance: (data[vm.user.groups[i]][tt].allowance === null ? 
+							allowance: Math.min((data[vm.user.groups[i]][tt].allowance === null ? 
 											data[vm.user.groups[i]][tt].available : 
-											data[vm.user.groups[i]][tt].allowance),
+											data[vm.user.groups[i]][tt].allowance), vm.allowance.remaining_allowance),
 							payment_methods: [],
 							errors: []
 						};
