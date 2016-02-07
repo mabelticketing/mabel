@@ -116,7 +116,6 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 					"ticket_type_id": parseInt(id),
 					"guest_name": "[Please Enter a Guest Name]",
 					"payment_method_id": vm.tickets[id].payment_methods[i],
-					"donation": vm.donate,
 					"notes": "",
 					"form_id": id + "-" + i
 				});
