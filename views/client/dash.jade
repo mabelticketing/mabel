@@ -67,6 +67,8 @@ block content
 		p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)") 
 			em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
 
+		//- TODO: un hard-code date.
+		p(ng-if="dashCtrl.ticketsBooked.length !== 0") Please ensure the names listed below are accurate. You may change the names until 31st May 2016.
 
 		table(ng-if="dashCtrl.ticketsBooked.length !== 0").table.table-striped.table-hover
 			thead
