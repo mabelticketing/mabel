@@ -75,7 +75,7 @@ function setupSockets() {
 
 	setInterval(function() {
 		connection
-			.runSql('select group_id, group_access_right.ticket_type_id, total_limit, allowance, sold, total_limit - sold available from group_access_right  LEFT JOIN (SELECT ticket_type_id, PENDING + CONFIRMED + ADMITTED sold FROM ticket_status_count) C ON group_access_right.ticket_type_id=C.ticket_type_id JOIN ticket_type ON ticket_type.id=group_access_right.ticket_type_id where open_time < UNIX_TIMESTAMP() and close_time > UNIX_TIMESTAMP()')
+			.runSql('SELECT * FROM user_group_type_update;')
 			.then(function(newRights) {
 				newRights = _(newRights)
 					.groupBy('group_id')
@@ -84,7 +84,6 @@ function setupSockets() {
 							.groupBy('ticket_type_id')
 							// mapValues below is used to aggregate multiple windows which apply to a single group/type pair
 							.mapValues(function(v) {
-								// console.log(v);
 								var o = {
 									available: Math.max(0, _.max(_.pluck(v, 'available'))),
 
@@ -94,6 +93,7 @@ function setupSockets() {
 										return Math.max(u, t);
 									})
 								};
+								// console.log(o);
 								return o;
 							})
 							.value();
