@@ -16,6 +16,7 @@ append scripts
 	script(type="text/javascript", src="/js/shared/mabel.shared.js")
 	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
 	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
+	script(type="text/javascript", src="/js/resources/user.js")
 
 	script(type="text/javascript").
 		var LoginApp = angular.module("LoginApp", ["mabel.shared", "ngRoute"]);
@@ -30,6 +31,11 @@ append scripts
 
 		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
 			
+			if ($location.search().registered == 1) { // deliberate ==
+				// user has just registered, tell them about email
+				$scope.registered = "You have successfully been registered. ___________________________________________";
+			}
+
 			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
 			
 			$scope.mabelLogin = function() {
@@ -37,10 +43,10 @@ append scripts
 					then(function(data) {
 						$scope.error = "";
 						$location.path("/done/" + data.data.id + "/" + data.data.token);
-					}	, function(failure) {
+					}, function(failure) {
 						$scope.error = failure.data.message;
 					});
-			}
+			};
 			
 			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
 
@@ -48,7 +54,22 @@ append scripts
 
 		LoginApp.controller('RegisterController', function($scope, $http, $cookies, $location) {
 
-			console.log('Register page');
+			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
+
+			$scope.mabelRegister = function() {
+				$http.post('/api/user', { u: {
+					name: $scope.name,
+					email: $scope.email,
+					crsid: null,
+					is_verified: false,
+					password: $scope.password
+				}}).then(function(data) {
+					// success
+					$location.path('/').search('registered', 1);
+				}, function(failure) {
+					$scope.error = failure.data.message;
+				})
+			};
 
 		})
 
@@ -121,6 +142,9 @@ block content
 
 		script(type="text/ng-template" id="/main.html")
 			.row
+				div.col-xs-12.col-md-6.alert.alert-danger(ng-if="registered.length>0")
+						strong Success!
+						span {{registered}}
 				.col-xs-12.col-md-6
 					h4.h4 Current students of the University
 					p.
@@ -170,10 +194,9 @@ block content
 		script(type="text/ng-template" id="/register.html")
 			.row
 				.col-lg-8.col-lg-offset-2
-					if error
-						div.alert.alert-danger
-							strong Error: 
-							span {{error}}
+					div.alert.alert-danger(ng-if="error.length>0")
+						strong Error: 
+						span {{error}}
 					form.form-horizontal(novalidate ng-submit="mabelRegister()")
 						fieldset.well
 							.form-group
