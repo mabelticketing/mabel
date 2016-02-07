@@ -123,13 +123,16 @@ block content
 							td
 								span.label.label-danger Not Booked
 
-				p A summary of your booking is below. 
+				p A summary of your booking is below. Guest names should be added to your tickets via the 
+					a(href="/dash") ticket management page
+					| .
 				p(ng-if="bookingCtrl.waiting_list.length > 0") Some of the tickets you requested have sold out. These tickets have been added to the #[b waiting list] instead. You will be contacted if these tickets become available.
 				table.table.table-striped.table-hover(ng-if="bookingCtrl.booked.length + bookingCtrl.waiting_list.length > 0")
 					thead
 						tr
 							th(colspan=2) Ticket Number
 							th Payment Method
+							th Guest Name
 							th Price
 							th Status
 					tbody
@@ -137,6 +140,7 @@ block content
 							td # {{ ticket.id }}
 							td #[em ({{ ticket.ticket_type.name }})]
 							td {{ ticket.payment_method.name }}
+							td #[em None Entered]
 							td &pound;{{ ticket.transaction_value | number:2 }}
 							td
 								span.label.label-info Booked
@@ -144,11 +148,13 @@ block content
 							td(colspan=2) {{ ticket.ticket_type.name }}
 							td {{ ticket.payment_method.name }}
 							td -
+							td -
 							td
 								span.label.label-warning Waiting list
 					tfoot
 						tr
 							th(colspan=2) Total Due
+							td
 							td
 							td &pound;{{bookingCtrl.totalPrice | number:2}} 
 							td
@@ -202,8 +208,8 @@ block content
 
 				h2.h2 Ticket Management
 				p You may now visit the #[a(href="/dash") ticket management page].
-					| On this page, you can add guest names to any tickets, or cancel any tickets or waiting list slots.
-				p You will be able to change guest names on your tickets via the management page until #[strong 31st March].
+					|  On this page, you may add guest names to any tickets, or cancel any tickets or waiting list slots.
+				p You will be able to change guest names on your tickets via the management page until #[strong 31st May].
 
 				p(style="text-align:center")
 					a.btn.btn-large.btn-success(href="/dash") Return to Management Page
