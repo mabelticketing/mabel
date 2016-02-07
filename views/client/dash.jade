@@ -35,32 +35,33 @@ block title
 block content
 	div(ng-app="mabel.dash" ng-controller="DashController as dashCtrl" ng-view)
 		
-		h1 Dashboard - {{ dashCtrl.user.name }}
+		h1.h1 Dashboard - {{ dashCtrl.user.name }}
 
-		.panel.panel-info
-			.panel-heading Available tickets
-			.panel-body
-				p(ng-if="dashCtrl.ticketsAvailableLoading") #[em Loading...]
-				p(ng-if="!dashCtrl.ticketsAvailableLoading && (dashCtrl.ticketAccessList.length === 0 || dashCtrl.remainingAllowance===0)", style="font-style:italic;")
-					| We couldn't find any tickets available to you.
-				div(ng-if="(!dashCtrl.ticketsAvailableLoading) && dashCtrl.ticketAccessList.length > 0")
-					p You may book up to #[strong {{ dashCtrl.remainingAllowance }}] more ticket{{dashCtrl.remainingAllowance===1?"":"s"}} of the following type{{dashCtrl.ticketAccessList.length>1?"s":""}}:
-					ul
-						li(ng-repeat="ticket in dashCtrl.ticketAccessList" ng-if="ticket.open_time*1000<dashCtrl.nowTime").
-							You may currently book #[b {{ (ticket.allowance===null)?"unlimited":ticket.allowance }} {{ ticket.name }}] tickets until #[b {{ ticket.closing }}].
-					ul
-						li(ng-repeat="ticket in dashCtrl.ticketAccessList" ng-if="ticket.open_time*1000>dashCtrl.nowTime").
-							You will be able to book #[b {{ (ticket.allowance===null)?"unlimited":ticket.allowance }} {{ ticket.name }}] tickets from #[b {{ ticket.opening }}] until #[b {{ ticket.closing }}].
-					p If tickets are sold out you will automatically be added to the waiting list when you book.
+		//- .panel.panel-info
+		//- 	.panel-heading Available tickets
+		//- 	.panel-body
+		//- 		p(ng-if="dashCtrl.ticketsAvailableLoading") #[em Loading...]
+		//- 		p(ng-if="!dashCtrl.ticketsAvailableLoading && (dashCtrl.ticketAccessList.length === 0 || dashCtrl.remainingAllowance===0)", style="font-style:italic;")
+		//- 			| We couldn't find any tickets available to you.
+		//- 		div(ng-if="(!dashCtrl.ticketsAvailableLoading) && dashCtrl.ticketAccessList.length > 0")
+		//- 			p You may book up to #[strong {{ dashCtrl.remainingAllowance }}] more ticket{{dashCtrl.remainingAllowance===1?"":"s"}} of the following type{{dashCtrl.ticketAccessList.length>1?"s":""}}:
+		//- 			ul
+		//- 				li(ng-repeat="ticket in dashCtrl.ticketAccessList" ng-if="ticket.open_time*1000<dashCtrl.nowTime").
+		//- 					You may currently book #[b {{ (ticket.allowance===null)?"unlimited":ticket.allowance }} {{ ticket.name }}] tickets until #[b {{ ticket.closing }}].
+		//- 			ul
+		//- 				li(ng-repeat="ticket in dashCtrl.ticketAccessList" ng-if="ticket.open_time*1000>dashCtrl.nowTime").
+		//- 					You will be able to book #[b {{ (ticket.allowance===null)?"unlimited":ticket.allowance }} {{ ticket.name }}] tickets from #[b {{ ticket.opening }}] until #[b {{ ticket.closing }}].
+		//- 			p If tickets are sold out you will automatically be added to the waiting list when you book.
 
 		
-		p
-			a.btn.btn-xlarge.btn-success(href="/book") Book tickets
+		.row
+			.col-xs-12
+				p Welcome to insert text blah blah
+			.col-xs-12.col-md-4.col-md-offset-4
+				a.btn.btn-xlarge.btn-info(href="/book" style="width:100%;") Book tickets
 
 
-		h2 Your tickets
-
-		h3 Booked
+		h2.h2 Your tickets
 
 		p(ng-if="dashCtrl.ticketsBookedLoading") #[em Loading...]
 
@@ -84,21 +85,29 @@ block content
 					td
 						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)")
 					td {{ ticket.payment_method }}
-					td(style="text-align:	right") &pound;{{ ticket.transaction_value | number:2 }}
+					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
 					td(class="{{ ticket.status }}") {{ ticket.status }}
 					td(style="text-align:right")
 						button.btn.btn-xs.btn-danger(ng-if="ticket.status=='PENDING'" tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
 			tfoot
 				tr
-					th(colspan=2) Total
+					th(colspan=2)
 					td
-					td
+					td #[strong Total]
 					td(style="text-align:right;")
 						b &pound;{{ dashCtrl.totalValue | number:2 }}
 					td
+				tr
+					th(colspan=2)
+					td
+					td Owe
+					td(style="text-align:right;") &pound;{{ dashCtrl.pendingValue | number:2 }}
+					td
 		
-		h3 Waiting List
+		p Please allow #[strong up to two weeks] for the money you have paid to show on this page.
+
+		h2.h2 Waiting List
 
 		p(ng-if="dashCtrl.waitingListLoading") #[em Loading...]
 		p(ng-if="!dashCtrl.transactionsLoading && !(dashCtrl.waitingListTickets.length > 0)") 
@@ -118,9 +127,4 @@ block content
 					td(style="text-align:right")
 						button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
-
-
-		h2 Billing
-
-		p(ng-if="dashCtrl.billingLoading") #[em Loading...]
-		p(ng-if="!dashCtrl.billingLoading") We have received #[strong &pound;{{ dashCtrl.confirmedValue | number: 2 }}] from you. You owe #[strong &pound;{{ dashCtrl.pendingValue | number: 2 }}]. Please allow #{ payment_processing_time } for your transactions to show on this page.
+	
