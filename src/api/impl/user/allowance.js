@@ -23,10 +23,13 @@ function allowance(user_id) {
 		var overall = runSql("SELECT * FROM user_group_remaining_allowance WHERE user_id=?", [user_id]);
 			
 		return Q.spread([access, overall], function(a, o) {
+			// in case there aren't allowances present:
+			var oa = o[0] && o[0].overall_allowance ? o[0].overall_allowance : 0;
+			var ra = o[0] && o[0].remaining_allowance ? o[0].remaining_allowance : 0;
 			return {
 				access: a,
-				overall_allowance: o[0].overall_allowance,
-				remaining_allowance: o[0].remaining_allowance
+				overall_allowance: oa,
+				remaining_allowance: ra
 			};
 		});
 	}
