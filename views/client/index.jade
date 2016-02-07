@@ -46,6 +46,12 @@ append scripts
 
 		});
 
+		LoginApp.controller('RegisterController', function($scope, $http, $cookies, $location) {
+
+			console.log('Register page');
+
+		})
+
 		LoginApp.controller("ExternalController", function($scope, $http, $location, $routeParams) {
 			$scope.token = $routeParams.token;
 
@@ -62,7 +68,6 @@ append scripts
 		LoginApp.controller("DoneController", function($location, $cookies, $routeParams) {
 			
 			if ( $routeParams.token && $routeParams.id) {
-				console.log(1)
 				// new authentication cookie/token
 				var token = $routeParams.token;
 				var id = $routeParams.id;
@@ -70,10 +75,8 @@ append scripts
 				$cookies.put("mabelAuthToken", token, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
 				$cookies.put("mabelUserId", id, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
 			} else if ( $cookies.get("mabelAuthToken") ) {
-			console.log(2)
 				// we already have a cookie so it's fine to proceed without route parameters
 			} else {
-			console.log(3	)
 				throw Error("Token not provided but you said I was done!");
 			}
 			
@@ -88,9 +91,13 @@ append scripts
 					templateUrl: '/main.html',
 					controller: 'IndexController' // TODO: better name
 				})
-				.when('/mabel-login', {
-					templateUrl: '/mabelLogin.html',
+				.when('/login', {
+					templateUrl: '/login.html',
 					controller: 'LoginController'
+				})
+				.when('/register', {
+					templateUrl: '/register.html',
+					controller: 'RegisterController'
 				})
 				.when('/external/:auth_id/:token', {
 					template: "",
@@ -132,21 +139,22 @@ block content
 				.col-xs-12.col-md-6
 					.row
 						.col-xs-12.col-md-6
-							a.btn.btn-default.index-btn(href="/register") Register
+							a.btn.btn-default.index-btn(href="#!/register") Register
 						.col-xs-12.col-md-6
-							a.btn.btn-info.index-btn(href="#!/mabel-login") Log in
+							a.btn.btn-info.index-btn(href="#!/login") Log in
 
-		script(type="text/ng-template" id="/mabelLogin.html")
+		script(type="text/ng-template" id="/login.html")
 			.row
 				.col-lg-8.col-lg-offset-2
 					div.alert.alert-danger(ng-if="error.length>0")
-						strong Error: 
+						strong Error:
 						span {{error}}
 					form.form-horizontal(novalidate ng-submit="mabelLogin()")
 						fieldset.well
 							.form-group
 								.col-lg-9.col-lg-offset-3
-									p If you are a current student, you should #[a(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") log in with Raven] instead. If you do not have a ticketing account, click #[a(href="/register") here] to register.
+									p If you are a current student, you should #[a(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") log inregister with Raven] instead.
+									p If you do not have a ticketing account, click #[a(href="#!/register") here]] to register.
 							.form-group
 								label.col-lg-3.control-label(for='inputEmail') Email
 								.col-lg-9
@@ -155,6 +163,34 @@ block content
 								label.col-lg-3.control-label(for='inputPassword') Password
 								.col-lg-9
 									input#inputPassword.form-control(type='password', name="password", ng-model="password", placeholder='Password')
+							.form-group.spacer
+								.col-lg-9.col-lg-offset-3
+									button.btn.btn-primary(type='submit' style="width:100%;") Submit
+
+		script(type="text/ng-template" id="/register.html")
+			.row
+				.col-lg-8.col-lg-offset-2
+					if error
+						div.alert.alert-danger
+							strong Error: 
+							span {{error}}
+					form.form-horizontal(novalidate ng-submit="mabelRegister()")
+						fieldset.well
+							.form-group
+								.col-lg-9.col-lg-offset-3
+									p You'll need to register before you are able to purchase tickets. If you are a current student, you should #[a(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") log in with Raven] instead (no need to register).
+							.form-group
+								label.col-lg-3.control-label(for='inputName') Name
+								.col-lg-9
+									input#inputName.form-control(type='text', name="name", value=name, placeholder='Name')
+							.form-group
+								label.col-lg-3.control-label(for='inputEmail') Email
+								.col-lg-9
+									input#inputEmail.form-control(type='email', name="email", value=email, placeholder='Email')
+							.form-group
+								label.col-lg-3.control-label(for='inputPassword') Password
+								.col-lg-9
+									input#inputPassword.form-control(type='password', name="password", placeholder='Password')
 							.form-group.spacer
 								.col-lg-9.col-lg-offset-3
 									button.btn.btn-primary(type='submit' style="width:100%;") Submit
