@@ -68,7 +68,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		//- TODO?: Can/should bower do automatic incuding/dependency resolution for us?
 
 		// jquery
-		script(src='/components/jquery/dist/jquery.min.js')
+		script(src='/lib/components/jquery/dist/jquery.min.js')
 			
 		// misc
 		script(type="text/javascript", src="/lib/components/moment/moment.js")
@@ -90,10 +90,10 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 
 		
 		// angular
-		script(type="text/javascript", src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.js")
+		script(type="text/javascript", src="/lib/components/angular/angular.js")
 		script(type="text/javascript" src="/lib/components/angular-cookies/angular-cookies.js")
 		script(type="text/javascript" src="/lib/components/angular-resource/angular-resource.js")
-		script(type="text/javascript" src="/lib/components/ng-table/ng-table.js")
+		script(type="text/javascript" src="/lib/components/ng-table/dist/ng-table.js")
 		script(type="text/javascript" src="/lib/components/ng-table-export/ng-table-export.js")
 
 		// bootstrap
@@ -116,7 +116,7 @@ body(class="skin-black" ng-app="mabel.admin" ng-controller="AdminPageController 
 		script(type = "text/javascript" src="/js/shared/icheck.directive.js")
 		script(type = "text/javascript" src="/js/shared/datetimepicker.directive.js")
 		script(type = "text/javascript" src="/js/shared/mabelresource.factory.js")
-		script(type = "text/javascript" src="/js/shared/user.factory.js")
+		script(type = "text/javascript" src="/js/resources/user.js")
 		script(type = "text/javascript" src="/js/shared/apicaller.factory.js")
 		
 		// admin

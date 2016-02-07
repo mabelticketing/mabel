@@ -7,10 +7,10 @@
 angular.module('mabel.shared')
 	.directive('mabelTable', MabelTable);
 
-function MabelTable(ngTableParams, $rootScope) {
+function MabelTable(NgTableParams, $rootScope) {
 	return {
 		restrict: 'AE',
-		templateUrl: '/views/admin/boxes/mabeltable',
+		templateUrl: '/admin/boxes/mabeltable',
 		scope: {
 			initialisor: '=',
 			Resource: '=resource',
@@ -25,10 +25,11 @@ function MabelTable(ngTableParams, $rootScope) {
 
 			if (vm.initialisor !== undefined) {
 				vm.newItem = vm.initialisor();
-				vm.newItem.defineMeta();
+
+				defineMeta(vm.newItem);
 			}
 
-			vm.tableParams = new ngTableParams({
+			vm.tableParams = new NgTableParams({
 				page: 1, // show first page
 				count: 5, // count per page
 				sorting: {
@@ -53,10 +54,10 @@ function MabelTable(ngTableParams, $rootScope) {
 					}, function(data) {
 						if (data.length > 0) {
 							params.total(data[0].$count);
-							$defer.resolve(data);
+							return $defer.resolve(data);
 						} else {
 							params.total(0);
-							$defer.resolve([]);
+							return $defer.resolve([]);
 						}
 					});
 				}
@@ -85,12 +86,12 @@ function MabelTable(ngTableParams, $rootScope) {
 				};
 			}
 			vm.submitNew = function() {
-				var promise = vm.newItem.save();
+				var promise = saveResource(vm.newItem);
 
 				promise.then(function() {
 					// reset the new item for next entry
 					vm.newItem = vm.initialisor();
-					vm.newItem.defineMeta();
+					defineMeta(vm.newItem);
 					vm.tableParams.reload();
 					vm.newItem._status = "success";
 					vm.newItem._error = "Successfully added new item.";
@@ -101,7 +102,7 @@ function MabelTable(ngTableParams, $rootScope) {
 				item.$backup = angular.copy(item);
 			};
 			vm.saveEdit = function(item) {
-				var promise = item.save();
+				var promise = updateResource(item);
 				var original = item.$backup;
 
 				promise.then(function() {
@@ -120,9 +121,7 @@ function MabelTable(ngTableParams, $rootScope) {
 				}
 				item.$edit = false;
 			};
-			vm.save = function(item) {
-				item.save();
-			};
+			vm.save = updateResource;
 			vm.delete = function(item) {
 				item.$delete(function() {
 					vm.tableParams.reload();
@@ -133,4 +132,73 @@ function MabelTable(ngTableParams, $rootScope) {
 			};
 		}
 	};
+}
+
+function defineMeta(obj) {
+	Object.defineProperty(obj, '_status', {
+		value: '',
+		enumerable: false,
+		writable: true
+	});
+	Object.defineProperty(obj, '$edit', {
+		value: '',
+		enumerable: false,
+		writable: true
+	});
+	Object.defineProperty(obj, '$count', {
+		value: '',
+		enumerable: false,
+		writable: true
+	});
+	Object.defineProperty(obj, '$backup', {
+		value: '',
+		enumerable: false,
+		writable: true
+	});
+	Object.defineProperty(obj, '_error', {
+		value: '',
+		enumerable: false,
+		writable: true
+	});
+}
+
+function updateResource(resource) {
+
+	if (!resource.hasOwnProperty('_status')) {
+		// this object doesn't have '_status' set yet for some reason
+		// (probably it was created via new Resource() rather than
+		// through .get() or .query())
+		defineMeta(resource);
+	}
+
+	var promise = resource.$update({id: resource.id});
+	promise.then(function() {
+		resource._status = "success";
+		resource._error = "";
+	}, function(response) {
+		resource._status = "error";
+		resource._error = response.data;
+		console.log(response.data);
+	});
+	return promise;
+}
+function saveResource(resource) {
+
+	if (!resource.hasOwnProperty('_status')) {
+		// this object doesn't have '_status' set yet for some reason
+		// (probably it was created via new Resource() rather than
+		// through .get() or .query())
+		defineMeta(resource);
+	}
+
+	var promise = resource.$save.apply(resource, arguments);
+	promise.then(function() {
+		resource._status = "success";
+		resource._error = "";
+	}, function(response) {
+		resource._status = "error";
+		resource._error = response.data;
+		console.log(response.data);
+	});
+	return promise;
 }

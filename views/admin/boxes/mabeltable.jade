@@ -4,7 +4,7 @@
 
 //- a.btn.btn-primary(ng-mousedown="csv.generate()" ng-href="{{ csv.link() }}" download="test.csv") Export to CSV
 
-table.table.table-hover(ng-table="tableParams", template-header="mabel-table-header", show-filter="true", export-csv="csv")
+table.table.table-hover(ng-table="tableParams", template-header="mabel-table-header", show-filter="true")
 	tbody
 		tr(ng-repeat="item in $data track by item.id"
 			ng-click="selectItem(item)" tooltip="{{item._error}}" tooltip-placement="top")

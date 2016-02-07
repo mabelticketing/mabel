@@ -18,12 +18,12 @@ function ticketResource($resource, MabelToken) {
 			method: 'POST'
 		},
 		'query': {
-			url: '/api/tickets',
+			url: '/api/ticket',
 			method: 'GET',
 			isArray: true
 		},
 		'exterminate': {
-			url: '/api/tickets',
+			url: '/api/ticket',
 			method: 'DELETE',
 			isArray: true
 		},
