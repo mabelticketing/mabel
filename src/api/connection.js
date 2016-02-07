@@ -36,7 +36,29 @@ function getConnection(opts) {
 	return conn;
 }
 
+// this is slightly hacky - values should be parsed at a higher level (e.g. swagger)
+function parseDataTableOpts(opts) {
+	// opts.columns is just a string
+	// opts.where is just a string
+	if (opts.filter !== undefined) {
+		opts.filter = JSON.parse(opts.filter);
+	}
+	if (opts.order !== undefined) {
+		opts.order = JSON.parse(opts.order);
+	}
+	
+	if (opts.size !== undefined) {
+		opts.size = parseInt(opts.size);
+	}
+	if (opts.from !== undefined) {
+		opts.from = parseInt(opts.from);
+	}
+
+	return opts;
+}
+
 function getFilteredSQL(table, opts) {
+	opts = parseDataTableOpts(opts);
 	var sql = "SELECT ";
 
 	// columns

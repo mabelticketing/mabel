@@ -2,6 +2,7 @@
 
 jade views/client -O mabel.json -o public --hierarchy --pretty;
 jade views/admin/*.jade -O mabel.json -o public/admin --hierarchy --pretty;
+jade views/admin/boxes/*.jade -O mabel.json -o public/admin/boxes --hierarchy --pretty;
 
 # move (...).html to /(...)/index.html  (except index.html)
 find public -name "*.html" | grep -v index | while read f; 

@@ -17,28 +17,30 @@ block content
 	.row
 		.col-md-12
 			include boxes/ticket.jade
-	.row
-		.col-md-12
-			include boxes/waiting-list.jade
-	.row
-		.col-md-6
-			include boxes/waiting-list-summary.jade
-		.col-md-6
-			include boxes/ticket-summary.jade
-	.row
-		.col-md-8
-			include boxes/ticket-types.jade
-		.col-md-4
-			include boxes/ticket-type-detail.jade
+	//- .row
+	//- 	.col-md-12
+	//- 		include boxes/waiting-list.jade
+	//- .row
+	//- 	.col-md-6
+	//- 		include boxes/waiting-list-summary.jade
+	//- 	.col-md-6
+	//- 		include boxes/ticket-summary.jade
+	//- .row
+	//- 	.col-md-8
+	//- 		include boxes/ticket-types.jade
+	//- 	.col-md-4
+	//- 		include boxes/ticket-type-detail.jade
 
 block append scripts
+	script(type = "text/javascript" src="/js/resources/ticket.js")
+	
 	script(type = "text/javascript" src="/js/shared/mabeltable.directive.js")
 	script(type = "text/javascript" src="/js/shared/tickettype.factory.js")
 	script(type = "text/javascript" src="/js/admin/tickettypedetail.controller.js")
 	script(type = "text/javascript" src="/js/admin/tickettypes.controller.js")
 	script(type = "text/javascript" src="/js/admin/ticket.controller.js")
 	script(type = "text/javascript" src="/js/admin/ticketsummary.controller.js")
-	script(type = "text/javascript" src="/js/admin/ticket.factory.js")
+	//- script(type = "text/javascript" src="/js/admin/ticket.factory.js")
 	script(type = "text/javascript" src="/js/admin/waitinglist.controller.js")
 	script(type = "text/javascript" src="/js/admin/waitinglistsummary.controller.js")
 	script(type = "text/javascript" src="/js/admin/waitinglist.factory.js")

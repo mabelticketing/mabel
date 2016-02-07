@@ -338,9 +338,17 @@ function respond(req, res, next) {
 		}, null);
 
 	// Call the final method with all the data we have (they're free to ignore it!)
-	var data = _.mapValues(req.swagger.params, function(o) {
-		return o.value;
-	});
+	var data = _.extend({}, 
+		// query-string stuff
+		req.query,
+		// stuff swagger knows about and has already parsed
+		_.mapValues(req.swagger.params, function(o) {
+			return o.value;
+		}));
+	// var data = _.mapValues(req.swagger.params, function(o) {
+	// 	return o.value;
+	// });
+
 
 	// finally, this should be the right method to call.
 	var promise = meth[req.swagger.operationPath[2]](data);

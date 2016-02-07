@@ -35,6 +35,18 @@ securityDefinitions:
     in: query
 security: # default security is just to have an auth token
   - token: []
+# parameters: 
+#   columns: # list of strings
+#   where: # string
+#   filter: # {string:string}
+#   order: # {string: "asc/desc"}
+#   size: # int
+#   from: # int (only if size is present)
+#   ## DATATABLE PARAMETERS
+#   # draw: # int
+#   # start: # int
+#   length: # int (may be -1)
+
 
 paths:
   /group:
@@ -1031,7 +1043,6 @@ definitions:
         type: string
         example: Pay for tickets by adding the price to your end of term college bill
         description: Payment method description
-
 
   Ticket:
     type: object
