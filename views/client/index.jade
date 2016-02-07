@@ -52,7 +52,7 @@ append scripts
 
 		});
 
-		LoginApp.controller('RegisterController', function($scope, $http, $location) {
+		LoginApp.controller('RegisterController', function($scope, $http, $location, $cookies) {
 
 			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
 			
