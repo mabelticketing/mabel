@@ -1087,11 +1087,6 @@ definitions:
         example: 14419663721
         readOnly: true
         description: Date the ticket was booked (seconds since unix epoch)
-      donation:
-        type: boolean
-        example: true
-        default: false
-        description: Whether the booker chose to make a donation which this ticket
       transaction_value:
         type: number
         format: float
@@ -1143,4 +1138,3 @@ definitions:
           - ticket_type_id
           - payment_method_id
           - guest_name
-          - donation
