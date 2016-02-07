@@ -6,32 +6,155 @@ extends ./main.jade
 
 append scripts
 	//- meta(name="blitz" content="mu-b71b91c7-69521387-684f86b3-c1bbca15")
-	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
 
-block title
-	title Ticketing Home
+	script(type="text/javascript", src="/lib/components/angular/angular.min.js")
+	script(type="text/javascript", src="/lib/components/angular-route/angular-route.min.js")
+	script(type="text/javascript", src="/lib/components/angular-cookies/angular-cookies.js")
+	script(type="text/javascript", src="/lib/components/angular-resource/angular-resource.js")
+	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
+	
+	script(type="text/javascript", src="/js/shared/mabel.shared.js")
+	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
+	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
+
+	script(type="text/javascript").
+		var LoginApp = angular.module("LoginApp", ["mabel.shared", "ngRoute"]);
+
+		LoginApp.controller('IndexController', function($cookies, $scope, $location) {
+			// check if user logged in, and if so
+			// redirect them to /dash
+			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
+
+			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
+		});
+
+		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
+			
+			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
+			
+			$scope.mabelLogin = function() {
+				$http.get('/api/token/mabel', {params:{email:$scope.email, password:$scope.password}}).
+					then(function(data) {
+						$scope.error = "";
+						$location.path("/done/" + data.data.id + "/" + data.data.token);
+					}	, function(failure) {
+						$scope.error = failure.data.message;
+					});
+			}
+			
+			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
+
+		});
+
+		LoginApp.controller("ExternalController", function($scope, $http, $location, $routeParams) {
+			$scope.token = $routeParams.token;
+
+			// trade the external token for a valid one
+			$http.get('/api/token/external/' + $routeParams.auth_id, {params:{access_token:$routeParams.token}}).
+				then(function(data) {
+					$scope.error = "";
+					$location.path("/done/" + data.data.id + "/" + data.data.token);
+				}, function(failure) {
+					$scope.error = failure.data.message;
+				});
+		});
+
+		LoginApp.controller("DoneController", function($location, $cookies, $routeParams) {
+			
+			if ( $routeParams.token && $routeParams.id) {
+				console.log(1)
+				// new authentication cookie/token
+				var token = $routeParams.token;
+				var id = $routeParams.id;
+				
+				$cookies.put("mabelAuthToken", token, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
+				$cookies.put("mabelUserId", id, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
+			} else if ( $cookies.get("mabelAuthToken") ) {
+			console.log(2)
+				// we already have a cookie so it's fine to proceed without route parameters
+			} else {
+			console.log(3	)
+				throw Error("Token not provided but you said I was done!");
+			}
+			
+			window.location = '/dash';
+			
+		});
+
+		LoginApp.config(function($routeProvider, $locationProvider) {
+			$locationProvider.hashPrefix('!');
+			$routeProvider
+				.when('/', {
+					templateUrl: '/main.html',
+					controller: 'IndexController' // TODO: better name
+				})
+				.when('/mabel-login', {
+					templateUrl: '/mabelLogin.html',
+					controller: 'LoginController'
+				})
+				.when('/external/:auth_id/:token', {
+					template: "",
+					controller: 'ExternalController'
+				})
+				.when('/done/:id/:token', {
+					template: '',
+					controller: 'DoneController'
+				})
+				.when('/done', {
+					template: '',
+					controller: 'DoneController'
+				})
+				.otherwise( { redirectTo: "/" });
+		});
 
 block content
 	h1.h1 Mabel Ticketing
-	.row
-		.col-xs-12.col-md-6
-			h4.h4 Current students of the University
-			p.
-				If you are a #[strong current] student
-				of the University of Cambridge, you
-				may log in with Raven. Otherwise, please
-				use the buttons on the right.
-		.col-xs-12.col-md-6
-			h4.h4 Alumni / members of staff / other
-			p.
-				If you are here for the first time, you'll need to register.
-				Otherwise, you may log in.
-	.row
-		.col-xs-12.col-md-6
-			a.btn.btn-info.index-btn(href="/login/raven") Log in with Raven
-		.col-xs-12.col-md-6
+	div(ng-app="LoginApp")
+		ng-view
+
+		script(type="text/ng-template" id="/main.html")
 			.row
 				.col-xs-12.col-md-6
-					a.btn.btn-default.index-btn(href="/register") Register
+					h4.h4 Current students of the University
+					p.
+						If you are a #[strong current] student
+						of the University of Cambridge, you
+						may log in with Raven. Otherwise, please
+						use the buttons on the right.
 				.col-xs-12.col-md-6
-					a.btn.btn-info.index-btn(href="/login/mabel") Log in
+					h4.h4 Alumni / members of staff / other
+					p.
+						If you are here for the first time, you'll need to register.
+						Otherwise, you may log in.
+			.row
+				.col-xs-12.col-md-6
+					a.btn.btn-info.index-btn(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") Log in with Raven
+				.col-xs-12.col-md-6
+					.row
+						.col-xs-12.col-md-6
+							a.btn.btn-default.index-btn(href="/register") Register
+						.col-xs-12.col-md-6
+							a.btn.btn-info.index-btn(href="#!/mabel-login") Log in
+
+		script(type="text/ng-template" id="/mabelLogin.html")
+			.row
+				.col-lg-8.col-lg-offset-2
+					div.alert.alert-danger(ng-if="error.length>0")
+						strong Error: 
+						span {{error}}
+					form.form-horizontal(novalidate ng-submit="mabelLogin()")
+						fieldset.well
+							.form-group
+								.col-lg-9.col-lg-offset-3
+									p If you are a current student, you should #[a(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") log in with Raven] instead. If you do not have a ticketing account, click #[a(href="/register") here] to register.
+							.form-group
+								label.col-lg-3.control-label(for='inputEmail') Email
+								.col-lg-9
+									input#inputEmail.form-control(type='text',ng-model="email", name="email", placeholder='Email')
+							.form-group
+								label.col-lg-3.control-label(for='inputPassword') Password
+								.col-lg-9
+									input#inputPassword.form-control(type='password', name="password", ng-model="password", placeholder='Password')
+							.form-group.spacer
+								.col-lg-9.col-lg-offset-3
+									button.btn.btn-primary(type='submit' style="width:100%;") Submit
