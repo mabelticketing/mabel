@@ -11,7 +11,7 @@ angular.module('mabel.shared')
 
 		if (token === null || token === undefined) {
 			alert("Please log in before proceeding.");
-			window.location = "/login";
+			window.location = "/";
 			return null;
 		}
 		return {
