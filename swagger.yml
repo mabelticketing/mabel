@@ -29,6 +29,10 @@ securityDefinitions:
     type: apiKey
     name: access_token
     in: query
+  open:
+    type: apiKey
+    name: access_token
+    in: query
   self: # NB Must only be used on operations for which the param {id} is the user id.
     type: apiKey
     name: access_token
@@ -435,7 +439,7 @@ paths:
       summary: Create a new user
       description: Create a new user with an automatically allocated ID
       security:
-        - admin: []
+        - open: []
       parameters:
         - name: u
           in: body

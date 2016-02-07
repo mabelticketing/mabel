@@ -121,6 +121,12 @@ function getSwaggerAuthObj() {
 	return {
 
 		// simplest auth - just check there's a valid token
+		open: function(req, authOrSecDef, token, next) {
+			// NB Won't set the user parameter
+			next();
+		},
+
+		// simplest auth - just check there's a valid token
 		token: function(req, authOrSecDef, token, next) {
 			checkToken(req, token, next)
 				.then(function(user) {
