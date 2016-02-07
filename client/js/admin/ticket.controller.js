@@ -64,12 +64,6 @@ function TicketController(Ticket) {
 			type: 'integer',
 			filter: {payment_method_id:'text'}
 		}, {
-			title: 'Donation',
-			type: 'boolean',
-			name: 'donation',
-			sortable: 'donation',
-			filter: {donation:'text'}
-		}, {
 			title: 'Ticket Value',
 			name: 'transaction_value',
 			sortable: 'transaction_value',

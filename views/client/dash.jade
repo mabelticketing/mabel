@@ -56,7 +56,7 @@ block content
 		
 		.row
 			.col-xs-12
-				p Welcome to insert text blah blah
+				p Welcome to the Emmanuel College June Event ticketing system.
 			.col-xs-12.col-md-4.col-md-offset-4
 				a.btn.btn-xlarge.btn-info(href="/book" style="width:100%;") Book tickets
 
@@ -69,7 +69,7 @@ block content
 			em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
 
 		//- TODO: un hard-code date.
-		p(ng-if="dashCtrl.ticketsBooked.length !== 0") Please ensure the names listed below are accurate. You may change the names until 31st May 2016.
+		p(ng-if="dashCtrl.ticketsBooked.length !== 0") Please ensure the names listed below are accurate. You may change your guests' names until #{ name_change_deadline }.
 
 		table(ng-if="dashCtrl.ticketsBooked.length !== 0").table.table-striped.table-hover
 			thead
@@ -77,7 +77,7 @@ block content
 					th(colspan=2) Ticket number
 					th Guest name
 					th Payment method
-					th Price
+					th(style="width:75px;") Price
 					th Status
 					th 
 			tbody
@@ -96,18 +96,18 @@ block content
 				tr
 					th(colspan=2)
 					td
-					td #[strong Total]
+					td #[strong Total:]
 					td(style="text-align:right;")
 						b &pound;{{ dashCtrl.totalValue | number:2 }}
 					td
 				tr
 					th(colspan=2)
 					td
-					td Owe
+					td Outstanding:
 					td(style="text-align:right;") &pound;{{ dashCtrl.pendingValue | number:2 }}
 					td
 		
-		p Please allow #[strong up to two weeks] for the money you have paid to show on this page.
+		p Please allow #[strong up to two weeks] for the payments you have made to become visible on this page.
 
 		h2.h2 Waiting List
 
@@ -119,7 +119,7 @@ block content
 				tr
 					th Ticket Type
 					th Payment Method
-					th Price
+					th(style="width:75px") Price
 					th 
 			tbody
 				tr(ng-repeat="ticket in dashCtrl.waitingListTickets")

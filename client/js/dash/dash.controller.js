@@ -69,6 +69,8 @@ function DashController($scope, APICaller, User) {
 					vm.ticketsBooked.push(tickets[i]);
 				}
 			}
+			vm.ticketsBooked = _.sortBy(vm.ticketsBooked, 'id');
+			vm.waitingListTickets = _.sortBy(vm.waitingListTickets, 'id');
 
 			vm.ticketsBookedLoading = false;
 			vm.waitingListLoading = false;
