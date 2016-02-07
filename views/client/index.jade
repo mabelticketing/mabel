@@ -26,15 +26,15 @@ append scripts
 			// redirect them to /dash
 			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
 
-			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
-		});
-
-		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
-			
 			if ($location.search().registered == 1) { // deliberate ==
 				// user has just registered, tell them about email
 				$scope.registered = "You have successfully been registered. ___________________________________________";
 			}
+
+			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
+		});
+
+		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
 
 			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
 			
@@ -52,26 +52,25 @@ append scripts
 
 		});
 
-		LoginApp.controller('RegisterController', function($scope, $http, $cookies, $location) {
+		LoginApp.controller('RegisterController', function($scope, $http, $location) {
 
 			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
-
+			
 			$scope.mabelRegister = function() {
-				$http.post('/api/user', { u: {
+				$http.post('/api/user',  {
 					name: $scope.name,
 					email: $scope.email,
-					crsid: null,
 					is_verified: false,
 					password: $scope.password
-				}}).then(function(data) {
+				}).then(function(data) {
 					// success
 					$location.path('/').search('registered', 1);
 				}, function(failure) {
 					$scope.error = failure.data.message;
-				})
+				});
 			};
 
-		})
+		});
 
 		LoginApp.controller("ExternalController", function($scope, $http, $location, $routeParams) {
 			$scope.token = $routeParams.token;
@@ -142,9 +141,9 @@ block content
 
 		script(type="text/ng-template" id="/main.html")
 			.row
-				div.col-xs-12.col-md-6.alert.alert-danger(ng-if="registered.length>0")
-						strong Success!
-						span {{registered}}
+				.col-xs-12
+					.alert.alert-success(ng-if="registered.length>0")
+						p #[strong Success!] {{registered}}
 				.col-xs-12.col-md-6
 					h4.h4 Current students of the University
 					p.
@@ -170,15 +169,14 @@ block content
 		script(type="text/ng-template" id="/login.html")
 			.row
 				.col-lg-8.col-lg-offset-2
-					div.alert.alert-danger(ng-if="error.length>0")
-						strong Error:
-						span {{error}}
+					.alert.alert-danger(ng-if="error.length>0")
+						p #[strong Error:] {{error}}
 					form.form-horizontal(novalidate ng-submit="mabelLogin()")
 						fieldset.well
 							.form-group
 								.col-lg-9.col-lg-offset-3
 									p If you are a current student, you should #[a(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") log inregister with Raven] instead.
-									p If you do not have a ticketing account, click #[a(href="#!/register") here]] to register.
+									p If you do not have a ticketing account, click #[a(href="#!/register") here] to register.
 							.form-group
 								label.col-lg-3.control-label(for='inputEmail') Email
 								.col-lg-9
@@ -194,9 +192,8 @@ block content
 		script(type="text/ng-template" id="/register.html")
 			.row
 				.col-lg-8.col-lg-offset-2
-					div.alert.alert-danger(ng-if="error.length>0")
-						strong Error: 
-						span {{error}}
+					.alert.alert-danger(ng-if="error.length>0")
+						p #[strong Error:] {{error}}
 					form.form-horizontal(novalidate ng-submit="mabelRegister()")
 						fieldset.well
 							.form-group
@@ -205,15 +202,15 @@ block content
 							.form-group
 								label.col-lg-3.control-label(for='inputName') Name
 								.col-lg-9
-									input#inputName.form-control(type='text', name="name", value=name, placeholder='Name')
+									input#inputName.form-control(type='text', name="name", ng-model="name", placeholder='Name')
 							.form-group
 								label.col-lg-3.control-label(for='inputEmail') Email
 								.col-lg-9
-									input#inputEmail.form-control(type='email', name="email", value=email, placeholder='Email')
+									input#inputEmail.form-control(type='email', name="email", ng-model="email", placeholder='Email')
 							.form-group
 								label.col-lg-3.control-label(for='inputPassword') Password
 								.col-lg-9
-									input#inputPassword.form-control(type='password', name="password", placeholder='Password')
+									input#inputPassword.form-control(type='password', name="password", ng-model="password", placeholder='Password')
 							.form-group.spacer
 								.col-lg-9.col-lg-offset-3
 									button.btn.btn-primary(type='submit' style="width:100%;") Submit
