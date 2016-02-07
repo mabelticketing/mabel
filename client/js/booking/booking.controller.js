@@ -35,7 +35,6 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	vm.allowance = {
 		remaining_allowance: 0
 	};
-	vm.donate = false;
 
 	// function on submission
 	vm.submitBooking = submitBooking;
@@ -44,9 +43,6 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	$scope.$watch(function() {
 		return _.pluck(_.values(vm.tickets), 'quantity');
 	}, updateMeta, true);
-	$scope.$watch(function() {
-		return vm.donate;
-	}, updateMeta);
 
 	Socket.on('open_types', function(data) {
 		if (vm.status === "done") return;
@@ -120,7 +116,6 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 					"ticket_type_id": parseInt(id),
 					"guest_name": "[Please Enter a Guest Name]",
 					"payment_method_id": vm.tickets[id].payment_methods[i],
-					"donation": vm.donate,
 					"notes": "",
 					"form_id": id + "-" + i
 				});
@@ -198,9 +193,6 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 			vm.ticketNumber += vm.tickets[id].quantity;
 			vm.tickets[id].payment_methods = resizeArray(vm.tickets[id].payment_methods, vm.tickets[id].quantity);
 			vm.tickets[id].errors = resizeArray(vm.tickets[id].errors, vm.tickets[id].quantity);
-
-			// TODO: un-hard-code donation value
-			if (vm.donate === true) vm.ticketPrice += vm.tickets[id].quantity * 2;
 		}
 	}
 
