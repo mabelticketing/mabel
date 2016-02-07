@@ -22,6 +22,7 @@ function MabelTable(NgTableParams, $rootScope) {
 		},
 		link: function($scope, element) {
 			var vm = $scope;
+			vm.moment = moment;
 
 			if (vm.initialisor !== undefined) {
 				vm.newItem = vm.initialisor();
@@ -80,13 +81,14 @@ function MabelTable(NgTableParams, $rootScope) {
 				element.find('.badge-' + id).tooltip('hide');
 			};
 
+			// TODO: Show detail on the row when you click - maybe a modal/popup?
 			if (vm.clickEvent !== undefined) {
 				vm.selectItem = function(item) {
 					$rootScope.$emit($scope.clickEvent, item);
 				};
 			}
 			vm.submitNew = function() {
-				var promise = saveResource(vm.newItem);
+				var promise = vm.saveResource(vm.newItem);
 
 				promise.then(function() {
 					// reset the new item for next entry
@@ -102,7 +104,7 @@ function MabelTable(NgTableParams, $rootScope) {
 				item.$backup = angular.copy(item);
 			};
 			vm.saveEdit = function(item) {
-				var promise = updateResource(item);
+				var promise = vm.updateResource(item);
 				var original = item.$backup;
 
 				promise.then(function() {
@@ -121,15 +123,111 @@ function MabelTable(NgTableParams, $rootScope) {
 				}
 				item.$edit = false;
 			};
-			vm.save = updateResource;
-			vm.delete = function(item) {
-				item.$delete(function() {
-					vm.tableParams.reload();
-				}, function(result) {
-					item._status = "error";
-					item._error = result.data;
+			vm.updateResource = function(resource) {
+
+				if (!resource.hasOwnProperty('_status')) {
+					// this object doesn't have '_status' set yet for some reason
+					// (probably it was created via new Resource() rather than
+					// through .get() or .query())
+					defineMeta(resource);
+				}
+				var essentials = {};
+
+				var promise = resource.$update({id: resource.id});
+				promise.then(function() {
+					resource._status = "success";
+					resource._error = "";
+				}, function(response) {
+					resource._status = "error";
+					resource._error = response.data;
+					console.log(response.data);
 				});
+				return promise;
+			}
+			vm.delete = function(item) {
+				item.constructor.delete({ids: item.id}).$promise
+					.then(function() {					
+						vm.tableParams.reload();
+					}, function(result) {
+						item._status = "error";
+						item._error = result.data;
+					});
 			};
+			vm.updateResource = function(resource) {
+
+				if (!resource.hasOwnProperty('_status')) {
+					// this object doesn't have '_status' set yet for some reason
+					// (probably it was created via new Resource() rather than
+					// through .get() or .query())
+					defineMeta(resource);
+				}
+				var essentials = {};
+				for (var i in vm.columns) {
+					if (vm.columns[i].updatable !== false) {
+						essentials[vm.columns[i].name] = (
+							vm.columns[i].type === "text"? "" + (resource[vm.columns[i].name] || ""):
+
+							// TODO: actually do something about this date type
+							vm.columns[i].type === "date"? resource[vm.columns[i].name]:
+							vm.columns[i].type === "boolean"? (resource[vm.columns[i].name] === true 
+								|| ['true','yes','1'].indexOf(resource[vm.columns[i].name].toString().toLowerCase()) > -1):
+							vm.columns[i].type === "integer"? parseInt(resource[vm.columns[i].name]):
+							vm.columns[i].type === "double"? parseDouble(resource[vm.columns[i].name]):
+							resource[vm.columns[i].name]
+						);
+					}
+				}
+
+				promise = resource.constructor.update( {id:resource.id}, essentials).$promise;
+				// var promise = resource.$update({id: resource.id});
+				promise.then(function() {
+					resource._status = "success";
+					resource._error = "";
+				}, function(response) {
+					resource._status = "error";
+					resource._error = response.data;
+					console.log(response.data);
+				});
+				return promise;
+			}
+
+			vm.saveResource = function(resource) {
+
+				if (!resource.hasOwnProperty('_status')) {
+					// this object doesn't have '_status' set yet for some reason
+					// (probably it was created via new Resource() rather than
+					// through .get() or .query())
+					defineMeta(resource);
+				}
+
+				var essentials = {};
+				for (var i in vm.columns) {
+					if (vm.columns[i].updatable !== false) {
+						essentials[vm.columns[i].name] = (
+							vm.columns[i].type === "text"? "" + (resource[vm.columns[i].name] || ""):
+
+							// TODO: actually do something about this date type
+							vm.columns[i].type === "date"? resource[vm.columns[i].name]:
+							vm.columns[i].type === "boolean"? (resource[vm.columns[i].name] === true 
+								|| ['true','yes','1'].indexOf(resource[vm.columns[i].name].toString().toLowerCase()) > -1):
+							vm.columns[i].type === "integer"? parseInt(resource[vm.columns[i].name]):
+							vm.columns[i].type === "double"? parseDouble(resource[vm.columns[i].name]):
+							resource[vm.columns[i].name]
+						);
+					}
+				}
+
+				promise = resource.constructor.save( {id:resource.id}, essentials).$promise;
+				promise.then(function() {
+					resource._status = "success";
+					resource._error = "";
+				}, function(response) {
+					resource._status = "error";
+					resource._error = response.data;
+					console.log(response.data);
+				});
+				return promise;
+			}
 		}
 	};
 }
@@ -160,45 +258,4 @@ function defineMeta(obj) {
 		enumerable: false,
 		writable: true
 	});
-}
-
-function updateResource(resource) {
-
-	if (!resource.hasOwnProperty('_status')) {
-		// this object doesn't have '_status' set yet for some reason
-		// (probably it was created via new Resource() rather than
-		// through .get() or .query())
-		defineMeta(resource);
-	}
-
-	var promise = resource.$update({id: resource.id});
-	promise.then(function() {
-		resource._status = "success";
-		resource._error = "";
-	}, function(response) {
-		resource._status = "error";
-		resource._error = response.data;
-		console.log(response.data);
-	});
-	return promise;
-}
-function saveResource(resource) {
-
-	if (!resource.hasOwnProperty('_status')) {
-		// this object doesn't have '_status' set yet for some reason
-		// (probably it was created via new Resource() rather than
-		// through .get() or .query())
-		defineMeta(resource);
-	}
-
-	var promise = resource.$save.apply(resource, arguments);
-	promise.then(function() {
-		resource._status = "success";
-		resource._error = "";
-	}, function(response) {
-		resource._status = "error";
-		resource._error = response.data;
-		console.log(response.data);
-	});
-	return promise;
 }

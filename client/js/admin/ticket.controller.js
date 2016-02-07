@@ -20,17 +20,19 @@ function TicketController(Ticket) {
 			title: 'ID',
 			name: 'id',
 			sortable: 'id',
-			filter: {id:'text'}
+			type: 'integer',
+			filter: {id:'text'},
+			updatable: false
 		}, {
 			title: 'User ID',
 			name: 'user_id',
-			type: 'text',
+			type: 'integer',
 			sortable: 'user_id',
 			filter: {user_id:'text'}
 		}, {
 			title: 'Ticket Type ID',
 			name: 'ticket_type_id',
-			type: 'text',
+			type: 'integer',
 			sortable: 'ticket_type_id',
 			filter: {ticket_type_id:'text'}
 		}, {
@@ -53,11 +55,13 @@ function TicketController(Ticket) {
 			title: 'Booking Time',
 			name: 'book_time',
 			type: 'date',
+			updatable:false,
 			sortable: 'book_time'
 		}, {
 			title: 'Payment Method ID',
 			name: 'payment_method_id',
 			sortable: 'payment_method_id',
+			type: 'integer',
 			filter: {payment_method_id:'text'}
 		}, {
 			title: 'Donation',
@@ -69,6 +73,8 @@ function TicketController(Ticket) {
 			title: 'Ticket Value',
 			name: 'transaction_value',
 			sortable: 'transaction_value',
+			type: 'double',
+			updatable:false,
 			filter: {transaction_value:'text'}
 		}
 	];

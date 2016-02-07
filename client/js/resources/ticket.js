@@ -22,7 +22,7 @@ function ticketResource($resource, MabelToken) {
 			method: 'GET',
 			isArray: true
 		},
-		'exterminate': {
+		'delete': {
 			url: '/api/ticket',
 			method: 'DELETE',
 			isArray: true

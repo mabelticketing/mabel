@@ -8,6 +8,8 @@ var connection = require("../connection.js");
 var runSql = connection.runSql;
 var _ = require("lodash");
 var Q = require("q");
+var api = require("../api.js");
+var config = require("../../config.js");
 
 module.exports = ticket;
 
@@ -41,16 +43,25 @@ function ticket(id) {
 // NB this route is only for admins (no validation)
 ticket.post = function post(data) {
 	var t = data.ticket;
-	// over-ride status whatever the admin says (TODO: is this right?)
-	t.status = 'PENDING';
-	var sql = "INSERT INTO ticket SET ?";
-	if (t.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
-	sql += ";";
 
-	return runSql(sql, [t])
+	// need to get/set ticket price
+	return api.type(t.ticket_type_id).get()
+		.then(function(type) {
+			t.transaction_value = type.price;
+			t.transaction_value += t.donation ? config.donation_value : 0;
+		})
+		.then(function() {
+			// over-ride status whatever the admin says (TODO: is this right?)
+			t.status = 'PENDING';
+			var sql = "INSERT INTO ticket SET ?";
+			if (t.book_time === undefined) sql += ", book_time=UNIX_TIMESTAMP()";
+
+			return runSql(sql, [t])
+		})
 		.then(function(result) {
 			return ticket(result.insertId).get();
 		});
+
 };
 
 ticket.get =

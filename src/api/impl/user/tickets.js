@@ -45,6 +45,7 @@ module.exports = function (user_id) {
 		}
 
 		function del() {
+			// TODO: maybe serve up a nice erorr message for people who try to cancel tickets which are not pending
 			return Q.all([
 				runSql("UPDATE ticket SET status='CANCELLED' where id=? AND status='PENDING';",[ticket_id]),
 				runSql("UPDATE ticket SET status='CANCELLED_WL' where id=? AND status='PENDING_WL';",[ticket_id])
