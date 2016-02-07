@@ -15,8 +15,6 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 	vm.range = range;
 
 
-	e = vm; // TODO: get rid
-
 	/*** DECLARATION ***/
 	// initialise scope vars 
 	vm.user = User.current();
