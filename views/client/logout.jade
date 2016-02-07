@@ -5,7 +5,6 @@
 extends ./main.jade
 
 block scripts
-	link(rel="stylesheet", type="text/css", href="/css/bootstrap-flatly.min.css")
 	link(rel="stylesheet", type="text/css", href="/css/main.css")
 	script(type="text/javascript").
 		function createCookie(name,value,days) {
@@ -19,14 +18,5 @@ block scripts
 		}
 		createCookie("mabelAuthToken", "",-1);
 
-block title
-	title Logout Successful
-
-block content
-	.container
-		.col-md-12
-			h1(style="padding-bottom:10px;") Logout Successful!
-			p(style="padding-bottom:10px;") 
-				| You have been logged out of our ticketing system. 
-				| Click #[a(href="/") here] to return to the ticketing home.
-			hr
+		// redirect to home
+		window.location = '/';
