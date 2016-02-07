@@ -60,13 +60,13 @@ function listen() {
 function setupSockets() {
 
 	io.on('connection', function(socket){
-		console.log('a user connected');
+		// console.log('a user connected');
 		socket.on('disconnect', function(){
-			console.log('user disconnected\n');
+			// console.log('user disconnected\n');
 		});
 
 		socket.on('booking_arrival', function(data) {
-			console.log("Someone arrived");
+			// console.log("Someone arrived");
 			console.log(data);
 		});
 	});

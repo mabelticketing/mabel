@@ -125,7 +125,6 @@ function getFilteredSQL(table, opts) {
 		sql += mysql.escape(opts.size);
 	}
 	sql += ";";
-	console.log(sql);
 	return sql;
 }
 
