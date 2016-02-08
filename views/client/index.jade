@@ -144,27 +144,25 @@ block content
 				.col-xs-12
 					.alert.alert-success(ng-if="registered.length>0")
 						p #[strong Success!] {{registered}}
-				.col-xs-12.col-md-6
-					h4.h4 Current students of the University
+				.col-xs-12.col-md-8
+					h4.h4 Current Students of the University
 					p.
 						If you are a #[strong current] student
 						of the University of Cambridge, you
-						may log in with Raven. Otherwise, please
-						use the buttons on the right.
-				.col-xs-12.col-md-6
-					h4.h4 Alumni / members of staff / other
+						should log in with Raven.
+				.col-xs-12.col-md-4
+					h4.h4 Alumni &amp; Members of Staff
 					p.
-						If you are here for the first time, you'll need to register.
-						Otherwise, you may log in.
+						Emmanuel alumni should log in to your Ticketing Account using the details sent to you by email.
 			.row
-				.col-xs-12.col-md-6
+				.col-xs-12.col-md-8
 					a.btn.btn-info.index-btn(href="http://emmamayball.soc.srcf.net/mabel_auth?redirect_to={{loc}}/%23!/external/raven") Log in with Raven
-				.col-xs-12.col-md-6
-					.row
-						.col-xs-12.col-md-6
-							a.btn.btn-default.index-btn(href="#!/register") Register
-						.col-xs-12.col-md-6
-							a.btn.btn-info.index-btn(href="#!/login") Log in
+				.col-xs-12.col-md-4
+					a.btn.btn-info.index-btn(href="#!/login") Log in with Ticketing Account
+					//- .row
+					//- 	.col-xs-12.col-md-6
+					//- 		a.btn.btn-default.index-btn(href="#!/register") Register
+					//- 	.col-xs-12.col-md-6
 
 		script(type="text/ng-template" id="/login.html")
 			.row

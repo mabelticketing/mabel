@@ -34,7 +34,7 @@ block scripts
 	script(type = "text/javascript" src="/js/booking/booking.controller.js")
 
 	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
-	link(rel="stylesheet", type="text/css", href="/css/main.css")
+	link(rel="stylesheet", type="text/css", href="/css/main.min.css")
 
 block title
 	//- Probably easiest to not use angular for this, and instead set document.title in javascript
@@ -61,7 +61,7 @@ block content
 					form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.allowance.remaining_allowance > 0")
 						fieldset
 							legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.
-							p Guest names can be assigned to tickets after you make your booking.
+							p Guest names must be assigned to tickets after you make your booking.
 							p You may book {{ bookingCtrl.allowance.remaining_allowance }} ticket{{ bookingCtrl.allowance.remaining_allowance===1?"":"s in total"}}. See the #[a(href="/dash") dashboard] for more details.
 							p(style="font-weight:bold") If we are unable to book all the tickets you request, the remainder will be added to the waiting list instead.
 							.form-group
