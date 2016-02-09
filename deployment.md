@@ -17,14 +17,14 @@ Select Ubuntu Server
 
 Select an appropriate instance_ type (probably t2.micro to begin with because it's free and generalised). Mostly after that the default settings are sufficient - the only change is the security group. By default it will only allow SSH traffic from the outside world. We want to make sure HTTP traffic (port 80) is allowed too. Create a new rule under "Configure Security Group" to allow all HTTP traffic. Add another new rule allowing traffic on ports 3000-4000 (to give us some space to work). Make sure you allow IPs from "Anywhere". Feel free to allow more in other places too if you like.
 
-When you first launch, you will be asked to create a new key pair. Do this. It will allow you to SSH into the machine. Download the .pem file and keep it somewhere. 
+When you first launch, you will be asked to create a new key pair. Do this. It will allow you to SSH into the machine. Download the .pem file and keep it somewhere.
 
-You can look around the EC2 dashboard if you like, but mostly you're done with setting up the machine now. Grab the public DNS address. Mine looks like ` ec2-52-30-220-107.eu-west-1.compute.amazonaws.com`.
+Amazon doesn't automatically grant a public IP address to EC2 machines. In Amazon parlance they're known as "Elastic IPs". On the left hand menu, click on Elastic IPs and then the "Allocate New Address" button. I _think_ these are free... Right click on the new address once it's been allocated, and click on "Associate". Your new instance should be suggested when you start filling in the form. Make a note of this address!
 
-SSH in from the terminal using the new key:
+You can now SSH in from the terminal using your key:
 
     chmod 600 yourkeyname.pem; # This is required for ssh accept to use the key
-    ssh -i yourkeyname.pem ubuntu@your-public-dns-here.com
+    ssh -i yourkeyname.pem ubuntu@your-elastic-IP
 
 ## Install All The Things
 
@@ -36,7 +36,7 @@ We are going to need: git, nginx, mysql, ruby (for sass), node/npm. I like to in
     # Note down the password for mysql!
     sudo gem install sass
 
-At this point you should be able to browse to your public DNS in the browser and see nginx's "Hello world!" page.
+At this point you should be able to browse to your Elastic IP in the browser and see nginx's "Hello world!" page.
 
 It also never hurts to update the pre-installed packages
 
@@ -70,7 +70,7 @@ The `prepare` script will ask you for a mysql username and password, and a datab
 
 You will need to configure Mabel's `config.js` to tell it which database details to use.
 
-Give it a spin with `node app.js`. You should be able to tack ':3008' to the public DNS and see Mabel running! 
+Give it a spin with `node app.js`. You should be able to tack ':3008' to the elastic IP in your browser and see Mabel running! 
 
 Technically, you could just call this a job done because everything should be workable. I want to do a few more things though...
 
@@ -109,15 +109,15 @@ You should now be able to run Mabel with `sudo service mabel start`. Other opera
 
 As long as that says something like "start/running" then you should be able to go back online and see Mabel shine. You can even see the running process with `ps aux | grep node`, kill it with `sudo kill <process_id>` and see Mabel bounce right back up again with a different process id.
 
+## DNS Configuration
+
+Let's use our own domain name rather than the lovely URL Amazon has given us. Coming soon!
+
 ## NGinx Configuration
 
 Let's run things through port 80 rather than 3008. Maybe even alongside our static web server. Also there's no point in introducing the node/express overhead for the Mabel client (i.e. everything but the API endpoints), so let's get nginx to serve them directly. In future, we might like to do this with Amazon S3 for extra performance (it's literally designed for fast static resources) but for now I think this is sufficient.
 
 This is also where we could set up extra redundant instances of Mabel and load balance between them (but I don't think I'm gonna bother doing that). Coming soon!
-
-## DNS Configuration
-
-Let's use our own domain name rather than the lovely URL Amazon has given us. Coming soon!
 
 ## Other thoughts
 
