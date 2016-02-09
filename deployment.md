@@ -143,7 +143,9 @@ nginx keeps its site configuration in `/etc/nginx/sites-available`. There's prob
     }
 
 
-Obviously you can create other files for other sites - the `listen` and `server_name` directives make nginx choose the right response for each request. For example, I'm making a second identical file with `server_name staging.emmajuneevent.com` and saving it as `eje16-staging`. You can enable a site by linking the file to `/etc/nginx/sites-enabled`:
+Obviously you can create other files for other sites - the `listen` and `server_name` directives make nginx choose the right response for each request. For example, I'm making a second identical file with `server_name staging.emmajuneevent.com` and saving it as `eje16-staging`. I've also changed the port number to 3007, and I'll repeat the steps above to ensure a second, separate installation of mabel runs on port 3007 (with its own separate database). 
+
+You can enable a site by linking the file to `/etc/nginx/sites-enabled`:
 
     sudo ln -s /etc/nginx/sites-available/mabel /etc/nginx/sites-enabled/mabel
     sudo ln -s /etc/nginx/sites-available/eje16-staging /etc/nginx/sites-enabled/eje16-staging
@@ -156,8 +158,23 @@ Browse to http://tickets.emmajuneevent.com and Mabel should show up again. You m
 
 This is also where we could set up extra redundant instances of Mabel and load balance between them (but I don't think I'm gonna bother doing that this year).
 
-## Other thoughts
+## Secure Your Staging Server
 
-You might like to repeat some of the steps above with a second installation and database, so that you have a staging server and a live server. 
+It probably doesn't matter much if commoners find their way onto your staging server, since you won't be printing tickets from there. But it can be nice to have a secure site where you can upload themed content before launch. It's very easy to add basic authentication to an nginx site.
 
-Maybe even password-protect the staging server for kind of free with this: https://www.digitalocean.com/community/tutorials/how-to-set-up-http-authentication-with-nginx-on-ubuntu-12-10.
+First we need to create a file describing what the username and password should be for the site. The easiest way to do that is with a tool called `htpasswd`:
+
+    sudo apt-get install -y apache2-utils
+    sudo htpasswd -c /etc/nginx/.htpasswd <Username You Want To Log In With>
+    # ... enter the password you want to log in with
+
+Now update your nginx configuration to use this username and password:
+    
+    server {
+        listen 80;
+        server_name staging.emmajuneevent.com;
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        ...
+
+Restart nginx as before (`sudo service nginx restart`) and now when you browse to http://staging.emmajuneevent.com your browser should present you with a login dialog. Success!
