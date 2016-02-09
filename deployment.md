@@ -124,7 +124,37 @@ You should now be able to browse to http://tickets.emmajuneevent.com:3008/ and s
 
 Let's run things through port 80 rather than 3008. Maybe even alongside our static web server. Also there's no point in introducing the node/express overhead for the Mabel client (i.e. everything but the API endpoints), so let's get nginx to serve them directly. In future, we might like to do this with Amazon S3 for extra performance (it's literally designed for fast static resources) but for now I think this is sufficient.
 
-This is also where we could set up extra redundant instances of Mabel and load balance between them (but I don't think I'm gonna bother doing that). Coming soon!
+nginx keeps its site configuration in `/etc/nginx/sites-available`. There's probably some default site in there, but we'll ignore that and create a new one at `etc/nginx/sites-available/mabel`. Enter the following:
+
+    server {
+            listen 80;
+            server_name tickets.emmajuneevent.com; # you can enter other domains here, space-separated
+
+            # Any requests made to the root address '/' will get forwarded to port 3008.
+            location / {
+                    proxy_pass http://localhost:3008;
+                    proxy_http_version 1.1;
+
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_cache_bypass $http_upgrade;
+            }
+    }
+
+
+Obviously you can create other files for other sites - the `listen` and `server_name` directives make nginx choose the right response for each request. For example, I'm making a second identical file with `server_name staging.emmajuneevent.com` and saving it as `eje16-staging`. You can enable a site by linking the file to `/etc/nginx/sites-enabled`:
+
+    sudo ln -s /etc/nginx/sites-available/mabel /etc/nginx/sites-enabled/mabel
+    sudo ln -s /etc/nginx/sites-available/eje16-staging /etc/nginx/sites-enabled/eje16-staging
+
+Restart nginx and we should be good!
+
+    sudo service nginx restart;
+
+Browse to http://tickets.emmajuneevent.com and Mabel should show up again. You may have to refresh, or force-empty the cache (Ctrl+F5).
+
+This is also where we could set up extra redundant instances of Mabel and load balance between them (but I don't think I'm gonna bother doing that this year).
 
 ## Other thoughts
 
