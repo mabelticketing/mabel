@@ -111,7 +111,14 @@ As long as that says something like "start/running" then you should be able to g
 
 ## DNS Configuration
 
-Let's use our own domain name rather than the lovely URL Amazon has given us. Coming soon!
+Let's use our own domain name rather than the lovely URL Amazon has given us. Log into your domain provider (or DNS provider if they're separate). Find the DNS configuration, and point something at your Elastic IP. At the very least set up a subdomain - "tickets.emmajuneevent.com" or something. Maybe also "staging"? Up to you. 
+
+DNS changes take a while to propagate, so feel free to add entries to /etc/hosts/ to get your local machine working in the meantime. Simply add these lines:
+
+    <elastic IP> tickets.emmajuneevent.com
+    <elastic IP> staging.emmajuneevent.com
+
+You should now be able to browse to http://tickets.emmajuneevent.com:3008/ and see Mabel. We're getting close!
 
 ## NGinx Configuration
 
