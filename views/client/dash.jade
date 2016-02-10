@@ -88,7 +88,8 @@ block content
 						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
-					td(class="{{ ticket.status }}") {{ ticket.status }}
+					td
+						span.label(class="{{ticket.status=='PENDING' ? 'label-info' : ticket.status=='CONFIRMED' ? 'label-success' : 'label-warning'}}") {{ ticket.status=='PENDING' ? 'RESERVED' : ticket.status }}
 					td(style="text-align:right")
 						button.btn.btn-xs.btn-danger(ng-if="ticket.status=='PENDING'" tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
