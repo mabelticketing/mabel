@@ -164,48 +164,49 @@ block content
 					h2.h2 Payment Information
 					p Payment must be received #[strong within 14 days] of booking. Any tickets which are not paid for by this date may be cancelled without further notice.
 
-					h4.h4(ng-if="bookingCtrl.payment_instructions.cheque") Cheque Payments
-					p(ng-if="bookingCtrl.payment_instructions.cheque") 
-						| To pay for tickets by #[strong Cheque], 
-						| please hand in a cheque made payable to 
-						| #[strong Emmanuel College May Ball] 
-						| to the Emmanuel College Porter's Lodge. 
-						| Please ensure that your name and ticket
-						| number(s) are written on the back of the
-						| cheque.
+					.row
+						.col-xs-12.col-md-4
+							h4.h4 Cheque Payments
+							p
+								| Please make cheques payable to 
+								| #[strong Emmanuel College May Ball] and hand them in
+								| to the Emmanuel College Porter's Lodge.
+								| Please ensure that your name and ticket
+								| number(s) are written on the back of the
+								| cheque.
 
-					h4.h4(ng-if="bookingCtrl.payment_instructions.banktransfer") Bank Transfer Payments
-					p(ng-if="bookingCtrl.payment_instructions.banktransfer") 
-						| To pay for tickets by #[strong Bank Transfer], 
-						| please send the amount due to the following
-						| account:								
-						table(ng-if="bookingCtrl.payment_instructions.banktransfer", style="padding-bottom:10px;")
-							tr 
-								th(style="padding: 5px;padding-right: 20px;") Account Number
-								td 60067911
-							tr
-								th(style="padding: 5px;") Sort Code
-								td 20-17-19
-							tr
-								th(style="padding: 5px;") Account name
-								td Emmanuel College May Ball
-					p(ng-if="bookingCtrl.payment_instructions.banktransfer") 
-						| Please set the payment reference to your
-						| surname followed by the ticket number above. 
-						| For example, if your name is John Smith, 
-						| your ticket reference should be 
-						| #[em SMITH {{bookingCtrl.booked[0].id}}]
-						| . To pay for multiple tickets with a single
-						| payment, simply use the ticket number of the
-						| first ticket booked.
+						.col-xs-12.col-md-4
+							h4.h4 Bank Transfer Payments
+							p
+								| Please send the amount due to the following
+								| account:								
+								table
+									tr 
+										th(style="padding: 5px;padding-right: 20px;") Account Number
+										td 60067911
+									tr
+										th(style="padding: 5px;") Sort Code
+										td 20-17-19
+									tr
+										th(style="padding: 5px;") Account name
+										td Emmanuel College May Ball
+							p
+								| Set the payment reference to your
+								| surname followed by the ticket number above. 
+								| For example, if your name is John Smith, 
+								| your ticket reference should be 
+								| #[em SMITH {{bookingCtrl.booked[0].id}}]
+								| . To pay for multiple tickets with a single
+								| payment, simply use the ticket number of the
+								| first ticket booked.
 
-
-					h4(ng-if="bookingCtrl.payment_instructions.college_bill") College Bill Payments
-					p(ng-if="bookingCtrl.payment_instructions.college_bill") 
-						| To pay for tickets by #[strong College Bill], 
-						| no further action needs to be taken. The
-						| price of your ticket will be added to your
-						| Lent term bill. #[em Please note that payment by college bill is only available to current students of Emmanuel College].
+						.col-xs-12.col-md-4
+							h4.h4 College Bill Payments
+							p
+								| If you are paying by college bill, 
+								| no further action needs to be taken. The
+								| price of your ticket will be added to your Lent term bill.
+							p: em Please note that payment by college bill is only available to current students of Emmanuel College.
 
 				h2.h2 Ticket Management
 				p You may now visit the #[a(href="/dash") ticket management page].
