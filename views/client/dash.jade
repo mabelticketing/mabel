@@ -56,7 +56,7 @@ block content
 		
 		.row
 			.col-xs-12
-				p Welcome to the Emmanuel College June Event ticketing system.
+				p Welcome to the Emmanuel College June Event ticketing system. Click #[a(href="/logout") here] to logout.
 			.col-xs-12.col-md-4.col-md-offset-4
 				a.btn.btn-xlarge.btn-info(href="/book" style="width:100%;") Book tickets
 
@@ -89,7 +89,7 @@ block content
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
 					td
-						span.label(class="{{ticket.status=='PENDING' ? 'label-info' : ticket.status=='CONFIRMED' ? 'label-success' : 'label-warning'}}") {{ ticket.status=='PENDING' ? 'RESERVED' : ticket.status }}
+						span.label(class="{{ticket.status=='PENDING' ? 'label-info' : ticket.status=='CONFIRMED' ? 'label-success' : 'label-warning'}}" style="width:100%;") {{ ticket.status=='PENDING' ? 'RESERVED' : ticket.status }}
 					td(style="text-align:right")
 						button.btn.btn-xs.btn-danger(ng-if="ticket.status=='PENDING'" tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
