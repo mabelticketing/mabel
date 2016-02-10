@@ -35,7 +35,7 @@ block title
 block content
 	div(ng-app="mabel.dash" ng-controller="DashController as dashCtrl" ng-view)
 		
-		h1.h1 Dashboard - {{ dashCtrl.user.name }}
+		h1.h1 Ticket Management - {{ dashCtrl.user.name }}
 
 		//- .panel.panel-info
 		//- 	.panel-heading Available tickets
@@ -85,7 +85,7 @@ block content
 					td # {{ ticket.id }}
 					td #[em ({{ ticket.name }})]
 					td
-						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)")
+						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
 					td(class="{{ ticket.status }}") {{ ticket.status }}
