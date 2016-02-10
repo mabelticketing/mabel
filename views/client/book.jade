@@ -132,16 +132,16 @@ block content
 					thead
 						tr
 							th(colspan=2) Ticket Number
-							th Payment Method
 							th Guest Name
+							th Payment Method
 							th Price
 							th Status
 					tbody
 						tr(ng-repeat="ticket in bookingCtrl.booked")
 							td # {{ ticket.id }}
 							td #[em ({{ ticket.ticket_type.name }})]
-							td {{ ticket.payment_method.name }}
 							td #[em None Entered]
+							td {{ ticket.payment_method.name }}
 							td &pound;{{ ticket.transaction_value | number:2 }}
 							td
 								span.label.label-info Booked
