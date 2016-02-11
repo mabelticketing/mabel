@@ -6,6 +6,8 @@
 
 var connection = require("../../connection.js");
 var config = require("../../../config.js");
+var emailer = require("../../../emailer");
+var unidecode = require('unidecode');
 var runSql = connection.runSql;
 var _ = require("lodash");
 var api = require("../../api.js");
@@ -45,7 +47,7 @@ module.exports = function (user_id) {
 		}
 
 		function del() {
-			// TODO: maybe serve up a nice erorr message for people who try to cancel tickets which are not pending
+			// TODO: maybe serve up a nice error message for people who try to cancel tickets which are not pending
 			return Q.all([
 				runSql("UPDATE ticket SET status='CANCELLED' where id=? AND status='PENDING';",[ticket_id]),
 				runSql("UPDATE ticket SET status='CANCELLED_WL' where id=? AND status='PENDING_WL';",[ticket_id])
@@ -102,13 +104,32 @@ module.exports = function (user_id) {
 					booked:booked, waiting_list:waiting_list,
 					totalPrice: _.sum(booked, "transaction_value"),
 					payment_deadline: moment().add(14,'d').format("dddd, MMMM Do YYYY"),
-					sampleID: booked.length>0?booked[0].id:123
+					sampleID: booked.length>0?booked[0].id:123,
+					payments: {
+					}
 				};
+				console.log(booked);
+				for (var i in booked) {
+					var ticket = booked[i];
+					if (ticket.payment_method.name === "Cheque") {
+						data.payments.cheque = true;
+					} else if (ticket.payment_method.name === "College Bill") {
+						data.payments.college_bill = true;
+					} else if (ticket.payment_method.name === "Bank Transfer") {
+						data.payments.bank_transfer = true;
+					} 
+				}
+
 				if (booked.length + waiting_list.length > 0) {
-					// TODO: Actually send the email
+					
+					// print to the log for fun
 					console.log(user.name + " just made a booking - " + booked.length + " tickets" + 
 						(waiting_list.length>0?" (and " + waiting_list.length + " waiting list)":"") +
 						" for a total of £" + data.totalPrice + "");
+					
+					// send the user an email
+					emailer.send("'" + unidecode(user.name) + "' <" + user.email + ">", "Emmanuel June Event - Booking Confirmation",
+                        "bookConf.jade", data);
 				}
 				return {
 					booked: booked, 

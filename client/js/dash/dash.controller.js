@@ -9,7 +9,7 @@
 angular.module('mabel.dash')
 	.controller("DashController", DashController);
 
-function DashController($scope, APICaller, User) {
+function DashController($scope, $timeout, APICaller, User) {
 	var vm = this;
 	e=vm;
 
@@ -105,19 +105,24 @@ function DashController($scope, APICaller, User) {
 
 	/*** FUNCTION DEFINITIONS ***/
 
-	// TODO: settimeout in order to prevent loads of requests at once
-	// TODO: some sort of notification that it worked... a tick maybe
 	function nameChange(ticket) {
+		ticket.guest_name_status = "";
 		// check if non-empty string
 		if(ticket.guest_name && typeof ticket.guest_name === 'string' && ticket.guest_name.length > 0) {
+			
+			if (nameChange.timeout !== undefined) $timeout.cancel(nameChange.timeout);
 
-			vm.user.ticket(ticket.id).update({
-				guest_name: ticket.guest_name
-			}).$promise.then(function() {
-				console.log("name changed");
-			}, function(err) {
-				console.log(err);
-			});
+			nameChange.timeout = $timeout(function() {
+				vm.user.ticket(ticket.id).update({
+					guest_name: ticket.guest_name
+				}).$promise.then(function() {
+					ticket.guest_name_status = "submitted";
+				}, function(err) {
+					ticket.guest_name_status = "error";
+				});
+			}, 500);
+		} else {
+			ticket.guest_name_status = "error";
 		}
 	}
 

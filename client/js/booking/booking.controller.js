@@ -66,7 +66,8 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 							quantity: 0,
 							// if the allowance is unbounded, set the limit to the number of tix available
 							allowance: Math.min((data[vm.user.groups[i]][tt].allowance === null ? 
-											data[vm.user.groups[i]][tt].available : 
+											// if there are no tickets available, set the limit to 100.
+											(data[vm.user.groups[i]][tt].available>0?data[vm.user.groups[i]][tt].available:100) : 
 											data[vm.user.groups[i]][tt].allowance), vm.allowance.remaining_allowance),
 							payment_methods: [],
 							errors: []
