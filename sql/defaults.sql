@@ -70,19 +70,16 @@ insert into group_access_right (group_id, ticket_type_id, allowance, open_time, 
 # Admins can have anything any time (< 10 years from now)
 	(1,1,null,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
 	(1,2,null,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
-	(1,3,null,0,UNIX_TIMESTAMP() + 10 * 365 * 24 * 60 * 60),
 # Current students can have any "normal" ticket since yesterday
 	(2,1,null,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
 	(2,2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(2,3,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
 # Early bird tickets were open to current students until yesterday
 	(2,1,1,UNIX_TIMESTAMP()- 7 * 24 * 60 * 60, UNIX_TIMESTAMP() - 1 * 24 * 60 * 60),
 # MCR members are allowed to book two "early bird" tickets
 	(4,1,2,UNIX_TIMESTAMP()- 7 * 24 * 60 * 60, UNIX_TIMESTAMP() - 1 * 24 * 60 * 60),
 # Alumni can have any "normal" ticket since yesterday
 	(3,1,null,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(3,2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
-	(3,3,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 );
+	(3,2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 );
 
 insert into payment_method (id, name, description) VALUES 
 (
