@@ -94,7 +94,7 @@ block content
 					td # {{ ticket.id }}
 					td #[em ({{ ticket.name }})]
 					td
-						input(type="text" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
+						input.namechange-input(type="text" class="{{ticket.guest_name_status}}" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
 					td
