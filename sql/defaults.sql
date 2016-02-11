@@ -7,20 +7,14 @@
 insert into ticket_type (id, name, price, total_limit) VALUES (
 	1,
 	'Standard',
-	135.00,
-	700
+	85.00,
+	900
 ), (
 	2,
 	'Queue Jump',
-	145.00,
-	100
-), (
-	3,
-	'Dining',
-	165.00,
+	95.00,
 	100
 );
-
 
 insert into user (id, name, email, password_md5, registration_time, is_verified) VALUES (
 	1,
@@ -60,6 +54,11 @@ insert into user_group (id, name, description, overall_allowance) VALUES (
 	'emma_alum',
 	'an alumnus of Emmanuel College',
 	2
+), (
+	4,
+	'mcr_with_affiliate',
+	'an Emmanuel College MCR member with an affiliated member',
+	2
 );
 
 insert into user_group_membership (user_id, group_id) VALUES 
@@ -78,6 +77,8 @@ insert into group_access_right (group_id, ticket_type_id, allowance, open_time, 
 	(2,3,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
 # Early bird tickets were open to current students until yesterday
 	(2,1,1,UNIX_TIMESTAMP()- 7 * 24 * 60 * 60, UNIX_TIMESTAMP() - 1 * 24 * 60 * 60),
+# MCR members are allowed to book two "early bird" tickets
+	(4,1,2,UNIX_TIMESTAMP()- 7 * 24 * 60 * 60, UNIX_TIMESTAMP() - 1 * 24 * 60 * 60),
 # Alumni can have any "normal" ticket since yesterday
 	(3,1,null,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
 	(3,2,2,UNIX_TIMESTAMP()- 1 * 24 * 60 * 60, UNIX_TIMESTAMP() + 365 * 24 * 60 * 60 ),
