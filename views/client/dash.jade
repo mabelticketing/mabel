@@ -37,6 +37,10 @@ block content
 		
 		h1.h1 Ticket Management - {{ dashCtrl.user.name }}
 
+		.row
+			.col-xs-12
+				p Welcome to the Emmanuel College June Event ticketing system. Click #[a(href="/logout") here] to logout.
+
 		.panel.panel-info
 			.panel-heading Available tickets
 			.panel-body
@@ -64,8 +68,6 @@ block content
 				p If tickets are sold out you will automatically be added to the waiting list when you book.
 		
 		.row
-			.col-xs-12
-				p Welcome to the Emmanuel College June Event ticketing system. Click #[a(href="/logout") here] to logout.
 			.col-xs-12.col-md-4.col-md-offset-4
 				a.btn.btn-xlarge.btn-info(href="/book" style="width:100%;") Book tickets
 
