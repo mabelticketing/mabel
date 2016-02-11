@@ -92,7 +92,7 @@ insert into payment_method (id, name, description) VALUES
 ), (
 	2,
 	'Cheque',
-	'Cheque made payable to "Emmanuel Colege May Ball"'
+	'Cheque made payable to "Emmanuel College May Ball"'
 ), (
 	3,
 	'Bank Transfer',
