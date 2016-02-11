@@ -75,7 +75,7 @@ block content
 										tbody
 											tr(ng-repeat="(id, ticket) in bookingCtrl.tickets track by id", style="background-color:#ffffff;")
 												td {{ ticket.type.name }} 
-													em(ng-if="ticket.available<10")  ({{ ticket.available }} remaining)
+													em(ng-if="ticket.available<10 && ticket.available>0")  ({{ ticket.available }} remaining)
 													em(ng-if="ticket.available<=0")  (Sold Out)
 												td &pound;{{ ticket.type.price }}
 												td
@@ -109,7 +109,7 @@ block content
 							p(style="text-align:center;" ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.allowance.remaining_allowance")
 								input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
 			div(ng-switch-when="done")
-				h1.h1 Booking {{bookingCtrl.failed.length > 0?"Partially":""}} Successful!
+				h1.h1 Booking {{bookingCtrl.failed.length > 0 || bookingCtrl.waiting_list.length > 0?"Partially":""}} Successful!
 				p(ng-if="bookingCtrl.failed.length > 0") There was a problem booking some of your tickets, and these have #[b not been booked] at all. Details of the problems are listed below.
 				table.table.table-striped.table-hover(ng-if="bookingCtrl.failed.length > 0")
 					thead
@@ -127,7 +127,7 @@ block content
 				p A summary of your booking is below. Guest names should be added to your tickets via the 
 					a(href="/dash") ticket management page
 					| .
-				p(ng-if="bookingCtrl.waiting_list.length > 0") Some of the tickets you requested have sold out. These tickets have been added to the #[b waiting list] instead. You will be contacted if these tickets become available.
+				p(ng-if="bookingCtrl.waiting_list.length > 0") #[b PLEASE NOTE]: Some of the tickets you requested have #[b sold out]. These tickets have been added to the #[b waiting list] instead. You will be contacted if these tickets become available.
 				table.table.table-striped.table-hover(ng-if="bookingCtrl.booked.length + bookingCtrl.waiting_list.length > 0")
 					thead
 						tr
@@ -144,25 +144,26 @@ block content
 							td {{ ticket.payment_method.name }}
 							td &pound;{{ ticket.transaction_value | number:2 }}
 							td
-								span.label.label-info Booked
+								span.label.label-info RESERVED
 						tr(ng-repeat="ticket in bookingCtrl.waiting_list")
 							td(colspan=2) {{ ticket.ticket_type.name }}
+							td -
 							td {{ ticket.payment_method.name }}
 							td -
-							td -
 							td
-								span.label.label-warning Waiting list
+								span.label.label-warning WAITING LIST
 					tfoot
 						tr
-							th(colspan=2) Total Due
 							td
 							td
-							td &pound;{{bookingCtrl.totalPrice | number:2}} 
+							td
+							th Total Due
+							td #[b &pound;{{bookingCtrl.totalPrice | number:2}}] 
 							td
 
 				div(ng-if="bookingCtrl.totalPrice > 0")
 					h2.h2 Payment Information
-					p Payment must be received #[strong within 14 days] of booking. Any tickets which are not paid for by this date may be cancelled without further notice.
+					p Payment must be received #[strong within 14 days] of booking. Any tickets which are not paid for by this date may be cancelled without further notice. These payment details have also been emailed to you, along with your booking confirmation.
 
 					.row
 						.col-xs-12.col-md-4
@@ -207,7 +208,7 @@ block content
 				h2.h2 Ticket Management
 				p You may now visit the #[a(href="/dash") ticket management page].
 					|  On this page, you may add guest names to any tickets, or cancel any tickets or waiting list slots.
-				p You will be able to change guest names on your tickets via the management page until #[strong #{ name_change_deadline }].
+				p You must change the guest names on your tickets via the management page before #[strong #{ name_change_deadline }].
 
 				p(style="text-align:center")
 					a.btn.btn-large.btn-success(href="/dash") Return to Management Page

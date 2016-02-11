@@ -84,8 +84,9 @@ ON user_group_allowance.user_id=user_bought.user_id;
 /* UNDOCUMENTED VIEWS SOZ */
 
 CREATE OR REPLACE VIEW tickets_sold AS
-	SELECT ticket_type_id
-		,PENDING + CONFIRMED + ADMITTED sold
+	SELECT ticket_type_id,
+		PENDING + CONFIRMED + ADMITTED sold,
+		PENDING_WL waiting_list
 	FROM ticket_status_count;
 
 CREATE OR REPLACE VIEW user_group_type_update AS
@@ -94,7 +95,7 @@ SELECT group_id
 	,total_limit
 	,allowance
 	,IFNULL(sold, 0) sold
-	,total_limit - IFNULL(sold, 0) available
+	,IF(C.waiting_list>0, 0, total_limit - IFNULL(sold, 0)) available
 FROM group_access_right
 LEFT JOIN tickets_sold C ON group_access_right.ticket_type_id = C.ticket_type_id
 INNER JOIN ticket_type ON ticket_type.id = group_access_right.ticket_type_id
