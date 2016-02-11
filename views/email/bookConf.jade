@@ -54,12 +54,12 @@ if (totalPrice > 0)
 		h4 Cheque Payments
 		p 
 
-			| To pay for tickets by #[strong Cheque],  please hand in a cheque
-			| made payable to  #[strong Emmanuel College May Ball]  to the
+			| To pay for tickets by #[strong Cheque],  please hand in a cheque 
+			| made payable to  #[strong Emmanuel College May Ball]  to the 
 			| Emmanuel College Porter's Lodge.  Please ensure that your 
-			| #[b surname] and   #[b ticket number] are written on the back of the
-			| cheque. To pay for multiple tickets with a single cheque, please
-			| include the ticket numbers for all the tickets you wish to pay
+			| #[b surname] and   #[b ticket number] are written on the back of the 
+			| cheque. To pay for multiple tickets with a single cheque, please 
+			| include the ticket numbers for all the tickets you wish to pay 
 			| for.
 
 	if payments.bank_transfer
@@ -80,13 +80,13 @@ if (totalPrice > 0)
 					th(style="padding: 5px;") Account name
 					td Emmanuel College May Ball
 		p 
-			| Please set the payment reference to your
+			| Please set the payment reference to your 
 			| surname followed by the ticket number above. 
 			| For example, if your name is John Smith, 
 			| your ticket reference should be 
-			| #[em SMITH #{sampleID}]
-			| . To pay for multiple tickets with a single
-			| payment, simply use the ticket number of the
+			| #[em SMITH #{sampleID}]. 
+			| To pay for multiple tickets with a single 
+			| payment, simply use the ticket number of the 
 			| first ticket booked.
 
 
@@ -94,37 +94,37 @@ if (totalPrice > 0)
 		h4 College Bill Payments
 		p 
 			| To pay for tickets by #[strong College Bill], 
-			| no further action needs to be taken. The
-			| price of your ticket will be added to your
-			| Lent term bill. Please note that payment by
-			| college bill is only available to current
-			| students at Emmanuel College.
+			| no further action needs to be taken. The 
+			| price of your ticket will be added to your 
+			| Lent term bill. Please note that payment by 
+			| college bill is only available to current 
+			| students at Emmanuel College. 
 
 	h2 Ticket Cancellation
 
 	if !payments.college_bill
 		//- (Cheque and/or Bank Transfer Only)
 		p 
-			| To ensure that tickets are fairly distributed to those on the
-			| waiting list we will not allow the re-sale of tickets on  
-			| #[em any online platform]. Prior to payment you will be able to
-			| cancel any unwanted tickets yourself through the website. After
-			| this date you should email #{ ticketing_officer } at 
-			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
-			| You will then be put in contact with the person at the top of
-			| the waiting list to arrange a transfer.
+			| To ensure that tickets are fairly distributed to those on the 
+			| waiting list we will not allow the re-sale of tickets on   
+			| #[em any online platform]. Prior to payment you will be able to 
+			| cancel any unwanted tickets yourself through the website. After 
+			| this date you should email #{ ticketing_officer } at  
+			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }]. 
+			| You will then be put in contact with the person at the top of 
+			| the waiting list to arrange a transfer. 
 	
 	else if !payments.cheque && !payments.bank_transfer
 		//- (College Bill Only)
 		p 
-			| To ensure that tickets are fairly distributed to those on the
-			| waiting list we will not allow the re-sale of tickets on  
-			| #[em any online platform]. Prior to the 27th February you will be
-			| able to cancel any unwanted tickets yourself through the website.  
-			| After this date you should email #{ ticketing_officer } at 
-			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
-			| You will then be put in contact with the person at the top of
-			| the waiting list to arrange a transfer.
+			| To ensure that tickets are fairly distributed to those on the 
+			| waiting list we will not allow the re-sale of tickets on   
+			| #[em any online platform]. Prior to the 27th February you will be 
+			| able to cancel any unwanted tickets yourself through the website.   
+			| After this date you should email #{ ticketing_officer } at  
+			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }]. 
+			| You will then be put in contact with the person at the top of 
+			| the waiting list to arrange a transfer. 
 	else 
 		//-  (Mixture of Cheque/Bank Transfer and College Bill)
 		p

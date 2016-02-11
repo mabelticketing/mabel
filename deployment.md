@@ -133,7 +133,7 @@ nginx keeps its site configuration in `/etc/nginx/sites-available`. There's prob
             # Some requests should be forwarded to port 3008.
 
             location ~ /(api-docs|docs|api|socket.io)/ {
-                    proxy_pass http://localhost:3008$request_uri;
+                    proxy_pass http://127.0.0.1:3008$request_uri;
                     proxy_http_version 1.1;
 
                     proxy_set_header Upgrade $http_upgrade;
