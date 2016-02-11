@@ -1,0 +1,21 @@
+insert into user (name, email, registration_time, password_md5, is_verified) values('Adam Mathias','adammathias@hotmail.co.uk', UNIX_TIMESTAMP(), md5('4ed38de0'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Alfred Highmore','treeroots06@gmail.com', UNIX_TIMESTAMP(), md5('c281c1ce'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Amy Jukes','amyejukes@hotmail.com', UNIX_TIMESTAMP(), md5('39de895b'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Briony Davies','Briony.davies@cantab.net', UNIX_TIMESTAMP(), md5('50914825'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Cathy Hu','cathy.yh92@gmail.com', UNIX_TIMESTAMP(), md5('089dc9e0'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Elizabeth Read','libbie.read100@gmail.com', UNIX_TIMESTAMP(), md5('d66fd737'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Emily Turner','emilyreturner@hotmail.com', UNIX_TIMESTAMP(), md5('b46ce9d5'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Emily Varley','emily.varley@cantab.net', UNIX_TIMESTAMP(), md5('20207e39'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Emma Smith','es578@cam.ac.uk', UNIX_TIMESTAMP(), md5('ae27b810'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Eve McMahon','eve.mcmahon66@gmail.com', UNIX_TIMESTAMP(), md5('c1fd0f32'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Fiona Hetherington','fionamary25@gmail.com', UNIX_TIMESTAMP(), md5('436cbb41'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Hassan Bassam','hassi94@gmail.com', UNIX_TIMESTAMP(), md5('727684c1'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Helen Webster','helenclarewebster@gmail.com', UNIX_TIMESTAMP(), md5('4d189f73'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Lauren Payne','lrpayne94@gmail.com', UNIX_TIMESTAMP(), md5('e67744af'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Michael Clifford','michaeldclifford@gmail.com', UNIX_TIMESTAMP(), md5('9bcd4c58'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Michael McLeod','mjomcleod@gmail.com', UNIX_TIMESTAMP(), md5('ac54733f'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Oliver MacFarlane','o_mac@hotmail.co.uk', UNIX_TIMESTAMP(), md5('39c27cae'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Phoebe Weller','Phoebeweller@hotmail.com', UNIX_TIMESTAMP(), md5('8325ddcd'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Rafa Baptista','rafa.baptista@cantab.net', UNIX_TIMESTAMP(), md5('74e35381'), 1);
+insert into user (name, email, registration_time, password_md5, is_verified) values('Richard Nicholl','rtrn2@cantab.net', UNIX_TIMESTAMP(), md5('85e696c8'), 1);
+
