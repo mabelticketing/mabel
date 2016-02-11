@@ -128,11 +128,12 @@ nginx keeps its site configuration in `/etc/nginx/sites-available`. There's prob
 
     server {
             listen 80;
-            server_name tickets.emmajuneevent.com; # you can enter other domains here, space-separated
+            server_name tickets.emmajuneevent.com;
 
-            # Any requests made to the root address '/' will get forwarded to port 3008.
-            location / {
-                    proxy_pass http://localhost:3008;
+            # Some requests should be forwarded to port 3008.
+
+            location ~ /(api-docs|docs|api|socket.io)/ {
+                    proxy_pass http://localhost:3008$request_uri;
                     proxy_http_version 1.1;
 
                     proxy_set_header Upgrade $http_upgrade;
@@ -140,6 +141,12 @@ nginx keeps its site configuration in `/etc/nginx/sites-available`. There's prob
                     proxy_set_header Host $host;
                     proxy_cache_bypass $http_upgrade;
             }
+
+            # Any other requests will be served directly from the FS
+            location / {
+                    root /home/mabel/mabel/public;
+            }
+
     }
 
 
@@ -178,3 +185,5 @@ Now update your nginx configuration to use this username and password:
         ...
 
 Restart nginx as before (`sudo service nginx restart`) and now when you browse to http://staging.emmajuneevent.com your browser should present you with a login dialog. Success!
+
+Note that we still have a small problem - if we're using basic auth headers to protect the overall site, we can't also use them as part of our login flow. Mabel uses this for alumni login, so the net effect is that you can't test alumni login with a protected site.
