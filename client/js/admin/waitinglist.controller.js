@@ -56,7 +56,7 @@ function WaitingListController(WaitingList, APICaller) {
 	vm.transferAll = function() {
 		APICaller.post("ticket/process_waiting_list", function(err, data) {
 			if (err) return console.log(err); // error handling
-			console.log(data);
+			// console.log(data);
 			var ticketsNum = 0;
 			for (var i in data.tickets) {
 				ticketsNum += data.tickets[i].length;
