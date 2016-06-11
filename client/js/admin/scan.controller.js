@@ -16,18 +16,27 @@ function ScanController($scope, APICaller) {
 	vm.searchTerm = "";
 	vm.admit = admit;
 
-	APICaller.get("ticket/admit", {}, 
+	APICaller.get("admission", {}, 
 		function(err, data) {
 			if (err) return alert("ERROR " + err);
-			if (!data.success) return alert("ERROR: " + data.error);
-			vm.admitted = data.result.admitted;
-		});
+			if (data.details.length < 1) return alert("No tickets found");
 
-	APICaller.get("ticket/getAllDetailed", {},
-		function(err, data) {
-			if (err) return alert(err);
-			if (data.length < 1) return alert("No tickets found");
-			vm.allTickets = _.sortBy(data, function(t) { return t.id;});
+			vm.admitted = data.admitted;
+			vm.allTickets = _.sortBy(data.details, function(t) { return t.id;})
+
+			vm.allTickets
+				.forEach(function(t) {
+					if (t.status_name === "ADMITTED") {
+						console.log(t)
+						t.status = "btn-success"
+					} else if (t.status_name === "CANCELLED") {
+						t.status = "btn-warning"
+					}
+				})
+
+			console.log(vm.admitted);
+			console.log(vm.allTickets.length)
+
 			$scope.$watch(function(){return vm.searchTerm;}, _.debounce(
 				function() {
 					// This code will be invoked after 1 second from the last time 'id' has changed.
@@ -35,14 +44,24 @@ function ScanController($scope, APICaller) {
 				},
 				 500)
 			);
-		}
-	);
+		})
+
+	// APICaller.get("ticket/admit", {}, 
+	// 	function(err, data) {
+	// 	});
+
+	// APICaller.get("ticket/getAllDetailed", {},
+	// 	function(err, data) {
+	// 		if (err) return alert(err);
+	// 	}
+	// );
 
 	function admit(ticket) {
-		APICaller.post("ticket/admit/" + ticket.id, {}, function(err, data) {
+		APICaller.post("admission/" + ticket.id, {}, function(err, data) {
 			if (data && !data.success) err = data.error;
 			if (err) {
 				alert("ERROR: " + err);
+				console.error(err);
 				ticket.status = "btn-danger";
 				
 				return;
