@@ -265,6 +265,39 @@ paths:
           description: Success. Returns the nesly created ticket
           schema:
             $ref: '#/definitions/Ticket'
+  /admission:
+    get:
+      summary: Get details on all tickets
+      description: "Get all tickets' details. Warning: likely to be big currently.... N.B. Demo schema response is incorrect"
+      security:
+        - admin: []
+      parameters: []
+      responses:
+        '200':
+          description: Success. Returns details for all tickets
+          schema:
+            items:
+              $ref: '#/definitions/Ticket'
+            type: array
+  '/admission/{id}':
+    post:
+      summary: Admit guests
+      description: 'Admit a person to the ball. N.B. Demo schema response is incorrect'
+      security:
+        - admin: []
+      parameters:
+        - name: id
+          in: path
+          minimum: 1
+          description: The ticket ID to admit
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Ticket'
   '/ticket/{id}':
     get:
       summary: Get ticket details
