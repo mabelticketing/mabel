@@ -125,7 +125,7 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 		}
 
 		vm.user.tickets().save(tickets).$promise.then(function(result) {
-			console.log(result);
+			// console.log(result);
 			for (var j=0; j<result.failed.length; j++) {
 				// find the offending tickets
 				var form_id = result.failed[j].form_id.split("-");

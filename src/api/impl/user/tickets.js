@@ -108,7 +108,7 @@ module.exports = function (user_id) {
 					payments: {
 					}
 				};
-				console.log(booked);
+				
 				for (var i in booked) {
 					var ticket = booked[i];
 					if (ticket.payment_method.name === "Cheque") {

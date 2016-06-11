@@ -105,7 +105,6 @@ function user(id) {
 user.post = function post(data) {
 	var source = data.u;
 
-	console.log("Here");
 	var u = {};
 
 	// extract groups
