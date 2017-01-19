@@ -5,30 +5,30 @@
  */
 
 insert into ticket_type (id, name, price) VALUES (
-	1,
+	4,
 	'Standard',
 	155.00
 ), (
-	2,
+	5,
 	'Queue Jump',
 	165.00
 ), (
-	3,
+	6,
 	'Dining',
 	190.00
 	-- 100
 ), (
-	4,
+	1,
 	'Standard (discounted)',
 	145.00
 	-- 100
 ), (
-	5,
+	2,
 	'Queue Jump (discounted)',
 	155.00
 	-- 100
 ), (
-	6,
+	3,
 	'Dining (discounted)',
 	180.00
 	-- 100
@@ -77,43 +77,43 @@ insert into user_group (id, name, description) VALUES (
 
 insert into ticket_group (id, name, description, overall_limit) VALUES (
 	1,
-	'self',
+	'discounted ticket',
 	'All the tickets you can only buy for yourself',
 	null
 ), (
 	2,
-	'standard',
+	'standard ticket',
 	'The standard tickets',
 	null
 ), (
 	3,
-	'queue_jump',
+	'queue jump ticket',
 	'The queue jump tickets',
 	100
 ), (
 	4,
-	'dining',
+	'dining ticket',
 	'The dining jump tickets',
 	100
 ), (
 	5,
-	'all',
+	'ticket',
 	'All the tickets',
 	1500
 ), (
 	6,
-	'normal',
+	'regular-price ticket',
 	'All non-self tickets',
 	null
 );
 
 insert into ticket_group_membership (ticket_type_id, ticket_group_id) VALUES
-	(4, 1), (5, 1), (6, 1), -- self group
+	(1, 1), (2, 1), (3, 1), -- self group
 	(1, 2), (4, 2), -- standard
 	(2, 3), (5, 3), -- queue jump
 	(3, 4), (6, 4), -- dining
 	(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), -- all tickets
-	(1, 6), (2, 6), (3, 6); -- all non-self tickets
+	(4, 6), (5, 6), (6, 6); -- all non-self tickets
 
 insert into user_group_membership (user_id, group_id) VALUES
 	(1, 1), (1, 2),

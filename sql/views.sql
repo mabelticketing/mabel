@@ -55,6 +55,26 @@ SELECT ticket_type_id,
 FROM ticket
 GROUP BY ticket_type_id;
 
+CREATE OR REPLACE VIEW current_group_allowance AS
+SELECT
+	user_group_membership.user_id,
+	MAX(IFNULL(allowance,9999)) allowance,
+	MAX(IFNULL(allowance, 9999)) - SUM(IFNULL(bought,0)) remaining,
+	group_access_right.ticket_group_id,
+	ticket_group.description,
+	ticket_group.name
+FROM group_access_right
+JOIN user_group_membership
+	ON group_access_right.group_id=user_group_membership.group_id
+LEFT JOIN user_bought_by_group
+	ON user_bought_by_group.user_id=user_group_membership.user_id
+		AND user_bought_by_group.ticket_group_id=group_access_right.ticket_group_id
+JOIN ticket_group
+	ON group_access_right.ticket_group_id=ticket_group.id
+WHERE open_time<UNIX_TIMESTAMP()
+	AND UNIX_TIMESTAMP()<close_time
+GROUP BY user_id, ticket_group_id;
+
 /*
 Get the number of tickets of each type bought by a particular user
  */
@@ -77,26 +97,31 @@ CREATE OR REPLACE VIEW user_bought_by_group AS
 		ON ticket_group_membership.ticket_type_id = user_bought_by_type.ticket_type_id
 	GROUP BY ticket_group_id, user_bought_by_type.user_id;
 
+CREATE OR REPLACE VIEW user_max_allowance AS
+	SELECT ticket_group_id, user_group_membership.group_id, user_group_membership.user_id, MAX(IFNULL(allowance,9999)) allowance
+	FROM group_access_right
+	JOIN user_group_membership
+		ON user_group_membership.group_id=group_access_right.group_id
+	WHERE open_time<unix_timestamp()
+		AND unix_timestamp()<close_time
+	GROUP BY user_id, ticket_group_id;
+
 /* gets the number of tickets of each type available for purchase by each user */
 CREATE OR REPLACE VIEW current_remaining_ticket_allowance AS
 SELECT
-	user_group_membership.user_id,
-	group_access_right.ticket_group_id,
+	user_max_allowance.user_id,
+	user_max_allowance.ticket_group_id,
 	ticket_type_id,
 	-- NB I'm making the simplifying assumption here that users only exist in one group
 	-- otherwise we couldn't simply do MIN (since users should get their highest group's allowance)
 	MIN(allowance) allowance,
 	MIN(allowance-IFNULL(bought,0)) remaining
-FROM group_access_right
-JOIN user_group_membership
-	ON user_group_membership.group_id=group_access_right.group_id
+FROM  user_max_allowance
 LEFT JOIN user_bought_by_group
-	ON user_group_membership.user_id=user_bought_by_group.user_id
-	AND group_access_right.ticket_group_id=user_bought_by_group.ticket_group_id
+	ON user_max_allowance.user_id=user_bought_by_group.user_id
+	AND user_max_allowance.ticket_group_id=user_bought_by_group.ticket_group_id
 JOIN ticket_group_membership
-	ON ticket_group_membership.ticket_group_id=group_access_right.ticket_group_id
-WHERE open_time < UNIX_TIMESTAMP()
-	AND close_time > UNIX_TIMESTAMP()
+	ON ticket_group_membership.ticket_group_id=user_max_allowance.ticket_group_id
 GROUP BY user_id, ticket_type_id;
 
 /*
@@ -213,6 +238,7 @@ CREATE OR REPLACE VIEW insert_ticket_status AS
 		IF( available>0, "PENDING", "PENDING_WL" ) status
 	FROM accessible_types
 	WHERE allowance > 0;
+
 -- CREATE OR REPLACE VIEW user_group_type_update AS
 -- SELECT group_id
 -- 	,group_access_right.ticket_type_id
@@ -337,37 +363,37 @@ END//
 It works by selecting our set of values once for each row in the inner SELECT'd table.
 NB - it does not take into account user allowances
 */
-DROP PROCEDURE IF EXISTS safe_add_ticket//
-CREATE PROCEDURE safe_add_ticket (IN _user_id int, IN _ticket_type_id int, IN _guest_name varchar(128), IN _donation boolean, IN _payment_method_id int, IN _transaction_value DECIMAL(6,2))
-
-BEGIN
-	INSERT INTO ticket \
-		(user_id, ticket_type_id, guest_name, donation, transaction_value, payment_method_id, status, book_time) \
-
-	-- prepare the row of data we'd like to insert. "SELECT" will pull out a
-	-- row of values once for each row in a given table. Here we're hacking this
-	-- slightly by providiner a row of constant values to use, and it will
-	-- repeat it once for each row in the inner table. We make the inner table
-	-- have either 1 or 0 rows.
-	SELECT _user_id, _ticket_type_id, _guest_name, _donation, _transaction_value, _payment_method_id, 'PENDING', UNIX_TIMESTAMP() \
-	FROM \
-		-- this table will have 1 row, containing 1 value - the number of tickets sold
-		(SELECT COUNT(*) sold
-			FROM ticket
-			WHERE ticket_type_id=_ticket_type_id AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
-		JOIN \
-		-- this table will have 1 row, containing 1 value - the limit for this ticket type
-		(SELECT total_limit cap FROM ticket_type WHERE id=_ticket_type_id) B \
-		JOIN \
-		-- this table will have 1 row, containing 1 value - the number of people in the waiting list
-		(SELECT COUNT(*) AS wl FROM ticket WHERE ticket_type_id=_ticket_type_id AND status='PENDING_WL') C \
-		-- if we've sold up to the limit or there are people waiting, then this
-		-- condition is false, and we select 0 rows instead of 1 as planned.
-		-- Nothing gets inserted.
-		WHERE B.cap>A.sold AND C.wl<1;
-	SELECT LAST_INSERT_ID() AS insertId, ROW_COUNT() AS rowsAffected;
-END//
-
+-- DROP PROCEDURE IF EXISTS safe_add_ticket//
+-- CREATE PROCEDURE safe_add_ticket (IN _user_id int, IN _ticket_type_id int, IN _guest_name varchar(128), IN _donation boolean, IN _payment_method_id int, IN _transaction_value DECIMAL(6,2))
+--
+-- BEGIN
+-- 	INSERT INTO ticket \
+-- 		(user_id, ticket_type_id, guest_name, donation, transaction_value, payment_method_id, status, book_time) \
+--
+-- 	-- prepare the row of data we'd like to insert. "SELECT" will pull out a
+-- 	-- row of values once for each row in a given table. Here we're hacking this
+-- 	-- slightly by providiner a row of constant values to use, and it will
+-- 	-- repeat it once for each row in the inner table. We make the inner table
+-- 	-- have either 1 or 0 rows.
+-- 	SELECT _user_id, _ticket_type_id, _guest_name, _donation, _transaction_value, _payment_method_id, 'PENDING', UNIX_TIMESTAMP() \
+-- 	FROM \
+-- 		-- this table will have 1 row, containing 1 value - the number of tickets sold
+-- 		(SELECT COUNT(*) sold
+-- 			FROM ticket
+-- 			WHERE ticket_type_id=_ticket_type_id AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
+-- 		JOIN \
+-- 		-- this table will have 1 row, containing 1 value - the limit for this ticket type
+-- 		(SELECT total_limit cap FROM ticket_type WHERE id=_ticket_type_id) B \
+-- 		JOIN \
+-- 		-- this table will have 1 row, containing 1 value - the number of people in the waiting list
+-- 		(SELECT COUNT(*) AS wl FROM ticket WHERE ticket_type_id=_ticket_type_id AND status='PENDING_WL') C \
+-- 		-- if we've sold up to the limit or there are people waiting, then this
+-- 		-- condition is false, and we select 0 rows instead of 1 as planned.
+-- 		-- Nothing gets inserted.
+-- 		WHERE B.cap>A.sold AND C.wl<1;
+-- 	SELECT LAST_INSERT_ID() AS insertId, ROW_COUNT() AS rowsAffected;
+-- END//
+--
 
 DROP PROCEDURE IF EXISTS user_payment_types//
 CREATE PROCEDURE user_payment_types (IN _user_id int)

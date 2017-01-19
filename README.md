@@ -15,9 +15,10 @@ Coming soon...
 1. Install Node/NPM.
 2. Install MySQL.
 3. `npm run prepare`
-4. `npm run dev`
-5. ???
-6. Profit!
+4. replace "PLACEHOLDER" with the actual host in `swagger.yml`
+5. `npm run dev`
+6. ???
+7. Profit!
 
 <!--
 ### Requirements

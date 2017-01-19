@@ -7,7 +7,7 @@ info:
   license:
     name: GPLv2
     url: 'http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1'
-host: 'PLACEHOLDER'
+host: 'localhost:3008'
 basePath: /api
 consumes: []
 produces:

@@ -78,24 +78,31 @@ module.exports = function (user_id) {
 
 				return [check_payments(booked), failed];
 			})
+			// .spread(function(results, failed) {
+			//
+			// 	// NB there is technically a race condition here which would allow a user to book more than their allowance
+			// 	// It's a time-of-check-to-time-of-use (TOCTTOU) vulnerability, since a user could have two sessions, both
+			// 	// of which pass the check_allowance before either has proceeded to `book`. I don't currently believe this
+			// 	// is a significant threat, so no measures are in place to mitigate it.
+			// 	return [check_allowance(results[0]), failed.concat(results[1])];
+			// })
 			.spread(function(results, failed) {
+				if (failed.length > 0 || results[1].length > 0) {
 
-				// NB there is technically a race condition here which would allow a user to book more than their allowance
-				// It's a time-of-check-to-time-of-use (TOCTTOU) vulnerability, since a user could have two sessions, both
-				// of which pass the check_allowance before either has proceeded to `book`. I don't currently believe this 
-				// is a significant threat, so no measures are in place to mitigate it.
-				return [check_allowance(results[0]), failed.concat(results[1])];
-			})
-			.spread(function(results, failed) {
-				
-				return [book(results[0]), failed.concat(results[1])];
-			})
-			.spread(function(results, failed) {
-				// collect final data
-				var booked = results.PENDING, 
-					waiting_list = results.PENDING_WL;
+					return [api.user(user_id).get(), [], failed.concat(results[1]), []];
+				} else {
 
-				return [api.user(user_id).get(), booked, failed, waiting_list];
+					return book(results[0], [])
+						.then(function(a) {
+							console.log("booked")
+							console.log(a)
+							// collect final dataj
+							var booked = a.PENDING,
+							waiting_list = a.PENDING_WL;
+
+							return [api.user(user_id).get(), booked, failed, waiting_list];
+						})
+				}
 			})
 			.spread(function(user, booked, failed, waiting_list) {
 				// log and send confirmation email
@@ -108,7 +115,7 @@ module.exports = function (user_id) {
 					payments: {
 					}
 				};
-				
+
 				for (var i in booked) {
 					var ticket = booked[i];
 					if (ticket.payment_method.name === "Cheque") {
@@ -117,22 +124,22 @@ module.exports = function (user_id) {
 						data.payments.college_bill = true;
 					} else if (ticket.payment_method.name === "Bank Transfer") {
 						data.payments.bank_transfer = true;
-					} 
+					}
 				}
 
 				if (booked.length + waiting_list.length > 0) {
-					
+
 					// print to the log for fun
-					console.log(user.name + " just made a booking - " + booked.length + " tickets" + 
+					console.log(user.name + " just made a booking - " + booked.length + " tickets" +
 						(waiting_list.length>0?" (and " + waiting_list.length + " waiting list)":"") +
 						" for a total of £" + data.totalPrice + "");
-					
+
 					// send the user an email
 					emailer.send("'" + unidecode(user.name) + "' <" + user.email + ">", "Emmanuel June Event - Booking Confirmation",
                         "bookConf.jade", data);
 				}
 				return {
-					booked: booked, 
+					booked: booked,
 					waiting_list:waiting_list,
 					failed: failed,
 					totalPrice: data.totalPrice,
@@ -144,31 +151,69 @@ module.exports = function (user_id) {
 	///////////////////////////
 	// Helpers (not exposed) //
 	///////////////////////////
-	
+
 	// Helper function to determine if booking is available for all tickets in an array
 	function check_types(ts) {
 
 		// get the types which are available to me
-		return api.user(user_id).type.get()
-			.then(function(types) {
-				types = _.indexBy(types, 'id');
+		return Q.all([api.user(user_id).type.get(),
+				runSql("SELECT ticket_group_id, ticket_type_id FROM ticket_group_membership;"),
+				runSql("SELECT * FROM current_group_allowance WHERE user_id=?;", [user_id])
+			])
+			.spread(function(types, groups, allowances) {
+				// console.log("hi friends")
+
+				types = _.indexBy(types, 'ticket_type_id');
+				groups = _.groupBy(groups, 'ticket_type_id')
+				allowances = _.indexBy(allowances, 'ticket_group_id')
 
 				ts = _.partition(ts, function(ticket) {
 						if (ticket.ticket_type_id in types) {
 
 							// jot down the type while we have it
 							ticket.ticket_type = types[ticket.ticket_type_id];
-							return true;	
-						} 
+							return true;
+						}
 						// console.log(ticket.ticket_type_id + "is not in ");
 						// console.log(types);
 						ticket.reason = "You don't have access to this kind of ticket right now.";
 					});
 
+				var groupNums = {};
+				ts[0].forEach( t => {
+					groups[t.ticket_type_id].forEach( m => {
+						if (groupNums[m.ticket_group_id]) {
+							groupNums[m.ticket_group_id] ++;
+						} else {
+							groupNums[m.ticket_group_id] = 1;
+						}
+					})
+				})
+				// console.log(groupNums)
+				for (let groupId in allowances) {
+					if (allowances[groupId].remaining < groupNums[groupId]) {
+						// invalidate all tickets within this group
+						ts[0].forEach( t => {
+							groups[t.ticket_type_id].forEach( m => {
+
+								if ( m.ticket_group_id == groupId ) {
+									let a = allowances[groupId];
+									t.reason = `You may only book ${a.remaining} ${a.name}${a.remaining===1?"":"s"}`
+										// + `(you already have ${a.allowance-a.remaining}/${a.allowance})`;
+								}
+							})
+						})
+					}
+				}
+				let allowed_tickets = _.partition(ts[0], t => (t.reason===undefined));
+				// console.log(allowed_tickets)
+				return allowed_tickets;
+
+
 				// note that we do not look at ticket_limit. That's
 				// because if there are no tickets available we should still
 				// join the waiting list, and that's handled by "book".
-			
+
 				// array of tickets:
 				// ts[0] = [{TICKET}, ...]
 				return ts[0].length<1?ts:_.chain(ts[0])
@@ -184,8 +229,8 @@ module.exports = function (user_id) {
 							if (i < t.ticket_type.remaining_allowance) return true;
 							t.reason = "You may currently only book " + t.ticket_type.type_allowance + " " + t.ticket_type.name + " ticket" + (t.ticket_type.type_allowance===1?"":"s" ) + " in total. ";
 							if (t.ticket_type.remaining_allowance > 0) {
-								t.reason += "You already have " + 
-									(t.ticket_type.type_allowance - t.ticket_type.remaining_allowance) + 
+								t.reason += "You already have " +
+									(t.ticket_type.type_allowance - t.ticket_type.remaining_allowance) +
 									" tickets booked, so you may currently only book " + t.ticket_type.remaining_allowance + " more.";
 							} else if (t.ticket_type.remaining_allowance === 0) {
 								t.reason += "You already have this many tickets booked, so you may not currently book any more.";
@@ -210,7 +255,7 @@ module.exports = function (user_id) {
 
 			});
 	}
-  
+
 	// Helper function to determine if payment method is available for all tickets in an array
 	function check_payments(ts) {
 
@@ -260,34 +305,41 @@ module.exports = function (user_id) {
 		var promises = [];
 		// add transaction value to each ticket
 		// This is technically redundant in the DB but Chris is paranoid
-		_.each(ts, function(t) {
-			promises.push(
-				api.type(t.ticket_type_id).get()
-					.then(function(type) {
-						t.transaction_value = type.price;
-						t.transaction_value += t.donation ? config.donation_value : 0;
-					})
-			);
-		});
+		// console.log(ts)
+		// _.each(ts, function(t) {
+		// 	promises.push(
+		// 		api.type(t.ticket_type_id).get()
+		// 			.then(function(type) {
+		// 				console.log("foo")
+		// 				t.transaction_value = type.price;
+		// 				t.transaction_value += t.donation ? config.donation_value : 0;
+		// 			})
+		// 	);
+		// });
+
+		console.log("BOOKING")
 
 		// now actually insert
 		return Q.all(promises)
 			.then(function() {
 
-				var sql = "CALL safe_add_ticket(?, ?, ?, ?, ?, ?);";
+				var sql = "CALL safe_add_ticket(?, ?, ?, ?, ?);";
 				var promises = [];
 
 				_.each(ts, function(t) {
 					promises.push(
-						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method_id, t.transaction_value])
+						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method_id])
 							.spread(function(result, meta) {
-
+								console.log("booked")
 								if (result[0].rowsAffected <= 0) {
-									// insert failed - waiting list
-									t.status = "PENDING_WL";
-									return runSql("INSERT INTO ticket SET user_id=?, ?, book_time=UNIX_TIMESTAMP()", [user_id, _.omit(t, ['ticket_type', 'payment_method', 'form_id'])]);
+								// 	// insert failed - waiting list
+								// 	t.status = "PENDING_WL";
+								// 	return runSql("INSERT INTO ticket SET user_id=?, ?, book_time=UNIX_TIMESTAMP()", [user_id, _.omit(t, ['ticket_type', 'payment_method', 'form_id'])]);
+								// } else {
+								// 	return result[0];
+									console.log(result)
 								} else {
-									return result[0];
+									return result[0]
 								}
 							})
 							.then(function(result) {
@@ -313,10 +365,14 @@ module.exports = function (user_id) {
 					.flatten()
 					.groupBy('status')
 					.value();
+				console.log(res)
+				console.log("es")
 				res.PENDING = res.PENDING || [];
 				res.PENDING_WL = res.PENDING_WL || [];
+				console.log(res)
 				return res;
-			});
+			})
+			.then(d => console.log(d) || d);
 	}
 
 };

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015  Mabel Ticketing 
+ * Copyright (C) 2015  Mabel Ticketing
  * GNU General Public License v2.0
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
@@ -36,9 +36,9 @@ function DashController($scope, $timeout, APICaller, User) {
 
 	vm.cancelTicket        = cancelTicket;
 	vm.cancelWaitingTicket = cancelWaitingTicket;
-	
+
 	vm.nameChange = nameChange;
-	
+
 	vm.ticketAccessList = [];
 	vm.overallAllowance = 0;
 	vm.remainingAllowance = 0;
@@ -56,7 +56,7 @@ function DashController($scope, $timeout, APICaller, User) {
 		// tickets
 
 		vm.user.tickets().get().$promise.then(function(tickets) {
-			
+
 			// sort tickets associated with user
 			for (var i=0; i<tickets.length; i++) {
 				if (tickets[i].status === 'PENDING_WL') {
@@ -83,25 +83,25 @@ function DashController($scope, $timeout, APICaller, User) {
 
 		// allowance
 
-		vm.user.allowance.get().$promise.then(function(allowance) {
-			// how many tickets are left for the user to purchase
-			vm.remainingAllowance = allowance.remaining_allowance;
-			vm.overallAllowance = allowance.overall_allowance;
-
-			// add formatted times to result
-			vm.ticketAccessList = _.forEach(allowance.access, function(v) {
-				v['opening'] = moment(v.open_time*1000).format('MMM Do [at] hh:mm');
-				v['closing'] = moment(v.close_time*1000).format('MMM Do [at] hh:mm');
-			});
-
-			vm.ticketsAvailableLoading = false;
-		}, function(err) {
-			console.log(err);
-		});
+		// vm.user.allowance.get().$promise.then(function(allowance) {
+		// 	// how many tickets are left for the user to purchase
+		// 	vm.remainingAllowance = allowance.remaining_allowance;
+		// 	vm.overallAllowance = allowance.overall_allowance;
+		//
+		// 	// add formatted times to result
+		// 	vm.ticketAccessList = _.forEach(allowance.access, function(v) {
+		// 		v['opening'] = moment(v.open_time*1000).format('MMM Do [at] hh:mm');
+		// 		v['closing'] = moment(v.close_time*1000).format('MMM Do [at] hh:mm');
+		// 	});
+		//
+		// 	vm.ticketsAvailableLoading = false;
+		// }, function(err) {
+		// 	console.log(err);
+		// });
 
 
 	});
-	
+
 
 	/*** FUNCTION DEFINITIONS ***/
 
@@ -109,7 +109,7 @@ function DashController($scope, $timeout, APICaller, User) {
 		ticket.guest_name_status = "";
 		// check if non-empty string
 		if(ticket.guest_name && typeof ticket.guest_name === 'string' && ticket.guest_name.length > 0) {
-			
+
 			if (nameChange.timeout !== undefined) $timeout.cancel(nameChange.timeout);
 
 			nameChange.timeout = $timeout(function() {

@@ -34,7 +34,7 @@ setupSockets();
 function listen() {
 
 
-	/****************************************************************************** 
+	/******************************************************************************
 	 * If you want to use clustering (run as many instances as you have processors
 	 * and share the load between them), uncomment the following chunk. You'll
 	 * need to install cluster2 though -- which I had difficulty with on some
@@ -54,19 +54,27 @@ function listen() {
 	 *********************************************/
 
 	 server.listen(config.port || 2000);
-	 console.log("running");	
+	 console.log("running");
 }
 
 function setupSockets() {
 
+	var synchers = {}
+
 	io.on('connection', function(socket){
-		// console.log('a user connected');
-		socket.on('disconnect', function(){
-			// console.log('user disconnected\n');
-		});
+		console.log('a user connected');
+
+		socket.on('declare', function(d) {
+			console.log("declared", d)
+			synchers[d] = socket;
+
+			socket.on('disconnect', function(){
+				delete synchers[d];
+			});
+		})
 
 		socket.on('booking_arrival', function(data) {
-			// console.log("Someone arrived");
+			console.log("Someone arrived");
 			console.log(data);
 		});
 	});
@@ -74,34 +82,40 @@ function setupSockets() {
 	// periodically broadcast open windows and how many tickets are available to book for each type
 
 	setInterval(function() {
-		connection
-			.runSql('SELECT * FROM user_group_type_update;')
-			.then(function(newRights) {
-				newRights = _(newRights)
-					.groupBy('group_id')
-					.mapValues(function (rs) { 
-						return _(rs)
-							.groupBy('ticket_type_id')
-							// mapValues below is used to aggregate multiple windows which apply to a single group/type pair
-							.mapValues(function(v) {
-								var o = {
-									available: Math.max(0, _.max(_.pluck(v, 'available'))),
-
-									allowance: _.foldl(_.pluck(v, 'allowance'), function(u, t) {
-										// preserve nulls so that if one allowance window is unbounded, the overall allowance is too
-										if (u===null || t===null) return null;
-										return Math.max(u, t);
-									})
-								};
-								// console.log(o);
-								return o;
-							})
-							.value();
-
-					})
-					.value();
-
-				io.emit('open_types', newRights);
-			});
+		for (d in synchers) {
+			connection.runSql('SELECT * FROM accessible_types WHERE user_id=?;', [d])
+				.then(function(r) {
+					synchers[d].emit('open_types', r)
+				})
+		}
+		// connection
+		// 	.runSql('SELECT * FROM accessible_types;')
+		// 	.then(function(newRights) {
+		// 		newRights = _(newRights)
+		// 			.groupBy('group_id')
+		// 			.mapValues(function (rs) {
+		// 				return _(rs)
+		// 					.groupBy('ticket_type_id')
+		// 					// mapValues below is used to aggregate multiple windows which apply to a single group/type pair
+		// 					.mapValues(function(v) {
+		// 						var o = {
+		// 							available: Math.max(0, _.max(_.pluck(v, 'available'))),
+		//
+		// 							allowance: _.foldl(_.pluck(v, 'allowance'), function(u, t) {
+		// 								// preserve nulls so that if one allowance window is unbounded, the overall allowance is too
+		// 								if (u===null || t===null) return null;
+		// 								return Math.max(u, t);
+		// 							})
+		// 						};
+		// 						// console.log(o);
+		// 						return o;
+		// 					})
+		// 					.value();
+		//
+		// 			})
+		// 			.value();
+		//
+		// 		io.emit('open_types', newRights);
+		// 	});
 	}, 3000);
 }

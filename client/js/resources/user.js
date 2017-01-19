@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015  Mabel Ticketing 
+ * Copyright (C) 2015  Mabel Ticketing
  * GNU General Public License v2.0
  * https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
  */
@@ -28,7 +28,7 @@ function userResource($resource, MabelToken) {
 		'delete': {
 			method: 'DELETE'
 		},
-		
+
 		// add a custom action to retrieve the current user
 		'current': {
 			method: 'GET',
@@ -39,12 +39,13 @@ function userResource($resource, MabelToken) {
 
 	User.prototype.init = function() {
 		this.$promise.then(function(u) {
-			var subpaths = ['allowance', 'payment-method', 'type'];
+			var subpaths = ['payment-method', 'type'];
 
 			for (var i=0; i<subpaths.length; i++) {
 				var path = subpaths[i];
 				u[path] = $resource('/api/user/:id/' + path, { access_token: MabelToken.token, id: u.id });
 			}
+			u['allowance'] = $resource('/api/user/:id/allowance', { access_token: MabelToken.token, id: u.id });
 		});
 	};
 

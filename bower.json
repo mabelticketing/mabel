@@ -25,7 +25,8 @@
     "ng-table": "1",
     "ng-table-export": "https://github.com/davisford/ng-table-export.git",
     "underscore": "~1.8.3",
-    "angular-datatables": "^0.5.3"
+    "angular-datatables": "^0.5.3",
+    "lodash": "^4.17.4"
   },
   "resolutions": {
     "angular": "1.4.9"
