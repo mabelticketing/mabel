@@ -1,12 +1,12 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
 h1 Waiting List Transfer
 
-p 
-	| Thank you for joining the waiting list for tickets to Emmanuel College June
-	| Event 2016. Some spaces have become available, and have been transferred to
+p
+	| Thank you for joining the waiting list for tickets to Emmanuel College May
+	| Ball 2017. Some spaces have become available, and have been transferred to
 	| your account. A summary of your new tickets is below.
 
 table.emailTable
@@ -18,7 +18,7 @@ table.emailTable
 			th Price
 			th Status
 	tbody
-		each ticket in ticketsAllocated 
+		each ticket in ticketsAllocated
 			tr
 				td # #{ ticket.id }
 				td #{ ticket.ticket_type.name }
@@ -30,7 +30,7 @@ table.emailTable
 			tr
 				th Donations
 				td
-				td 
+				td
 				td &pound;#{donationPrice}
 				td
 	tfoot
@@ -43,15 +43,15 @@ table.emailTable
 
 if (totalPrice > 0)
 	h2 Payment Information
-	p Payment must be received within #[strong 14] days of the transfer (i.e. before #[strong #{payment_deadline}]). 
+	p Payment must be received within #[strong 14] days of the transfer (i.e. before #[strong #{payment_deadline}]).
 		| Any tickets which are not paid for by this date may be cancelled without further notice.
 
 	h4 Cheque Payments
-	p 
-		| To pay for tickets by #[strong Cheque], 
-		| please hand in a cheque made payable to 
-		| #[strong Emmanuel College May Ball] 
-		| to the Emmanuel College Porter's Lodge. 
+	p
+		| To pay for tickets by #[strong Cheque],
+		| please hand in a cheque made payable to
+		| #[strong Emmanuel College May Ball]
+		| to the Emmanuel College Porter's Lodge.
 		| Please ensure that your surname and ticket
 		| number are written on the back of the
 		| cheque. To pay for multiple tickets with a
@@ -60,13 +60,13 @@ if (totalPrice > 0)
 		| for.
 
 	h4 Bank Transfer Payments
-	p 
-		| To pay for tickets by #[strong Bank Transfer], 
+	p
+		| To pay for tickets by #[strong Bank Transfer],
 		| please send the amount due to the following
 		| account:
 
 		table.emailTable(style="padding-bottom:10px;")
-			tr 
+			tr
 				th(style="padding: 5px;padding-right: 20px;") Account Number
 				td 60067911
 			tr
@@ -75,11 +75,11 @@ if (totalPrice > 0)
 			tr
 				th(style="padding: 5px;") Account name
 				td Emmanuel College May Ball
-	p 
+	p
 		| Please set the payment reference to your
-		| surname followed by the ticket number above. 
-		| For example, if your name is John Smith, 
-		| your ticket reference should be 
+		| surname followed by the ticket number above.
+		| For example, if your name is John Smith,
+		| your ticket reference should be
 		| #[em SMITH #{sampleID}]
 		| . To pay for multiple tickets with a single
 		| payment, simply use the ticket number of the
@@ -87,8 +87,8 @@ if (totalPrice > 0)
 
 
 	h4 College Bill Payments
-	p 
-		| To pay for tickets by #[strong College Bill], 
+	p
+		| To pay for tickets by #[strong College Bill],
 		| no further action needs to be taken. The
 		| price of your ticket will be added to your
 		| Lent term bill. Please note that payment by
@@ -98,6 +98,6 @@ if (totalPrice > 0)
 		| bill.
 
 h2 Ticket Management
-p You may now visit the #[a(href="http://tickets.emmajuneevent.com/dash") ticket management page].
+p You may now visit the #[a(href="http://tickets.emmamayball.com/dash") ticket management page].
 	| On this page, you can add guest names to any tickets, or cancel any tickets or remaining waiting list slots.
 p You will be able to change guest names on your tickets via the management page until #[b 7th June].

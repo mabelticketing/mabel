@@ -135,7 +135,7 @@ module.exports = function (user_id) {
 						" for a total of £" + data.totalPrice + "");
 
 					// send the user an email
-					emailer.send("'" + unidecode(user.name) + "' <" + user.email + ">", "Emmanuel June Event - Booking Confirmation",
+					emailer.send("'" + unidecode(user.name) + "' <" + user.email + ">", "Emmanuel May Ball - Booking Confirmation",
                         "bookConf.jade", data);
 				}
 				return {
