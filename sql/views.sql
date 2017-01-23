@@ -55,6 +55,17 @@ SELECT ticket_type_id,
 FROM ticket
 GROUP BY ticket_type_id;
 
+/*
+Get the number of tickets bought by a particular user in each ticket group
+(includes user group membership for easy joining with access rights)
+*/
+CREATE OR REPLACE VIEW user_bought_by_group AS
+	SELECT ticket_group_id, user_bought_by_type.user_id, SUM( bought ) bought
+	FROM ticket_group_membership
+	JOIN user_bought_by_type
+		ON ticket_group_membership.ticket_type_id = user_bought_by_type.ticket_type_id
+	GROUP BY ticket_group_id, user_bought_by_type.user_id;
+
 CREATE OR REPLACE VIEW current_group_allowance AS
 SELECT
 	user_group_membership.user_id,
@@ -86,16 +97,6 @@ SELECT user_id,
 	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
 	GROUP BY user_id, ticket_type_id;
 
-/*
-Get the number of tickets bought by a particular user in each ticket group
-(includes user group membership for easy joining with access rights)
-*/
-CREATE OR REPLACE VIEW user_bought_by_group AS
-	SELECT ticket_group_id, user_bought_by_type.user_id, SUM( bought ) bought
-	FROM ticket_group_membership
-	JOIN user_bought_by_type
-		ON ticket_group_membership.ticket_type_id = user_bought_by_type.ticket_type_id
-	GROUP BY ticket_group_id, user_bought_by_type.user_id;
 
 CREATE OR REPLACE VIEW user_max_allowance AS
 	SELECT ticket_group_id, user_group_membership.group_id, user_group_membership.user_id, MAX(IFNULL(allowance,9999)) allowance
@@ -104,7 +105,7 @@ CREATE OR REPLACE VIEW user_max_allowance AS
 		ON user_group_membership.group_id=group_access_right.group_id
 	WHERE open_time<unix_timestamp()
 		AND unix_timestamp()<close_time
-	GROUP BY user_id, ticket_group_id;
+	GROUP BY user_id, ticket_group_id, user_group_membership.group_id;
 
 /* gets the number of tickets of each type available for purchase by each user */
 CREATE OR REPLACE VIEW current_remaining_ticket_allowance AS
@@ -122,7 +123,7 @@ LEFT JOIN user_bought_by_group
 	AND user_max_allowance.ticket_group_id=user_bought_by_group.ticket_group_id
 JOIN ticket_group_membership
 	ON ticket_group_membership.ticket_group_id=user_max_allowance.ticket_group_id
-GROUP BY user_id, ticket_type_id;
+GROUP BY user_id, ticket_type_id, ticket_group_id;
 
 /*
 Get the number of tickets bought by a particular user, grouped by payment method
@@ -193,7 +194,7 @@ CREATE OR REPLACE VIEW tickets_sold AS
 	FROM ticket_status_count;
 
 CREATE OR REPLACE VIEW tickets_sold_by_group AS
-SELECT ticket_group_id, sold, waiting_list
+SELECT ticket_group_id, SUM(sold) sold, SUM(waiting_list) waiting_list
 FROM ticket_group_membership
 JOIN tickets_sold
 	ON ticket_group_membership.ticket_type_id=tickets_sold.ticket_type_id
@@ -206,7 +207,7 @@ LEFT JOIN tickets_sold_by_group
 	ON ticket_group.id=tickets_sold_by_group.ticket_group_id
 JOIN ticket_group_membership
 ON ticket_group_membership.ticket_group_id=ticket_group.id
-GROUP BY ticket_type_id;
+GROUP BY ticket_type_id, ticket_group_id;
 
 
 CREATE OR REPLACE VIEW accessible_types AS
