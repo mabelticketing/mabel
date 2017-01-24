@@ -266,6 +266,11 @@ module.exports = function (user_id) {
 
 				return _.partition(ts, function(ticket) {
 						if (ticket.payment_method_id in payment_methods) {
+							payment_methods[ticket.payment_method_id].bought++;
+							if (payment_methods[ticket.payment_method_id].bought && ticket.payment_method_id===1) {
+								ticket.reason = "You may only put one ticket on your college bill.";
+							}
+
 							// jot down the payment method while we have it
 							ticket.payment_method= payment_methods[ticket.payment_method_id];
 							return true;

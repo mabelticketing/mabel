@@ -68,6 +68,17 @@ SELECT user_id,
 	GROUP BY user_id, ticket_type_id;
 
 /*
+Get the number of tickets of each type bought by a particular user
+ */
+CREATE OR REPLACE VIEW user_bought_by_type AS
+SELECT user_id,
+		ticket_type_id,
+		COUNT(*) bought
+	FROM ticket
+	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
+	GROUP BY user_id, ticket_type_id;
+
+/*
 Get the number of tickets bought by a particular user in each ticket group
 (includes user group membership for easy joining with access rights)
 */
@@ -184,8 +195,8 @@ Example output:
 -- FROM user_group_allowance
 -- LEFT JOIN user_bought
 -- ON user_group_allowance.user_id=user_bought.user_id;
-
 /* UNDOCUMENTED VIEWS SOZ */
+
 
 CREATE OR REPLACE VIEW tickets_sold AS
 	SELECT ticket_type_id,
@@ -201,7 +212,7 @@ JOIN tickets_sold
 	GROUP BY ticket_group_id;
 
 CREATE OR REPLACE VIEW ticket_limits AS
-SELECT ticket_type_id, ticket_group.id ticket_group_id, MIN(overall_limit-IFNULL(sold,0)) remaining, MIN(overall_limit) overall_limit
+SELECT ticket_type_id, MIN(overall_limit-IFNULL(sold,0)) remaining, MIN(overall_limit) overall_limit
 FROM ticket_group
 LEFT JOIN tickets_sold_by_group
 	ON ticket_group.id=tickets_sold_by_group.ticket_group_id
@@ -239,6 +250,19 @@ CREATE OR REPLACE VIEW insert_ticket_status AS
 		IF( available>0, "PENDING", "PENDING_WL" ) status
 	FROM accessible_types
 	WHERE allowance > 0;
+
+CREATE OR REPLACE VIEW payment_method_status AS
+SELECT
+	user_group_membership.user_id user_id,
+	group_payment_method_access.payment_method_id payment_method_id,
+	MAX(IFNULL(bought,0)) bought
+FROM user_group_membership
+JOIN group_payment_method_access
+	ON user_group_membership.group_id=group_payment_method_access.group_id
+LEFT JOIN user_bought_by_payment_method
+	ON user_bought_by_payment_method.user_id = user_group_membership.user_id
+	AND user_bought_by_payment_method.payment_method_id =group_payment_method_access.payment_method_id
+GROUP BY user_group_membership.user_id, group_payment_method_access.payment_method_id;
 
 -- CREATE OR REPLACE VIEW user_group_type_update AS
 -- SELECT group_id

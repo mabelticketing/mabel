@@ -79,7 +79,6 @@ block content
 		p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)")
 			em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
 
-		//- TODO: un hard-code date.
 		p(ng-if="dashCtrl.ticketsBooked.length !== 0") Please ensure the names listed below are accurate. You must enter your guests' names before #{ name_change_deadline }. Reserved tickets may be cancelled up until the moment your payment is received. Tickets paid for by college bill may be cancelled within two weeks of the original booking.
 
 		table(ng-if="dashCtrl.ticketsBooked.length !== 0").table.table-striped.table-hover
