@@ -12,7 +12,7 @@ module.exports = {
     db_user     : "emb17",
     db_db       : "emb17",
     jwt_secret  : "jwt-psdfsdfass",
-    mailgun_api_key: "123",
+    mailgun_api_key: "key-b2441b341e4124c1efaff49c5216dcbe",
   	admin_groups: [1],
   	donation_value: 2,
     external_keys: {

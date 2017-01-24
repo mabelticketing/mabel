@@ -57,7 +57,7 @@ block content
 			div(ng-switch-when="open")
 				h1.h1 Booking
 				.well
-					p(ng-if="bookingCtrl.totalAllowance < 1") You may not book any more tickets.
+					p(ng-if="bookingCtrl.totalAllowance < 1") You may not currently book any tickets.
 					form.form-horizontal(ng-submit="bookingCtrl.submitBooking()" novalidate, ng-if="bookingCtrl.totalAllowance > 0")
 						fieldset
 							legend Welcome {{ bookingCtrl.user.name }}, please select your tickets.

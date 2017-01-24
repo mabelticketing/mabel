@@ -94,8 +94,6 @@ module.exports = function (user_id) {
 
 					return book(results[0], [])
 						.then(function(a) {
-							console.log("booked")
-							console.log(a)
 							// collect final dataj
 							var booked = a.PENDING,
 							waiting_list = a.PENDING_WL;

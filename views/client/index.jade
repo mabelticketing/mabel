@@ -32,6 +32,7 @@ append scripts
 			}
 
 			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
+			a = $scope;
 		});
 
 		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
