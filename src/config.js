@@ -5,13 +5,13 @@
  */
 
 module.exports = {
-    port        : 3008,
-    base_url    : "http://localhost:3008",
+    port        : 3011,
+    base_url    : "http://emb17.littlehq.uk:3011",
     db_host     : "localhost",
-    db_password : "LockDown1",
-    db_user     : "root",
-    db_db       : "mabel",
-    jwt_secret  : "jwt-pass",
+    db_password : "Eureka!",
+    db_user     : "emb17",
+    db_db       : "emb17",
+    jwt_secret  : "jwt-psdfsdfass",
     mailgun_api_key: "123",
   	admin_groups: [1],
   	donation_value: 2,

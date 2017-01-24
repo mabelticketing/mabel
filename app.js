@@ -83,7 +83,7 @@ function setupSockets() {
 
 	setInterval(function() {
 		for (d in synchers) {
-			connection.runSql('SELECT * FROM accessible_types WHERE user_id=?;', [d])
+			connection.runSql('SELECT * FROM accessible_types WHERE user_id=? AND allowance>0;', [d])
 				.then(function(r) {
 					synchers[d].emit('open_types', r)
 				})

@@ -29,7 +29,8 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 		vm.payment_methods =  vm.user["payment-method"].query();
 		var a = vm.user.allowance.query();
 		a.$promise.then(function() {
-			vm.allowance = a;
+			vm.allowance = a.filter(function(e) { return e.allowance > 0 });
+			console.log("Here I am!")
 			console.log(a)
 			vm.totalAllowance = a.map(function(e) {return e.allowance;})
 				.reduce(function(a,b){return a+b;}, 0);

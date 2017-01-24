@@ -39,7 +39,7 @@ block content
 
 		.row
 			.col-xs-12
-				p Welcome to the Emmanuel College June Event ticketing system. Click #[a(href="/logout") here] to logout.
+				p Welcome to the Emmanuel College May Ball ticketing system. Click #[a(href="/logout") here] to logout.
 
 		.panel.panel-info
 			.panel-heading Available tickets
@@ -95,7 +95,9 @@ block content
 				tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
 					td # {{ ticket.id }}
 					td #[em ({{ ticket.name }})]
-					td
+					td(ng-if="dashCtrl.nameChangeOpen")
+						input.namechange-input(type="text" class="{{ticket.guest_name_status}}" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
+					td(ng-if="!dashCtrl.nameChangeOpen")
 						{{ ticket.guest_name }}
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}

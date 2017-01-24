@@ -55,6 +55,18 @@ SELECT ticket_type_id,
 FROM ticket
 GROUP BY ticket_type_id;
 
+
+/*
+Get the number of tickets of each type bought by a particular user
+ */
+CREATE OR REPLACE VIEW user_bought_by_type AS
+SELECT user_id,
+		ticket_type_id,
+		COUNT(*) bought
+	FROM ticket
+	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
+	GROUP BY user_id, ticket_type_id;
+
 /*
 Get the number of tickets bought by a particular user in each ticket group
 (includes user group membership for easy joining with access rights)
@@ -85,18 +97,6 @@ JOIN ticket_group
 WHERE open_time<UNIX_TIMESTAMP()
 	AND UNIX_TIMESTAMP()<close_time
 GROUP BY user_id, ticket_group_id;
-
-/*
-Get the number of tickets of each type bought by a particular user
- */
-CREATE OR REPLACE VIEW user_bought_by_type AS
-SELECT user_id,
-		ticket_type_id,
-		COUNT(*) bought
-	FROM ticket
-	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
-	GROUP BY user_id, ticket_type_id;
-
 
 CREATE OR REPLACE VIEW user_max_allowance AS
 	SELECT ticket_group_id, user_group_membership.group_id, user_group_membership.user_id, MAX(IFNULL(allowance,9999)) allowance

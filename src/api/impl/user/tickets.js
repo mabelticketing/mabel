@@ -328,7 +328,7 @@ module.exports = function (user_id) {
 
 				_.each(ts, function(t) {
 					promises.push(
-						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, t.donation, t.payment_method_id])
+						runSql(sql, [user_id, t.ticket_type_id, t.guest_name, 0, t.payment_method_id])
 							.spread(function(result, meta) {
 								console.log("booked")
 								if (result[0].rowsAffected <= 0) {

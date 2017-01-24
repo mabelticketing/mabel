@@ -1,11 +1,3 @@
--- Copyright (C) 2015  Mabel Ticketing
--- GNU General Public License v2.0
--- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
-
--- Schema for initialising the MySQL database
-
--- We use foreign key dependencies, so make sure you
--- create and delete in the right order.
 
 drop table if exists email_destination;
 drop table if exists email;
@@ -21,7 +13,6 @@ drop table if exists user;
 drop table if exists ticket_type;
 
 
------- TICKET TYPES ------
 
 create table if not exists ticket_type (
 	id int auto_increment not null,
@@ -30,7 +21,6 @@ create table if not exists ticket_type (
 	primary key (id)
 );
 
------- USERS ------
 
 create table if not exists user (
 	id int auto_increment not null,
@@ -38,15 +28,15 @@ create table if not exists user (
 	email varchar(128) not null,
 	crsid varchar(16),
 	registration_time int not null,
-	password_md5 varchar(128), -- will be null for raven logins
-	verification_code varchar(128), -- emailed to new users if registered via mabel
+	password_md5 varchar(128), 
+	verification_code varchar(128),
 	is_verified boolean not null DEFAULT 0,
 	primary key (id),
 	unique(email),
 	unique(crsid)
 );
 
------- GROUPS ------
+
 
 create table if not exists ticket_group (
 	id int auto_increment not null,
@@ -63,7 +53,7 @@ create table if not exists user_group (
 	primary key (id)
 );
 
------- GROUP MEMBERSHIPS ------
+
 
 create table if not exists ticket_group_membership (
 	id int auto_increment not null,
@@ -85,7 +75,7 @@ create table if not exists user_group_membership (
 	unique(user_id, group_id)
 );
 
------- GROUP ACCESS RIGHTS ------
+
 
 create table if not exists group_access_right (
 	id int auto_increment not null,
@@ -99,7 +89,7 @@ create table if not exists group_access_right (
 	FOREIGN KEY (ticket_group_id) REFERENCES ticket_group(id)
 );
 
------- PAYMENT METHODS ------
+
 
 create table if not exists payment_method (
 	id int auto_increment not null,
@@ -108,7 +98,7 @@ create table if not exists payment_method (
 	primary key (id)
 );
 
------- PAYMENT METHODS ACCESS ------
+
 
 create table if not exists group_payment_method_access (
 	id int auto_increment not null,
@@ -120,7 +110,7 @@ create table if not exists group_payment_method_access (
 	unique(group_id, payment_method_id)
 );
 
------- TICKET ------
+
 
 create table if not exists ticket (
 	id int auto_increment not null,
@@ -132,12 +122,12 @@ create table if not exists ticket (
 	donation boolean not null DEFAULT 0,
 	transaction_value DECIMAL(6,2) not null,
 	notes text,
-	-- PENDING       means that the ticket has been requested but not paid for/approved by thte committee
-	-- CONFIRMED     means that the ticket is valid, and the guest may come to the ball
-	-- CANCELLED     means the ticket is not available to be reclaimed via the waiting list
-	-- ADMITTED      means that the guest has entered the ball - so shouldn't be allowed in again
-	-- PENDING_WL    means that the ticket is on the waiting list, and is ready to be transferred
-	-- CANCELLED_WL  means that the ticket was on the waiting list, but has since been cancelled
+	
+	
+	
+	
+	
+	
 	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'ADMITTED', 'PENDING_WL', 'CANCELLED_WL', 'INVALID') not null default 'INVALID',
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
@@ -146,7 +136,7 @@ create table if not exists ticket (
 );
 
 
------- MAIL LOGS ------
+
 
 create table if not exists email (
 	id int auto_increment not null,

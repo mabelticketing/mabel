@@ -13,6 +13,7 @@ function DashController($scope, $timeout, APICaller, User) {
 	var vm = this;
 	e=vm;
 
+	console.log("Latest")
 
 	/*** DECLARATION ***/
 
@@ -38,6 +39,8 @@ function DashController($scope, $timeout, APICaller, User) {
 	vm.cancelWaitingTicket = cancelWaitingTicket;
 
 	vm.nameChange = nameChange;
+	vm.nameChangeOpen = Date.now() < new Date("05/31/2017");
+	console.log(vm.nameChangeOpen);
 
 	vm.ticketAccessList = [];
 	vm.overallAllowance = 0;
