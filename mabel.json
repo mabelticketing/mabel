@@ -3,6 +3,9 @@
   "ticketing_email": "ticketing@emmamayball.com",
   "payment_processing_time": "up to 2 weeks",
   "name_change_deadline": "31st May",
+  "name_change_close_year": 2017,
+  "name_change_close_month": 4,
+  "name_change_close_day": 31,
   "event_name": "Emmanuel College May Ball",
   "event_year": "2017"
 }

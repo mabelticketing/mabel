@@ -76,7 +76,7 @@ block content
 										tbody
 											tr(ng-repeat="(id, ticket) in bookingCtrl.tickets track by id", style="background-color:#ffffff;")
 												td {{ ticket.type.name }}
-													em(ng-if="ticket.available<10 && ticket.available>0")  ({{ ticket.available }} remaining)
+													em(ng-if="console.log(ticket) || ticket.available<10 && ticket.available>0")  ({{ ticket.available }} remaining)
 													em(ng-if="ticket.available<=0")  (Sold Out)
 												td &pound;{{ ticket.type.price }}
 												td
@@ -125,7 +125,7 @@ block content
 							td
 								span.label.label-danger Not Booked
 
-				p A summary of your booking is below. Guest names should be added to your tickets via the 
+				p A summary of your booking is below. Guest names should be added to your tickets via the
 					a(href="/dash") ticket management page
 					| .
 				p(ng-if="bookingCtrl.waiting_list.length > 0") #[b PLEASE NOTE]: Some of the tickets you requested have #[b sold out]. These tickets have been added to the #[b waiting list] instead. You will be contacted if these tickets become available.
