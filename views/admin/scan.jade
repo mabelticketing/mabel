@@ -1,4 +1,4 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
@@ -33,10 +33,9 @@ block content
 			.col-md-12
 				h1 Scan guests
 				.progress
-					.progress-bar.progress-bar-success.progress-bar-striped.active(
-						role="progressbar" style="width:{{100* scan.admitted / scan.allTickets.length }}%; min-width:8em")
+					.progress-bar.progress-bar-success.progress-bar-striped.active(role="progressbar" style="width:{{100* scan.admitted / scan.allTickets.length }}%; min-width:8em")
 						| {{ scan.admitted }} / {{scan.allTickets.length }} guests admitted ({{100* scan.admitted / scan.allTickets.length | number : 0 }}%)
-		.row		
+		.row
 			.col-md-2
 			.col-md-8
 				input.scan-input.input-lg.form-control(type="numeric" ng-model="scan.searchTerm" autofocus)
@@ -45,7 +44,7 @@ block content
 			.col-md-12(style="background-color:#eee; margin-top:20px")
 				div(style="display:inline-block; width:80%; vertical-align:middle;")
 					h3 {{t.guest_name}} - {{t.ticket_type_name}} #[small #[em ({{t.status_name}})]]
-					h5 Guest of 
+					h5 Guest of
 						strong {{t.booking_user_name}}
 					h6 #[em Ticket ID]: # {{t.id}} &nbsp;&nbsp;&nbsp;&nbsp;
 						| #[em Booker ID]: # {{t.user_id}} &nbsp;&nbsp;&nbsp;&nbsp;
