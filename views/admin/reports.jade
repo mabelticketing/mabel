@@ -1,4 +1,4 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
@@ -26,17 +26,17 @@ block content
 							table.table.table-bordered.table-hover
 								thead
 									tr
-										th(ng-repeat="c in r.t.cols") 
-											{{c.Field}}
+										th(ng-repeat="c in r.t.cols")
+											| {{c.Field}}
 									tr
-										th(ng-repeat="c in r.t.cols" style="text-align:right;") 
+										th(ng-repeat="c in r.t.cols" style="text-align:right;")
 											button.btn.btn-default(ng-click="r.filter(c)") S
 											button.btn.btn-default(ng-click="r.showJoin(c)") J
 											button.btn.btn-default(ng-click="r.rmCol(c)") X
 								tbody
 									tr(ng-repeat="d in r.data")
 										// TODO: Format the data according to c.Type
-										td(ng-repeat="c in r.t.cols") {{d[r.fieldify(c)]}}	
+										td(ng-repeat="c in r.t.cols") {{d[r.fieldify(c)]}}
 
 						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
 							.col-sm-5
@@ -47,17 +47,17 @@ block content
 						row(ng-if="r.dataSize !== undefined && r.dataSize > 0")
 							h4 Actions
 							ul
-								li(ng-click="r.alert('TODO')") 
+								li(ng-click="r.alert('TODO')")
 									a(href="#") Remove tables
-								li(ng-click="r.alert('TODO')") 
+								li(ng-click="r.alert('TODO')")
 									a(href="#") Hide/Show Columns
-								li(ng-click="r.saveTable()") 
+								li(ng-click="r.saveTable()")
 									a(href="#") Pin Report To Dashboard
 									|  << This one does something but not what you want
 								li
 									a(ng-click="r.getCSV()") Export Data
 									|  << This one does the right thing
-								li(ng-click="r.alert('TODO')") 
+								li(ng-click="r.alert('TODO')")
 									a(href="#") Send bulk email
 
 						row(ng-if="r.t.tables.length < 1")
@@ -65,7 +65,7 @@ block content
 							ul
 								li(ng-repeat="t in r.tableNames")
 									a(ng-click="r.init(t)") {{t}}
-	
+
 
 block append scripts
 	script(type="text/javascript", src="/lib/components/underscore/underscore-min.js")

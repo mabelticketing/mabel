@@ -193,10 +193,11 @@ block content
 										th(style="padding: 5px;") Account name
 										td Emmanuel College May Ball
 							p
-								| Set the payment reference to your
-								| surname followed by the ticket number above (e.g. #[em SMITH 32]).
-								| When paying for multiple tickets, use the ticket number of the
-								| first ticket booked.
+								| Set the payment reference to your ticket number,
+								| followed by your surname (e.g. #[em 32 SMITH]).
+								| To pay for multiple tickets with a single bank transfer,
+								| please include the ticket numbers for all the tickets
+								| you wish to pay for: #[em 32/33 SMITH], for example.
 
 						.col-xs-12.col-md-4
 							h4.h4 College Bill Payments
@@ -204,12 +205,16 @@ block content
 								| If you are paying by college bill,
 								| no further action needs to be taken. The
 								| price of your ticket will be added to your Lent term bill.
-							p: em Please note that payment by college bill is only available to current students of Emmanuel College.
+							p: em Please note that payment by college bill is only available to current students of Emmanuel College, and that only one ticket may be put on your end of term bill.
 
 				h2.h2 Ticket Management
 				p You may now visit the #[a(href="/dash") ticket management page].
 					|  On this page, you may add guest names to any tickets, or cancel any tickets or waiting list slots.
 				p You must change the guest names on your tickets via the management page before #[strong #{ name_change_deadline }].
+				p
+					| Please note that you must assign a name to every ticket
+					| on your account, including your own, and that any tickets left blank
+					| after this date will also incur a name change fee.
 
 				p(style="text-align:center")
 					a.btn.btn-large.btn-success(href="/dash") Return to Management Page
