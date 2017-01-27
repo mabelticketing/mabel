@@ -26,7 +26,7 @@
     "dev": "parallelshell 'npm run watch -s' 'nodemon --debug=5000 app.js'",
     "test": "mocha --reporter nyan ./tests/*.js",
     "start": "node app.js",
-    "prepare": "npm install && bower install && npm run build && bash ./scripts/setup-sql.sh"
+    "my-prepare": "npm install && bower install && npm run build && bash ./scripts/setup-sql.sh"
   },
   "dependencies": {
     "body-parser": "^1.10.0",
@@ -54,7 +54,6 @@
     "chai": "^3.2.0",
     "livereload": "latest",
     "mocha": "^2.3.2",
-    "node-inspector": "^0.12.2",
     "nodemon": "^1.4.1",
     "parallelshell": "^2.0.0",
     "rimraf": "^2.4.2",

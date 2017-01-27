@@ -17,7 +17,7 @@ function types(user_id) {
 
     // gets the ticket types available to the user, with up-to-date ticket limits and user allowances
     function get() {
-        return runSql("SELECT * FROM accessible_types WHERE user_id=?;", [user_id])
+        return runSql("SELECT * FROM accessible_types WHERE allowance>0;", [user_id])
         	// .then(function(types) {
         	// 	return types;
         	// });

@@ -22,7 +22,7 @@ function allowance(user_id) {
 		// 	FROM user_group_membership as A, group_access_right as B,\
 		// ticket_type as C, user_group as D WHERE A.group_id=B.group_id AND B.ticket_type_id=C.id AND user_id=? AND close_time>UNIX_TIMESTAMP() AND A.group_id=D.id;`, [user_id]);
 		// var overall = runSql("SELECT * FROM user_group_remaining_allowance WHERE user_id=?", [user_id]);
-		var allowances = runSql(`SELECT * FROM accessible_types WHERE user_id=?;`, [user_id]);
+		var allowances = runSql("SELECT * FROM accessible_types WHERE user_id=?;", [user_id]);
 
 		return allowances.then(function(a) {
 			// in case there aren't allowances present:

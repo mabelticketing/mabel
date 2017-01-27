@@ -51,9 +51,14 @@ function BookingController($scope, User, Type, PaymentMethod, Socket) {
 
 	Socket.on('open_types', function(data) {
 		if (vm.status === "done") return;
+		data = _.filter(data, function(d) {
+			return d.user_id === vm.user.id;
+		})
 
 		var oldTypes = vm.tickets;
 		vm.status = "open";
+		console.log("Opening");
+		console.log(data);
 		vm.tickets = _.mapValues(
 			_.groupBy(data, "ticket_type_id"),
 			function(tt) {

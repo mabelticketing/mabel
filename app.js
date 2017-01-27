@@ -11,7 +11,8 @@ var config = require('./src/config.js');
 var server = require('http').Server(app);
 var connection = require('./src/api/connection.js');
 var io = require('socket.io')(server);
-var _ = require('lodash');
+var control = require('strong-cluster-control');
+var cluster = require('express-cluster');
 
 // bail if it doesn't look like we've got a real config
 if (!config.port) throw new Error("I don't think you've initialised the config.");
@@ -22,7 +23,7 @@ module.exports.app = app;
 module.exports.io = io;
 
 // serve content in public/ from root
-app.use('/', express.static(__dirname + '/public'));
+// app.use('/', express.static(__dirname + '/public'));
 
 // initalise swagger api
 var swapi = require("./swapi.js");
@@ -41,53 +42,34 @@ function listen() {
 	 * machines.
 	 *******************************************************************************/
 
-	// var Cluster   = require('cluster2');
-	// var c = new Cluster({
-	// port: config.port || 2000
-	// });
-	// c.listen(function(cb) {
-	// cb(app);
-	// });
+	 ////var Cluster   = require('cluster2');
+	 ////var c = new Cluster({
+	 //port: config.port || 2000
+	 //});
+	 //c.listen(function(cb) {
+	 //cb(app);
+	 //});
 
 	/*********************************************
 	 * This is the regular (non-clustered) option
 	 *********************************************/
 
-	 server.listen(config.port || 2000);
-	 console.log("running");
+	server.listen(config.port || 2000);
+	console.log("running");
 }
 
 function setupSockets() {
 
-	var synchers = {}
-
-	io.on('connection', function(socket){
-		console.log('a user connected');
-
-		socket.on('declare', function(d) {
-			console.log("declared", d)
-			synchers[d] = socket;
-
-			socket.on('disconnect', function(){
-				delete synchers[d];
-			});
-		})
-
-		socket.on('booking_arrival', function(data) {
-			console.log("Someone arrived");
-			console.log(data);
-		});
-	});
+	  setInterval(function() {
+			  connection.runSql('SELECT * FROM accessible_types WHERE allowance>0;')
+				  .then(function(r) {
+					console.log("Emitted")
+				  	io.emit('open_types', r);
+				  });
+	  }, 3000);
 
 	// periodically broadcast open windows and how many tickets are available to book for each type
 
-	setInterval(function() {
-		for (d in synchers) {
-			connection.runSql('SELECT * FROM accessible_types WHERE user_id=? AND allowance>0;', [d])
-				.then(function(r) {
-					synchers[d].emit('open_types', r)
-				})
-		}
 		// connection
 		// 	.runSql('SELECT * FROM accessible_types;')
 		// 	.then(function(newRights) {
@@ -117,5 +99,4 @@ function setupSockets() {
 		//
 		// 		io.emit('open_types', newRights);
 		// 	});
-	}, 3000);
 }

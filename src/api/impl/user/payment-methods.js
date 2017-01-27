@@ -15,18 +15,18 @@ function payment_method(user_id) {
     };
 
     function get() {
-        var sql = `select
-			payment_method.id id,
-			name,
-			description,
-			bought
-		FROM payment_method_status
-		JOIN payment_method
-			ON payment_method_status.payment_method_id=payment_method.id
-		WHERE user_id=?;`;
+        var sql = "select\
+			payment_method.id id,\
+			name,\
+			description,\
+			bought\
+		FROM payment_method_status\
+		JOIN payment_method\
+			ON payment_method_status.payment_method_id=payment_method.id\
+		WHERE user_id=?;";
         return runSql(sql, [user_id])
-        	.spread(function(result, stuff) {
-        		return result;
-        	});
+        	// .spread(function(result, stuff) {
+        		// return result;
+        	// });
     }
 }
