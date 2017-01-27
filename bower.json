@@ -24,7 +24,7 @@
     "jspdf": "~1.1.135",
     "ng-table": "1",
     "ng-table-export": "https://github.com/davisford/ng-table-export.git",
-    "underscore": "~1.8.3",
+    "lodash": "*",
     "angular-datatables": "^0.5.3"
   },
   "resolutions": {

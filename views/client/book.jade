@@ -1,4 +1,4 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
@@ -9,7 +9,7 @@ block scripts
 	script(type="text/javascript", src="/lib/components/angular/angular.js")
 	script(type="text/javascript", src="/lib/components/angular-cookies/angular-cookies.js")
 	script(type="text/javascript", src="/lib/components/angular-resource/angular-resource.js")
-	
+
 	// misc
 	script(type="text/javascript", src="/lib/components/moment/moment.js")
 	script(type="text/javascript", src="/lib/components/underscore/underscore.js")
@@ -23,7 +23,7 @@ block scripts
 	script(type="text/javascript", src="/js/shared/datetimepicker.directive.js")
 	script(type="text/javascript", src="/js/shared/apicaller.factory.js")
 	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
-	
+
 	// resources
 	script(type="text/javascript", src="/js/resources/type.js")
 	script(type="text/javascript", src="/js/resources/user.js")
@@ -74,7 +74,7 @@ block content
 												th Quantity
 										tbody
 											tr(ng-repeat="(id, ticket) in bookingCtrl.tickets track by id", style="background-color:#ffffff;")
-												td {{ ticket.type.name }} 
+												td {{ ticket.type.name }}
 													em(ng-if="ticket.available<10 && ticket.available>0")  ({{ ticket.available }} remaining)
 													em(ng-if="ticket.available<=0")  (Sold Out)
 												td &pound;{{ ticket.type.price }}
@@ -89,22 +89,22 @@ block content
 									table.table.table-striped
 										tbody(ng-repeat="(id, ticket) in bookingCtrl.tickets", ng-if="ticket.quantity > 0")
 											tr(style="background-color:#ffffff;")
-												th(colspan="2") {{ ticket.type.name }} (&pound;{{ ticket.type.price | number:2 }}) 
+												th(colspan="2") {{ ticket.type.name }} (&pound;{{ ticket.type.price | number:2 }})
 											tr(ng-repeat="t in ticket.payment_methods track by $index" style="background-color:#ffffff;")
-												td Payment method for {{ticket.type.name}} Ticket {{$index + 1}}: 
+												td Payment method for {{ticket.type.name}} Ticket {{$index + 1}}:
 													select(ng-model="ticket.payment_methods[$index]" ng-options="m.id as m.name for m in bookingCtrl.payment_methods")
 													div.alert.alert-danger(ng-if="ticket.errors[$index].length > 0" style="margin-top:10px;")
-														button.close(type="button", aria-label="Close", ng-click="ticket.errors[$index] = '';") 
+														button.close(type="button", aria-label="Close", ng-click="ticket.errors[$index] = '';")
 															span(aria-hidden="true") &times;
-														strong Error: 
+														strong Error:
 														| {{ticket.errors[$index]}}
 										tfoot
 											tr.info
 												td(colspan="2") Total cost: #[b &pound;{{ bookingCtrl.ticketPrice | number:2 }}]
 							div.alert.alert-danger(ng-if="bookingCtrl.overall_error.length > 0")
-								button.close(type="button", aria-label="Close", ng-click="bookingCtrl.overall_error = '';") 
+								button.close(type="button", aria-label="Close", ng-click="bookingCtrl.overall_error = '';")
 									span(aria-hidden="true") &times;
-								strong Error: 
+								strong Error:
 								| {{bookingCtrl.overall_error}}
 							p(style="text-align:center;" ng-if="bookingCtrl.ticketNumber > 0 && bookingCtrl.ticketNumber <= bookingCtrl.allowance.remaining_allowance")
 								input.btn.btn-info(id="submitButton", type="submit", value="Confirm")
@@ -124,7 +124,7 @@ block content
 							td
 								span.label.label-danger Not Booked
 
-				p A summary of your booking is below. Guest names should be added to your tickets via the 
+				p A summary of your booking is below. Guest names should be added to your tickets via the
 					a(href="/dash") ticket management page
 					| .
 				p(ng-if="bookingCtrl.waiting_list.length > 0") #[b PLEASE NOTE]: Some of the tickets you requested have #[b sold out]. These tickets have been added to the #[b waiting list] instead. You will be contacted if these tickets become available.
@@ -158,9 +158,8 @@ block content
 							td
 							td
 							th Total Due
-							td #[b &pound;{{bookingCtrl.totalPrice | number:2}}] 
+							td #[b &pound;{{bookingCtrl.totalPrice | number:2}}]
 							td
-
 				div(ng-if="bookingCtrl.totalPrice > 0")
 					h2.h2 Payment Information
 					p Payment must be received #[strong within 14 days] of booking. Any tickets which are not paid for by this date may be cancelled without further notice. These payment details have also been emailed to you, along with your booking confirmation.
@@ -169,7 +168,7 @@ block content
 						.col-xs-12.col-md-4
 							h4.h4 Cheque Payments
 							p
-								| Please make cheques payable to 
+								| Please make cheques payable to
 								| #[strong Emmanuel College May Ball] and hand them in
 								| to the Emmanuel College Porter's Lodge.
 								| Please ensure that your name and ticket
@@ -180,9 +179,9 @@ block content
 							h4.h4 Bank Transfer Payments
 							p
 								| Please send the amount due to the following
-								| account:								
+								| account:
 								table
-									tr 
+									tr
 										th(style="padding: 5px;padding-right: 20px;") Account Number
 										td 60067911
 									tr
@@ -192,24 +191,28 @@ block content
 										th(style="padding: 5px;") Account name
 										td Emmanuel College May Ball
 							p
-								| Set the payment reference to your 
-								| surname followed by the ticket number above (e.g. #[em SMITH 32]). 
-								| When paying for multiple tickets, use the ticket number of the
-								| first ticket booked.
+								| Set the payment reference to your ticket number,
+								| followed by your surname (e.g. #[em 32 SMITH]).
+								| To pay for multiple tickets with a single bank transfer,
+								| please include the ticket numbers for all the tickets
+								| you wish to pay for: #[em 32/33 SMITH], for example.
 
 						.col-xs-12.col-md-4
 							h4.h4 College Bill Payments
 							p
-								| If you are paying by college bill, 
+								| If you are paying by college bill,
 								| no further action needs to be taken. The
 								| price of your ticket will be added to your Lent term bill.
-							p: em Please note that payment by college bill is only available to current students of Emmanuel College.
+							p: em Please note that payment by college bill is only available to current students of Emmanuel College, and that only one ticket may be put on your end of term bill.
 
 				h2.h2 Ticket Management
 				p You may now visit the #[a(href="/dash") ticket management page].
 					|  On this page, you may add guest names to any tickets, or cancel any tickets or waiting list slots.
 				p You must change the guest names on your tickets via the management page before #[strong #{ name_change_deadline }].
+				p
+					| Please note that you must assign a name to every ticket
+					| on your account, including your own, and that any tickets left blank
+					| after this date will also incur a name change fee.
 
 				p(style="text-align:center")
 					a.btn.btn-large.btn-success(href="/dash") Return to Management Page
-						

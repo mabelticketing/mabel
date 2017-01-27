@@ -1,4 +1,4 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
@@ -9,10 +9,10 @@ block scripts
 	script(type="text/javascript" src="/lib/components/angular/angular.js")
 	script(type="text/javascript" src="/lib/components/angular-cookies/angular-cookies.js")
 	script(type="text/javascript" src="/lib/components/angular-resource/angular-resource.js")
-	
+
 	// bootstrap
 	script(type="text/javascript" src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
-	script(type="text/javascript", src="/lib/components/underscore/underscore.js")
+	script(type="text/javascript", src="/lib/components/lodash/lodash.js")
 	script(type="text/javascript" src="/lib/components/moment/moment.js")
 
 	// shared
@@ -34,39 +34,41 @@ block title
 
 block content
 	div(ng-app="mabel.dash" ng-controller="DashController as dashCtrl" ng-view)
-		
+
 		h1.h1 Ticket Management - {{ dashCtrl.user.name }}
 
 		.row
 			.col-xs-12
-				p Welcome to the Emmanuel College June Event ticketing system. Click #[a(href="/logout") here] to logout.
+				p Welcome to the Emmanuel College May Ball ticketing system. Click #[a(href="/logout") here] to logout.
 
 		.panel.panel-info
 			.panel-heading Available tickets
 			.panel-body
 				div(ng-if="dashCtrl.user.groups.indexOf(2) >= 0")
 					p We have identified you as a #[b current student of Emmanuel College]. If this is incorrect, please immediately email #{ ticketing_officer } at  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
-					p At #[b midday on 12th February], you will be able to pre-reserve #[b 1] Standard ticket. 
-					p At #[b midday on 13th February], you will be able to reserve a total of #[b 6] tickets, including any pre-reserved tickets, of which:
-						ul 
-							li Up to #[b 6] may be Standard tickets
+					p At #[b midday on 25th January], you will be able to reserve a total of #[b 1] discounted standard ticket.
+					p At #[b 10pm on 26th January], you will be able to book a total of #[b 6] tickets, including any pre-reserved tickets, of which:
+						ul
 							li Up to #[b 2] may be Queue Jump tickets.
+							li Only #[b 1] may be discounted.
 
 				div(ng-if="dashCtrl.user.groups.indexOf(3) >= 0")
-					p We have identified you as an #[b alumnus of Emmanuel College]. If this is incorrect, please immediately email #{ ticketing_officer } at  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
-					p At #[b midday on 13th February], you will be able to reserve a total of #[b 2] tickets, of which:
-						ul 
-							li Up to #[b 2] may be Standard tickets
+
+					p We have identified you as an #[b alumnus or affiliate MCR member of Emmanuel College]. If this is incorrect, please immediately email #{ ticketing_officer } #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
+
+					p At #[b midday on 25th January], you will be able to reserve a total of #[b 1] Standard ticket.
+					p At #[b 10pm on 26th January], you will be able to book a total of #[b 2] tickets, including any pre-reserved tickets, of which:
+						ul
 							li Up to #[b 2] may be Queue Jump tickets.
 
 				div(ng-if="dashCtrl.user.groups.indexOf(2) < 0 && dashCtrl.user.groups.indexOf(3) < 0")
 					p We have identified you as neither a current student nor alumnus of Emmanuel College. If this is incorrect, please immediately email #{ ticketing_officer } at  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
-					p At #[b midday on 13th February], you will be able to reserve a total of #[b 6] tickets,of which:
-						ul 
-							li Up to #[b 6] may be Standard tickets
+					p At #[b 00:00 on 3rd February], you will be able to book a total of #[b 2] tickets,of which:
+						ul
 							li Up to #[b 2] may be Queue Jump tickets.
+
 				p If tickets are sold out you will automatically be added to the waiting list when you book.
-		
+
 		.row
 			.col-xs-12.col-md-4.col-md-offset-4
 				a.btn.btn-xlarge.btn-info(href="/book" style="width:100%;") Book tickets
@@ -76,10 +78,9 @@ block content
 
 		p(ng-if="dashCtrl.ticketsBookedLoading") #[em Loading...]
 
-		p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)") 
+		p(ng-if="!dashCtrl.ticketsBookedLoading && !(dashCtrl.ticketsBooked.length > 0)")
 			em You have not yet booked any tickets. Once you have booked tickets, you will be able to review your orders here.
 
-		//- TODO: un hard-code date.
 		p(ng-if="dashCtrl.ticketsBooked.length !== 0") Please ensure the names listed below are accurate. You must enter your guests' names before #{ name_change_deadline }. Reserved tickets may be cancelled up until the moment your payment is received. Tickets paid for by college bill may be cancelled within two weeks of the original booking.
 
 		table(ng-if="dashCtrl.ticketsBooked.length !== 0").table.table-striped.table-hover
@@ -90,13 +91,15 @@ block content
 					th Payment method
 					th(style="width:75px;") Price
 					th Status
-					th 
+					th
 			tbody
 				tr(ng-repeat="ticket in dashCtrl.ticketsBooked")
 					td # {{ ticket.id }}
 					td #[em ({{ ticket.name }})]
 					td
 						input.namechange-input(type="text" class="{{ticket.guest_name_status}}" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
+					//- td
+					//- 	| {{ ticket.guest_name }}
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
 					td
@@ -118,13 +121,13 @@ block content
 					td Outstanding:
 					td(style="text-align:right;") &pound;{{ dashCtrl.pendingValue | number:2 }}
 					td
-		
+
 		p Please allow #[strong up to two weeks] for the payments you have made to become visible on this page.
 
 		h2.h2 Waiting List
 
 		p(ng-if="dashCtrl.waitingListLoading") #[em Loading...]
-		p(ng-if="!dashCtrl.transactionsLoading && !(dashCtrl.waitingListTickets.length > 0)") 
+		p(ng-if="!dashCtrl.transactionsLoading && !(dashCtrl.waitingListTickets.length > 0)")
 			em You are not currently in the waiting list for any tickets.
 		table.table.table-striped.table-hover(ng-if="dashCtrl.waitingListTickets.length > 0")
 			thead
@@ -132,7 +135,7 @@ block content
 					th Ticket Type
 					th Payment Method
 					th(style="width:75px") Price
-					th 
+					th
 			tbody
 				tr(ng-repeat="ticket in dashCtrl.waitingListTickets")
 					td {{ ticket.name }}
@@ -141,4 +144,3 @@ block content
 					td(style="text-align:right")
 						button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
-	

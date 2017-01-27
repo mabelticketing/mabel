@@ -1,9 +1,9 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
 h1 Booking Successful
-p Thank you for booking tickets to Emmanuel College June Event 2016. A summary of your booking is below.
+p Thank you for booking tickets to Emmanuel College May Ball 2017. A summary of your booking is below.
 table.emailTable
 	thead
 		tr
@@ -14,7 +14,7 @@ table.emailTable
 			th Price
 			th Status
 	tbody
-		each ticket in booked 
+		each ticket in booked
 			tr
 				td # #{ ticket.id }
 				td #{ ticket.ticket_type.name }
@@ -47,30 +47,30 @@ table.emailTable
 
 if (totalPrice > 0)
 	h2 Payment Information
-	p Payment must be received within #[strong 14] days of booking (i.e. before #[strong #{payment_deadline}]). 
+	p Payment must be received within #[strong 14] days of booking (i.e. before #[strong #{payment_deadline}]).
 		| Any tickets which are not paid for by this date may be cancelled without further notice.
 
 	if payments.cheque
 		h4 Cheque Payments
-		p 
+		p
 
-			| To pay for tickets by #[strong Cheque],  please hand in a cheque 
-			| made payable to  #[strong Emmanuel College May Ball]  to the 
-			| Emmanuel College Porter's Lodge.  Please ensure that your 
-			| #[b surname] and   #[b ticket number] are written on the back of the 
-			| cheque. To pay for multiple tickets with a single cheque, please 
-			| include the ticket numbers for all the tickets you wish to pay 
+			| To pay for tickets by #[strong Cheque],  please hand in a cheque
+			| made payable to  #[strong Emmanuel College May Ball]  to the
+			| Emmanuel College Porter's Lodge.  Please ensure that your
+			| #[b surname] and   #[b ticket number] are written on the back of the
+			| cheque. To pay for multiple tickets with a single cheque, please
+			| include the ticket numbers for all the tickets you wish to pay
 			| for.
 
 	if payments.bank_transfer
 		h4 Bank Transfer Payments
-		p 
-			| To pay for tickets by #[strong Bank Transfer], 
+		p
+			| To pay for tickets by #[strong Bank Transfer],
 			| please send the amount due to the following
 			| account:
 
 			table.emailTable(style="padding-bottom:10px;")
-				tr 
+				tr
 					th(style="padding: 5px;padding-right: 20px;") Account Number
 					td 60067911
 				tr
@@ -79,68 +79,59 @@ if (totalPrice > 0)
 				tr
 					th(style="padding: 5px;") Account name
 					td Emmanuel College May Ball
-		p 
-			| Please set the payment reference to your 
-			| surname followed by the ticket number above. 
-			| For example, if your name is John Smith, 
-			| your ticket reference should be 
-			| #[em SMITH #{sampleID}]. 
-			| To pay for multiple tickets with a single 
-			| payment, simply use the ticket number of the 
-			| first ticket booked.
+		p
+			| Please set the payment reference to your
+			| ticket number, followed by your surname.
+			| For example, if your name is John Smith,
+			| your ticket reference should be
+			| #[em #{sampleID} SMITH].
+			| To pay for multiple tickets with a single
+			| bank transfer, please include the ticket
+			| numbers for all the tickets you wish to
+			| pay for: #[em 1125/1126 SMITH], for example.
 
 
 	if payments.college_bill
 		h4 College Bill Payments
-		p 
-			| To pay for tickets by #[strong College Bill], 
-			| no further action needs to be taken. The 
-			| price of your ticket will be added to your 
-			| Lent term bill. Please note that payment by 
-			| college bill is only available to current 
-			| students at Emmanuel College. 
+		p
+			| To pay for tickets by #[strong College Bill],
+			| no further action needs to be taken. The
+			| price of your ticket will be added to your
+			| Lent term bill. Please note that payment by
+			| college bill is only available to current
+			| students at Emmanuel College, and that only
+			| one ticket may be put on your end of term bill.
+
+	h2 Ticket Management
+
+	p You may now visit the #[a(href="http://tickets.emmamayball.com/dash") ticket management page].
+		|  On this page, you can add guest names to any tickets, or cancel any tickets or waiting list slots.
+	p You must assign guest names on your tickets via the management page before #[b #{name_change_deadline}].
+		| Please note that you must assign a name to every ticket on your account, including your own, and that any tickets left blank after this date will also incur a name change fee.
 
 	h2 Ticket Cancellation
 
-	if !payments.college_bill
-		//- (Cheque and/or Bank Transfer Only)
-		p 
-			| To ensure that tickets are fairly distributed to those on the 
-			| waiting list we will not allow the re-sale of tickets on   
-			| #[em any online platform]. Prior to payment you will be able to 
-			| cancel any unwanted tickets yourself through the website. After 
-			| this date you should email #{ ticketing_officer } at  
-			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }]. 
-			| You will then be put in contact with the person at the top of 
-			| the waiting list to arrange a transfer. 
-	
-	else if !payments.cheque && !payments.bank_transfer
-		//- (College Bill Only)
-		p 
-			| To ensure that tickets are fairly distributed to those on the 
-			| waiting list we will not allow the re-sale of tickets on   
-			| #[em any online platform]. Prior to the 27th February you will be 
-			| able to cancel any unwanted tickets yourself through the website.   
-			| After this date you should email #{ ticketing_officer } at  
-			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }]. 
-			| You will then be put in contact with the person at the top of 
-			| the waiting list to arrange a transfer. 
-	else 
-		//-  (Mixture of Cheque/Bank Transfer and College Bill)
-		p
-			| To ensure that tickets are fairly distributed to those on the
-			| waiting list we will not allow the re-sale of tickets on  
-			| #[em any online platform]. Prior to payment 
-			|  (or 27th February in the case of the college bill payment)
-			| you will be able to
-			| cancel any unwanted tickets yourself through the website. After
-			| this date you should email #{ ticketing_officer } at 
-			|  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
-			| You will then be put in contact with the person at the top of
-			| the waiting list to arrange a transfer.
+	p
+		| To ensure that tickets are fairly distributed to those on the
+		| waiting list we will not allow the re-sale of tickets that have
+		| not yet been paid for, via
+		| #[em any online platform]. You will be able to cancel any unwanted
+		| tickets yourself through the website, until the point we receive
+		| a payment for them.
 
-h2 Ticket Management
-p You may now visit the #[a(href="http://tickets.emmajuneevent.com/dash") ticket management page].
-	|  On this page, you can add guest names to any tickets, or cancel any tickets or waiting list slots.
-p You must assign guest names on your tickets via the management page before #[b #{name_change_deadline}].
-p If you have any queries, please contact #{ ticketing_officer } at #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }]
+	h2 Name Changes and Account Transfers
+
+	p
+		| Account holders may change the names on their account themselves for
+		| free up until #[b #{name_change_deadline}].
+		| The ticket will remain on the account of the
+		| original buyer unless you email
+		| #[a(href="mailto:#{ ticketing_email }") #{ ticketing_email }] to arrange a
+		| transfer between accounts. There will be a £10 fee for this service.
+		| After #[b #{name_change_deadline} ], all name changes will need to be processed via
+		| #[a(href="mailto:#{ ticketing_email }") #{ ticketing_email }],
+		| and there will be a £15 fee for this service.
+		| The Emmanuel College May Ball Committee retains the right to refuse name
+		| changes after Wednesday 14th June.
+
+	p If you have any queries, please contact #{ ticketing_officer } at #[a(href="mailto:#{ ticketing_email }") #{ ticketing_email }]

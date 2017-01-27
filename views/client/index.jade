@@ -1,4 +1,4 @@
-//- Copyright (C) 2015  Mabel Ticketing 
+//- Copyright (C) 2015  Mabel Ticketing
 //- GNU General Public License v2.0
 //- https://github.com/mabelticketing/mabel/blob/master/LICENSE.txt
 
@@ -12,7 +12,7 @@ append scripts
 	script(type="text/javascript", src="/lib/components/angular-cookies/angular-cookies.js")
 	script(type="text/javascript", src="/lib/components/angular-resource/angular-resource.js")
 	script(type="text/javascript", src="/lib/components/angular-bootstrap/ui-bootstrap.min.js")
-	
+
 	script(type="text/javascript", src="/js/shared/mabel.shared.js")
 	script(type="text/javascript", src="/js/shared/mabelresource.factory.js")
 	script(type="text/javascript", src="/js/shared/mabeltoken.factory.js")
@@ -32,12 +32,13 @@ append scripts
 			}
 
 			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
+			a = $scope;
 		});
 
 		LoginApp.controller('LoginController', function($scope, $http, $cookies, $location) {
 
 			if ($cookies.get("mabelAuthToken")) window.location = '/dash';
-			
+
 			$scope.mabelLogin = function() {
 				$http.get('/api/token/mabel', {params:{email:$scope.email, password:$scope.password}}).
 					then(function(data) {
@@ -47,7 +48,7 @@ append scripts
 						$scope.error = failure.data.message;
 					});
 			};
-			
+
 			$scope.loc = $location.protocol() + "://" + $location.host() + ":" + $location.port();
 
 		});
@@ -66,12 +67,12 @@ append scripts
 		});
 
 		LoginApp.controller("DoneController", function($location, $cookies, $routeParams) {
-			
+
 			if ( $routeParams.token && $routeParams.id) {
 				// new authentication cookie/token
 				var token = $routeParams.token;
 				var id = $routeParams.id;
-				
+
 				$cookies.put("mabelAuthToken", token, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
 				$cookies.put("mabelUserId", id, {path:"/", expires: new Date(new Date().getTime() + 3600000) });
 			} else if ( $cookies.get("mabelAuthToken") ) {
@@ -79,9 +80,9 @@ append scripts
 			} else {
 				throw Error("Token not provided but you said I was done!");
 			}
-			
+
 			window.location = '/dash';
-			
+
 		});
 
 		LoginApp.config(function($routeProvider, $locationProvider) {
@@ -111,7 +112,7 @@ append scripts
 		});
 
 block content
-	h1.h1 Emmanuel College June Event Ticketing
+	h1.h1 Emmanuel College May Ball Ticketing
 	div(ng-app="LoginApp")
 		ng-view
 
@@ -161,4 +162,3 @@ block content
 							.form-group.spacer
 								.col-lg-9.col-lg-offset-3
 									button.btn.btn-primary(type='submit' style="width:100%;") Submit
-
