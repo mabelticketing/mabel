@@ -8,7 +8,7 @@
 var connection = require('./api/connection.js');
 var config = require('./config.js');
 var mabelData = require('../mabel.json');
-var mailgun = require('mailgun-js')({ apiKey: config.mailgun_api_key, domain: "emmajuneevent.com" });
+var mailgun = require('mailgun-js')({ apiKey: config.mailgun_api_key, domain: "emmamayball.com" });
 var jade = require("jade");
 var htmlToText = require('html-to-text');
 var Q = require("q");
@@ -22,7 +22,7 @@ function send(to, subject, template, data) {
 	template = __dirname + "/../views/email/" + template;
 
 	// TODO: parameterise event details
-	var from = "'Emmanuel June Event Ticketing' <ticketing@emmajuneevent.com>";
+	var from = "'Emmanuel May Ball Ticketing' <ticketing@emmamayball.com>";
 
 	// debug
 	// to = "'Christopher Little Test' <hephistocles+mabeltest@gmail.com>";
@@ -34,7 +34,7 @@ function send(to, subject, template, data) {
 	var html = render(extend({}, mabelData, data));
 	var text = htmlToText.fromString(html, {
 		tables:['.emailTable'],
-		linkHrefBaseUrl: 'http://tickets.emmajuneevent.com'
+		linkHrefBaseUrl: 'http://tickets.emmamayball.com'
 	});
 
 	var mailcomposer = new MailComposer();

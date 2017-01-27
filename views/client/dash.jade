@@ -44,20 +44,24 @@ block content
 		.panel.panel-info
 			.panel-heading Available tickets
 			.panel-body
+				div
+					p
+						em Please note that, following our technical issues at launch, you may find that you are able to book tickets outside of your allowance.
+							| All tickets booked will be reviewed, and if any are found to be in breach of the allowance listed below, they will be cancelled.
 				div(ng-if="dashCtrl.user.groups.indexOf(2) >= 0")
 					p We have identified you as a #[b current student of Emmanuel College]. If this is incorrect, please immediately email #{ ticketing_officer } at  #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
 					p At #[b midday on 25th January], you will be able to reserve a total of #[b 1] discounted standard ticket.
-					p At #[b 10pm on 26th January], you will be able to book a total of #[b 6] tickets, including any pre-reserved tickets, of which:
+					p At #[b 9am on 27th January], you will be able to book a total of #[b 6] tickets, including any pre-reserved tickets, of which:
 						ul
 							li Up to #[b 2] may be Queue Jump tickets.
-							li Only #[b 1] may be discounted.
+							li Only #[b 1] may be discounted. Note that the discount may not be visible during booking, but will be applied manually before payment is taken.
 
 				div(ng-if="dashCtrl.user.groups.indexOf(3) >= 0")
 
 					p We have identified you as an #[b alumnus or affiliate MCR member of Emmanuel College]. If this is incorrect, please immediately email #{ ticketing_officer } #[a(href="mailto #{ ticketing_email }") #{ ticketing_email }].
 
 					p At #[b midday on 25th January], you will be able to reserve a total of #[b 1] Standard ticket.
-					p At #[b 10pm on 26th January], you will be able to book a total of #[b 2] tickets, including any pre-reserved tickets, of which:
+					p At #[b 9am on 27th January], you will be able to book a total of #[b 2] tickets, including any pre-reserved tickets, of which:
 						ul
 							li Up to #[b 2] may be Queue Jump tickets.
 
