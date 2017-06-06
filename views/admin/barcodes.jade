@@ -5,9 +5,11 @@
 extends ./includes/main.jade
 
 block append scripts
-	script(type="text/javascript", src="/lib/components/jsbarcode/JsBarcode.js")
-	script(type="text/javascript", src="/lib/components/jsbarcode/EAN_UPC.js")
-	script(type="text/javascript", src="/lib/components/jsbarcode/CODE128.js")
+	//- script(type="text/javascript", src="/lib/components/jsbarcode/JsBarcode.js")
+	//- script(type="text/javascript", src="/lib/components/jsbarcode/EAN_UPC.js")
+	//- script(type="text/javascript", src="/lib/components/jsbarcode/CODE128.js")
+	script(type="text/javascript", src="https://cdn.jsdelivr.net/jsbarcode/3.6.0/JsBarcode.all.min.js")
+	script(type="text/javascript", src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.debug.js")
 	script(type="text/javascript", src="/lib/components/bower-pdfkit/pdfkit-0.7.0.js")
 	script(type="text/javascript", src="/lib/components/bower-pdfkit/blob-stream-v0.1.2.js")
 	script(type = "text/javascript" src="/js/admin/barcode.controller.js")
