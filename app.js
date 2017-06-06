@@ -53,7 +53,7 @@ function listen() {
 	 * This is the regular (non-clustered) option
 	 *********************************************/
 
-	 server.listen(config.port || 2000);
+	 server.listen(process.env.PORT || config.port || 2000);
 	 console.log("running");	
 }
 

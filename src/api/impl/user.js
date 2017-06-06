@@ -106,11 +106,11 @@ user.post = function post(data) {
 	var source = data.u;
 
 	var u = {};
-
 	// extract groups
-	var groups = null;
+	// everyone gets at least group 4
+	var groups = [4];
 	if (source.groups !== undefined) {
-		groups = source.groups;
+		groups = groups.concat(source.groups);
 	}
 
 	// basic validation
