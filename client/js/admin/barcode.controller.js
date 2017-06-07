@@ -11,6 +11,13 @@ angular.module('mabel.admin')
 function BarcodeController($scope, APICaller) {
 	var vm = this;
 
+	$scope.$watch('filter', _.debounce(
+		function(value) {
+	  		makePDF("pdf", value);
+		},
+		500)
+	);
+
 	function EANchecksum(number){
 		var result = 0;
 		
@@ -54,7 +61,7 @@ function BarcodeController($scope, APICaller) {
 	  }
 	}
 
-	function makePDF(iframeID) {
+	function makePDF(iframeID, filter) {
 		function drawStickerBase(doc) {
 			// modelled after https://www.a4labels.com/products/transparent-gloss-labels-63-x-38mm/24696
 			for (var y = 0; y < 7; y++) {
@@ -121,6 +128,30 @@ function BarcodeController($scope, APICaller) {
 			  	.text(code,  stickerWidth/2 + r.offX, r.offY + 17, "center");
 	  	}
 
+		//  TODO: apply filter
+		var tickets = vm.allTickets;
+		if (filter === undefined || filter.length<1 || filter.toLowerCase().trim()==="all tickets") {
+			tickets = vm.allTickets;
+		} else {
+		  filter = filter.replace(/\s/, "");
+		  var ranges = filter.split(",");
+		  var ids = [];
+		  for (var i=0; i<ranges.length; i++) {
+		  	var range = ranges[i];
+			var ends = range.split("-");
+			if (ends.length === 1) {
+			  	if (isNaN(parseInt(ends[0]))) continue;
+				ids.push(parseInt(ends[0]));
+			} else if (ends.length === 2) {
+			  	if (isNaN(parseInt(ends[0]))) continue;
+			  	if (isNaN(parseInt(ends[1]))) continue;
+				for (var j=parseInt(ends[0]); j<=parseInt(ends[1]); j++) {
+					ids.push(j);
+				}
+			}
+		  }
+			tickets = vm.allTickets.filter(function(t){return ids.indexOf(t.id) >= 0;});
+		}
 
 		// create a document and pipe to a blob
 		var doc = new jsPDF();
@@ -140,7 +171,7 @@ function BarcodeController($scope, APICaller) {
 		var stickerWidth = 63.5;
 		var stickerHeight = 13;
 
-		for (var i = 0; i < vm.allTickets.length; i++) {
+		for (var i = 0; i < tickets.length; i++) {
 			
 			if (i > 0 && i % (cols * rows) === 0) {
 				doc.addPage();
@@ -153,18 +184,16 @@ function BarcodeController($scope, APICaller) {
 			r.offY = offY + y * (h + mY);
 			r.offX = offX + x * (stickerWidth + mX);
 
-			var code = fiveChar(vm.allTickets[i].user_id) + "  " + fiveChar(vm.allTickets[i].id);
-			drawSticker(r, doc, code, vm.allTickets[i].guest_name, ticketType(vm.allTickets[i].ticket_type_id), stickerWidth, stickerHeight);
+			var code = fiveChar(tickets[i].user_id) + "  " + fiveChar(tickets[i].id);
+			drawSticker(r, doc, code, tickets[i].guest_name, ticketType(tickets[i].ticket_type_id), stickerWidth, stickerHeight);
 		}
 
-		console.log("Sent all commands");
 
 		// end and display the document in the iframe
 		document.getElementById(iframeID).src = doc.output('bloburl');
-		console.log("Ended");
 	}
 
-	console.log("Getting ticket data...")
+	vm.pdf = function(){};
 	APICaller.get("ticket", {},
 		function(err, data) {
 			if (err) return console.error(err);
@@ -173,8 +202,8 @@ function BarcodeController($scope, APICaller) {
 			vm.allTickets = _.filter(data, function(t) {
 				return t.status==="CONFIRMED";
 			});
-			allTickets = vm.allTickets;
-			makePDF("pdf");
+			vm.pdf = function() {return makePDF("pdf")};
+			vm.pdf();
 		}
 	);
 

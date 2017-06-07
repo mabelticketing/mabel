@@ -25,15 +25,17 @@ block prepend variables
 	- notifications = notifications || []
 
 block content
-	div(ng-controller="BarcodeController as barcode")
+	div(ng-controller="BarcodeController")
 	.row
 		.col-md-12
 			h1 Ticket barcodes
-			//- svg#barcode
-			//- br
-			//- canvas#barcode2
-			//- br
-			//- img#barcode3
-			//- br
-			//- svg#barcode4
-			iframe#pdf(style="width:100%; height:500px;")
+		.row		
+			.col-md-2
+			.col-md-8
+				input.barcode-filter-input.input-lg.form-control(type="text" ng-model="filter" ng-change="change()" autofocus placeholder="Enter ticket IDs to filter (e.g. 10,12,20-30) or blank for all tickets")
+			.col-md-2
+		.row		
+			.col-md-2
+			.col-md-8
+				iframe#pdf(style="width:100%; height:500px;")
+			.col-md-2
