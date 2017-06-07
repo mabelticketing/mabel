@@ -18,15 +18,15 @@ function ScanController($scope, APICaller) {
 
 	APICaller.get("ticket/admit", {}, 
 		function(err, data) {
-			if (err) return alert("ERROR " + err);
-			if (!data.success) return alert("ERROR: " + data.error);
+			if (err) return console.error("ERROR ", err);
+			if (!data.success) return console.error("ERROR: ", data.error);
 			vm.admitted = data.result.admitted;
 		});
 
-	APICaller.get("ticket/getAllDetailed", {},
+	APICaller.get("ticket", {},
 		function(err, data) {
-			if (err) return alert(err);
-			if (data.length < 1) return alert("No tickets found");
+			if (err) return console.error(err);
+			if (data.length < 1) return console.error("No tickets found");
 			vm.allTickets = _.sortBy(data, function(t) { return t.id;});
 			$scope.$watch(function(){return vm.searchTerm;}, _.debounce(
 				function() {
@@ -42,7 +42,7 @@ function ScanController($scope, APICaller) {
 		APICaller.post("ticket/admit/" + ticket.id, {}, function(err, data) {
 			if (data && !data.success) err = data.error;
 			if (err) {
-				alert("ERROR: " + err);
+				console.error("ERROR: ", err);
 				ticket.status = "btn-danger";
 				
 				return;

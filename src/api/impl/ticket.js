@@ -17,7 +17,8 @@ function ticket(id) {
 	return {
 		// main methods
 		get: get,
-		put: put
+		put: put,
+		// post: post // admission method
 	};
 
 	function get() {
