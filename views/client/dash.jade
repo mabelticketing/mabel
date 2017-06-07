@@ -101,15 +101,15 @@ block content
 					td # {{ ticket.id }}
 					td #[em ({{ ticket.name }})]
 					td
-						input.namechange-input(type="text" class="{{ticket.guest_name_status}}" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-change="dashCtrl.nameChange(ticket);" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
+						input.namechange-input(type="text" disabled class="{{ticket.guest_name_status}}" ng-model="ticket.guest_name" tabindex="{{$index + 1}}" ng-focus="dashCtrl.clearStatus(ticket)" style="width:100%;")
 					//- td
 					//- 	| {{ ticket.guest_name }}
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
 					td
 						span.label(class="{{ticket.status=='PENDING' ? 'label-info' : ticket.status=='CONFIRMED' ? 'label-success' : 'label-warning'}}" style="width:100%;") {{ ticket.status=='PENDING' ? 'RESERVED' : ticket.status }}
-					td(style="text-align:right")
-						button.btn.btn-xs.btn-danger(ng-if="ticket.status=='PENDING'" tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
+					//-td(style="text-align:right")
+						//-button.btn.btn-xs.btn-danger(ng-if="ticket.status=='PENDING'" tabindex="-1", ng-click="dashCtrl.cancelTicket(ticket)") x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
 			tfoot
 				tr
@@ -190,6 +190,6 @@ block content
 					td {{ ticket.name }}
 					td {{ ticket.payment_method }}
 					td(style="text-align:right") &pound;{{ ticket.transaction_value | number:2 }}
-					td(style="text-align:right")
-						button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  x
+					//-td(style="text-align:right")
+						//-button.btn.btn-xs.btn-danger(tabindex="-1", ng-click="dashCtrl.cancelWaitingTicket(ticket)")  x
 						//- span.label.label-notifier(class="label-{{ticket.id}} label-{{ticket._status}}") .
