@@ -26,13 +26,31 @@ function BarcodeController($scope, APICaller) {
 	
 	function ticketType(n) {
 	  switch(n) {
-		  case 1:
-		  case 2:
-		  case 3:
-		  case 4:
-		  case 5:
-		  case 6:
-		  	return "Standard";
+		  case 1: //Standard (discounted)
+		  case 4: //Standard
+		  case 7: //Free Standard
+		  case 10: //Set up
+		  case 12: //Robinson/Tit Hall Swap
+		  case 13: //Master's Guest
+		  case 14: //Staff
+		  case 15: //Staff Guest
+		  case 18: //Photographer
+		  case 19: //Downing Swap
+		  case 20: //Performer (50)
+		  case 21: //Performer (115)
+		  case 22: //Performer (95)
+			return "Standard";
+		  case 5: //Queue Jump
+		  case 2: //Queue Jump (discounted)
+		  case 8: //10 Pound Q jump
+		  case 17: //Free Queue Jump
+			return "Queue Jump";
+		  case 6: //Dining
+		  case 3: //Dining (discounted)
+		  case 9: //President's Dining
+		  case 11: //Free Dining
+		  case 16: //Set up Dining
+				return "Dining";
 	  }
 	}
 
