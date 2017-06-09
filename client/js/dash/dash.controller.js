@@ -170,7 +170,7 @@ function DashController($scope, $timeout, APICaller, User) {
 		for (var i = 0; i<vm.ticketsBooked.length; i++) {
 			if (vm.ticketsBooked[i].status === 'PENDING') {
 				vm.pendingValue += vm.ticketsBooked[i].transaction_value;
-			} else if (vm.ticketsBooked[i].status === 'CONFIRMED' || vm.ticketsBooked[i].status === 'ADMITTED') {
+			} else if (vm.ticketsBooked[i].status === 'CONFIRMED' || vm.ticketsBooked[i].status === 'ADMITTED' || vm.ticketsBooked[i].status === 'COLLECTED') {
 				vm.confirmedValue += vm.ticketsBooked[i].transaction_value;
 			}
 			vm.totalValue += vm.ticketsBooked[i].transaction_value;

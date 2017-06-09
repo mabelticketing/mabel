@@ -52,6 +52,7 @@ function admit(ticket_id) {
 		.then(function(statuses) {
 			if (statuses.length < 1) throw Error("No ticket with that ID");
 			if (statuses[0].status !== "CONFIRMED" &&
+				statuses[0].status !== "COLLECTED" &&
 				statuses[0].status !== "PENDING") 
 					throw Error("Ticket status is '" + statuses[0].status + "'");
 			sql = "UPDATE ticket SET status=\"ADMITTED\" WHERE id=?";

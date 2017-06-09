@@ -17,6 +17,7 @@ CREATE OR REPLACE VIEW ticket_status_count AS
 SELECT ticket_type_id,
 	   SUM(IF(status='PENDING', 1, 0)) PENDING,
 	   SUM(IF(status='CONFIRMED', 1, 0)) CONFIRMED,
+	   SUM(IF(status='COLLECTED', 1, 0)) COLLECTED,
 	   SUM(IF(status='CANCELLED', 1, 0)) CANCELLED,
 	   SUM(IF(status='ADMITTED', 1, 0)) ADMITTED,
 	   SUM(IF(status='PENDING_WL', 1, 0)) PENDING_WL,
@@ -32,7 +33,7 @@ SELECT user_id,
 		ticket_type_id,
 		COUNT(*) bought
 	FROM ticket
-	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
+	WHERE (status='CONFIRMED'OR OR status='COLLECTED' status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
 	GROUP BY user_id, ticket_type_id;
 
 /*
@@ -43,7 +44,7 @@ SELECT user_id,
 		payment_method_id,
 		COUNT(*) bought
 	FROM ticket
-	WHERE (status='CONFIRMED'OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
+	WHERE (status='CONFIRMED'OR status='COLLECTED' OR status='PENDING'OR status='ADMITTED'OR status='PENDING_WL')
 	GROUP BY user_id, payment_method_id;
 
 /* 
@@ -85,7 +86,7 @@ ON user_group_allowance.user_id=user_bought.user_id;
 
 CREATE OR REPLACE VIEW tickets_sold AS
 	SELECT ticket_type_id,
-		PENDING + CONFIRMED + ADMITTED sold,
+		PENDING + COLLECTED + CONFIRMED + ADMITTED sold,
 		PENDING_WL waiting_list
 	FROM ticket_status_count;
 
@@ -163,7 +164,7 @@ BEGIN
 		# get the number sold/in the waiting list for each ticket type
 		(SELECT ticket_type_id,
 			PENDING_WL wl,
-			PENDING + CONFIRMED + ADMITTED sold 
+			PENDING + COLLECTED + CONFIRMED + ADMITTED sold 
 		FROM ticket_status_count) C 
 	ON C.ticket_type_id=id
 	# get the number of tickets bought so far of this type
@@ -230,7 +231,7 @@ BEGIN
 		# this table will have 1 row, containing 1 value - the number of tickets sold
 		(SELECT COUNT(*) sold 
 			FROM ticket 
-			WHERE ticket_type_id=_ticket_type_id AND (status='PENDING' OR status='CONFIRMED' OR status='ADMITTED')) A \
+			WHERE ticket_type_id=_ticket_type_id AND (status='PENDING' OR status='CONFIRMED' OR status='COLLECTED' OR status='ADMITTED')) A \
 		JOIN \
 		# this table will have 1 row, containing 1 value - the limit for this ticket type
 		(SELECT total_limit cap FROM ticket_type WHERE id=_ticket_type_id) B \

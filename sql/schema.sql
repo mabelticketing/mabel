@@ -116,11 +116,12 @@ create table if not exists ticket (
 	notes text,
 	# PENDING       means that the ticket has been requested but not paid for/approved by thte committee
 	# CONFIRMED     means that the ticket is valid, and the guest may come to the ball
+	# COLLECTED     means that the ticket is valid, and the guest has received their ticket
 	# CANCELLED     means the ticket is not available to be reclaimed via the waiting list
 	# ADMITTED      means that the guest has entered the ball - so shouldn't be allowed in again
 	# PENDING_WL    means that the ticket is on the waiting list, and is ready to be transferred
 	# CANCELLED_WL  means that the ticket was on the waiting list, but has since been cancelled
-	status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'ADMITTED', 'PENDING_WL', 'CANCELLED_WL', 'INVALID') not null default 'INVALID',
+	status ENUM('PENDING', 'CONFIRMED', 'COLLECTED', 'CANCELLED', 'ADMITTED', 'PENDING_WL', 'CANCELLED_WL', 'INVALID') not null default 'INVALID',
 	primary key (id),
 	FOREIGN KEY (user_id) REFERENCES user(id),
 	FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id),

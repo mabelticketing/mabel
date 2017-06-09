@@ -200,7 +200,7 @@ function BarcodeController($scope, APICaller) {
 			if (data.length < 1) return alert("No tickets found");
 			console.log("Ticket data obtained.")
 			vm.allTickets = _.filter(data, function(t) {
-				return t.status==="CONFIRMED";
+				return t.status==="CONFIRMED" || t.status==="COLLECTED";
 			});
 			vm.pdf = function() {return makePDF("pdf")};
 			vm.pdf();
